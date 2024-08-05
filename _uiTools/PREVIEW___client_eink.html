@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+    
+        <meta charset="utf-8">
+        
+        <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1">
+        <link href="ui/style.css" rel="stylesheet">
+    </head>
+
+    <body>
+        
+        <div class="page-wrapper">
+        
+            <div class="page-header" >
+                <div id="header"></div>
+             </div>
+             
+            <div id="device-info-container">
+            
+                <div id="notification-info"></div> 
+                <div id="device-info"></div>                
+                <div class="device-info-actions"><a href="#" id="device-info-refresh">Обновить</a> <!--a href="#">View log</a--> </div>
+            </div>
+            
+            <div class="page-options" id="page"></div>
+            <div id="result"><div id="result-close">X</div><div></div></div>
+            
+        </div>
+        <script type="text/javascript" src="uiEink/ENV.js"></script>
+        <script type="text/javascript" src="uiEink/locale/localeRU.js"></script>
+        <script type="text/javascript" src="ui/KellyTools.js"></script>
+        <script type="text/javascript" src="ui/KellyEnv.js"></script>
+        <script>
+            
+            // NOT ACTUAL ENV, JUST TEST VARIABLES, SEE client.html for actual "load" boot function implementation
+            
+             var ENVCFG = {};
+             var load = function() {
+                ENVINIT(true);
+             }
+            
+        </script>
+        <script type="text/javascript" src="uiEink/init.js"></script>

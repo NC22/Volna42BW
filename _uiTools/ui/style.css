@@ -1,0 +1,494 @@
+
+*, :after, :before {
+    box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+    height: 16px;
+    width: 16px;
+    background: #4d4d4d;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #858585;
+}
+
+::-webkit-scrollbar-corner {
+    background: #858585;
+}
+
+body, html {
+    margin: 0px;
+    padding: 0px;
+    font-family: 'Open Sans',Sans-serif;
+    background: #262626;
+    color: #bfbfbf;
+    font-size: 14px; 
+    width : 100%;
+    height : 100%;
+}
+
+a {
+    color: #efefef;
+    display: inline-block;
+    line-height: normal;
+}
+
+input[type=text], input[type=password] {
+    background: #535353;
+    border: 1px solid #383838;
+    color: #c5c5c5;
+}
+
+p {
+    margin: 7px 0;
+}
+
+button.loading {
+    background: #7d7d7d;
+    color: #a5a5a5;
+    cursor: default;
+}
+
+select {
+    display: block;
+    min-height: 32px;
+    background: #535353;
+    color: #fff;
+    width: 100%;
+    margin-bottom: 6px;
+}
+
+button {
+    display: block;
+    height: 34px;
+    min-width: 20px;
+    background: #535353;
+    border: 0;
+    color: #fff;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 6px;
+    cursor: pointer;
+    border-radius: 3px;
+    position : relative;
+}
+
+button:hover, .k-options-action:hover {
+    background-color: #838383;
+    color: #fff;
+}
+
+/* not implemented */
+#disp-info button#disp-flip {
+    display : none;
+}
+
+.file {
+    display: block;
+    width: 100%;
+    background: #535353;
+    padding: 12px;
+}
+
+#header {    
+    color : #fff;
+    position: relative;
+}
+
+.fade {
+   opacity : 0; 
+}
+
+#wList-items {
+    margin: 0;
+    padding: 0;
+    min-height: 120px;
+    max-height: 320px;
+    display : none;
+    overflow-y: auto;
+    position: relative;
+}        
+      
+.shown {
+    display : block!important;
+}  
+
+.clear {
+    clear : both;
+}
+
+.checkbox {
+    margin-bottom: 6px;
+    display: block;
+}
+
+li.dselect-item button {
+    display: inline-block;
+    height: 24px;
+    width: 24px;
+    float: right;
+}
+
+li.dselect-item {
+    background: #6f6f6f;
+    list-style-type: none;
+    padding: 4px;
+    margin-bottom: 3px;
+}
+
+li.dselect-item:last-child {
+    margin-bottom: 0;
+}
+
+#wList-items li.selected {
+    background: #7a7a7a;
+}
+        
+.lvl {
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.lvl div:first-child {
+    height: 4px;
+}
+
+.lvl div:nth-child(2) {
+    height: 11px;
+}
+
+.lvl div {
+    width: 4px;
+    height: 16px;
+    display: inline-block;
+    background: rgba(102, 227, 20, 0.67);
+    margin-right: 1px;
+}
+
+#device-info-container {
+    display : none;
+    padding: 15px;
+    float: right;
+    max-width: 466px;
+    min-width: 305px;
+}
+
+.device-info-actions {
+    margin-top: 12px;
+    text-align: right;
+}
+
+#device-info, #notification-info {
+    
+    background: #535353;
+    border-radius: 4px;
+    padding: 15px;
+    position: relative;
+    margin-bottom : 12px;
+    transition : height .3s ease-out;
+    overflow : hidden;
+}
+
+#device-info > div > span {
+    color : #fff;
+}
+
+#device-info > div {
+    margin-bottom : 4px;
+}
+
+#device-info > div:last-child {
+    margin-bottom : 0;
+}
+
+.widget-hidden-params {
+    display : none;
+}
+
+.widgets-show-hidden .widget-hidden-params {
+    display : block;
+}
+
+.conversion-settings input[type=text].widget-params {
+    width : 100%;
+}
+
+.page-header {
+    padding: 12px 55px;
+    background: #535353;
+    border-bottom: 1px solid #7e7e7e;
+    font-size: 16px;
+    min-height : 40px;
+}
+
+.page-options {
+    padding-left: 50px;
+    padding-top: 15px;
+    max-width: 466px;
+}
+
+.device-info-row {
+    padding: 6px;
+    background: #656565;
+}
+
+.data-list-item button {
+    margin : 0;
+}
+
+.data-list-item:after {
+    display: block;
+    clear: both;
+    content: " ";
+}
+
+.data-list-item, .dtl-add-row {
+    margin-top: 6px;
+}
+
+.data-list-item:first-child {
+    margin-top : 0;
+}
+
+.data-list-item label, .dtl-add-row {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 4px;
+    border-radius: 4px;
+    display: block;
+    min-height: 46px;
+}
+
+.dtl-name, .k-options-row-input.dtl-add-row input {
+    width: 70%;
+}
+
+.dtl-name, .dtl-actions {
+    display: inline-block;
+}
+
+.dtl-actions {
+    float: right;
+}
+
+.dtl-delete, .dtl-add {
+    float: right;
+    width: 14%;
+    display: inline-block;
+}
+
+.dtl-priority:first-child {
+    margin-right: 4px;
+}
+
+.dtl-priority {
+    width: 30px;
+    padding: 0;
+    display: inline-block;
+    min-width: unset;
+    height: 30px;
+}   
+     
+.kelly-app-version {
+    background: #7f7f7f59;
+    padding: 6px;
+    border-radius: 4px;
+}
+
+.kelly-app-name {
+    display : block;
+    font-size: 20px;
+    text-decoration: none;
+}
+
+.kelly-copyright {
+    display : block;
+    font-size: 12px;
+}
+
+.k-options-row {
+    padding-bottom: 6px;
+}
+
+.k-options-row-title {
+    font-size: 14px;
+    padding-bottom: 6px;
+    /* padding-left: 0; */
+}
+
+.k-options-row-input input {
+    height: 37px;
+    width: 100%;
+    box-sizing: border-box;
+    padding-left: 6px;
+}
+
+.k-options-additions-wrap {
+    max-height: 0;
+    transition : max-height .3s ease-out;
+    overflow: hidden;
+}
+
+.k-options-additions {
+    /* overflow-y: scroll; */
+    background: rgb(135 135 135 / 35%);
+    padding: 6px 6px;
+    box-sizing: border-box;
+    margin-bottom: 6px;
+}
+
+.k-options-additions::-webkit-scrollbar {
+    width: 1em;
+}
+ 
+.k-options-additions::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+}
+ 
+.k-options-additions::-webkit-scrollbar-thumb {
+    background-color: #65749e;
+    outline: 1px solid slategrey;
+}
+
+.k-options-action {
+    display: block;
+    width: 100%;
+    height: 32px;
+    background: #5a5a5a;
+    margin-bottom: 4px;
+    border-radius: 4px;
+    line-height: 32px;
+    text-decoration: none;
+    padding: 0 12px;
+}
+
+#commit, .k-important {
+    background: #c40000;
+    color: #fff;
+}
+
+a.k-important {
+    background: #ff0000;
+    color: #fff;
+    padding-right: 12px;
+    padding-left: 12px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#result {
+    position: fixed;
+    left: 12px;
+    bottom: -42px;
+    font-size: 16px;
+    opacity: 0;
+    transition: bottom .3s ease-out, opacity .3s ease-out;
+}
+
+#result div {
+    min-height: 42px;
+    background: #878787;
+    padding: 12px;
+    color: #fff;
+    margin-right: 12px;
+    display: inline-block;
+}
+
+#result-close {
+    cursor : pointer;
+}
+
+#result.show {
+    opacity: 1;
+}
+
+#result.error div {
+    background: #e32e2e;
+}
+
+.k-options-additions-show {
+    text-align: left;
+    padding-left: 12px;
+}
+
+span.k-options-row-help {
+    background : unset;
+    float: right;
+    display: inline-block;
+    padding: 0 8px;
+    color: #afafaf;
+    cursor : pointer;
+}
+
+.k-options-tool-group-wrap.k-options-tool-group-target-screen {
+    padding : 16px;
+}
+
+.k-options-tool-group-wrap .k-options-tool-group-close {
+    top : -30px;
+    left : 0px;
+}
+
+.kelly-copyright a {
+    background: 0;
+    color: #ff2e2e;
+    padding: 0;
+}
+
+.loading:after {
+    content : ""; 
+    display : block; 
+    position: absolute;
+    width : 30px; 
+    height: 30px;
+    margin: 0 auto;
+    animation: loaderSpin 2s linear infinite;
+    background-image : none!important;
+    border-radius: 50%;
+    border: 4px solid rgba(98, 98, 98, 0.1803);
+    border-left: 4px solid #ff9b20;
+    left: 50%;
+    margin-left: -15px;
+    top: 50%;
+    margin-top: -15px;
+}
+
+@keyframes loaderSpin {
+     0% {
+         transform: rotate(0deg);
+    }
+     100% {
+         transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 800px) {
+    
+    body, html,
+    .k-options-row-title {
+        font-size: 16px;
+    }
+
+    #device-info-container {
+        float: unset;
+        max-width: unset;
+        padding-bottom : 0;
+    }
+          
+    .page-header {
+        padding: 12px;
+        background: #535353;
+        border-bottom: 1px solid #7e7e7e;
+        font-size: 16px;
+        height: auto; 
+    }
+    
+    .page-options {
+        padding-left: 0; 
+        max-width: unset;
+        padding: 14px;
+        padding-top: 18px;
+    }
+}
