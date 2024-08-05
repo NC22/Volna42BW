@@ -40,13 +40,12 @@ Firmware Update page : http://192.168.1.1/update (login : admin, password : admi
 # Developer tools 
 
 [1-bit image converter & icon editor](https://42volna.ru/tools/glypheditor)  
-[Fonts generator](https://42volna.ru/tools/fontconverter) 
-[Tools GitHub repo](https://github.com/NC22/Volna42BW-Tools)  
+[Fonts generator](https://42volna.ru/tools/fontconverter)  
+[Tools GitHub Repo](https://github.com/NC22/Volna42BW-Tools)  
 
 # Links
 
-[Cases examples](https://42volna.ru/boxes/)  
-
+[Cases examples](https://42volna.ru/boxes/) 
 [How to setup connection with external sensor](https://42volna.ru/instructions/external)  
 [How to setup sending data to mqtt broker](https://42volna.ru/instructions/mqtt)  
 [Trobleshooting](https://42volna.ru/instructions/issues)  
