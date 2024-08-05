@@ -2,7 +2,7 @@
 
 To convert web-data resources to C++ headers files, execute
 
-minify_einkdisplay.bat - on Windows
+minify_einkdisplay.bat - on Windows (compile htmlpack in *htmlpack* subfolder, or download htmlpack.exe binary separetly from releases since Windows protection can mark it as unsafe)
 
 minify_einkdisplay.sh - on Linux (untested, check the *htmlpack* subfolder to compile the packer tool)
 
