@@ -2,6 +2,9 @@
 
 [Project homepage](https://42volna.ru/en/instructions/)
 
+![Interface for weatherstation 4.2](_ImagesSrc/previews/ui1.png)
+![Interface for weatherstation 1.5](_ImagesSrc/previews/ui3.png)
+
 A weather station project with a monochrome E-Ink display
 
 - E-Ink Waveshare 4.2' display (400x300), Heltect 1.5' (200x200) or equivalents ([List of supported displays](https://42volna.ru/en/instructions/))
@@ -20,33 +23,28 @@ A weather station project with a monochrome E-Ink display
 - Setup settings in UserSetting.h
 - Build!
 
-Default [ESP8266 D1 Mini](https://docs.platformio.org/en/latest/boards/espressif8266/d1_mini_lite.html) config - **platformio.esp8266.ini** 
+Default [ESP8266 D1 Mini](https://docs.platformio.org/en/latest/boards/espressif8266/d1_mini_lite.html) config - **platformio.esp8266.ini**  
 Default [ESP32-S3-DEVKITC-1](https://docs.platformio.org/en/latest/boards/espressif32/esp32-s3-devkitc-1.html)  - **platformio.esp32.ini**
 
 Default settings (UserSetting.h)
 
-WiFi Access Point (turned on if WiFi settings not settings not specified)
-Name : VOLNA42-EINK
-Password : volnaaccess
-Web-interface : http://192.168.1.1/
-Firmware Update page : http://192.168.1.1/update (login : admin, password : admin)
+WiFi Access Point (turned on if WiFi settings not settings not specified)  
+Name : VOLNA42-EINK  
+Password : volnaaccess  
+Web-interface : http://192.168.1.1/  
+Firmware Update page : http://192.168.1.1/update (login : admin, password : admin)  
 
 [Full documentation & extended build instructions](https://42volna.ru/instructions/)
 [Schematics](https://42volna.ru/en/scheme/)
 
 # Links
 
-[Developer tools : fonts generator & 1-bit image converter](https://github.com/NC22/Volna42BW-Tools)
-[Cases examples](https://42volna.ru/boxes/)
+[Developer tools : fonts generator & 1-bit image converter](https://github.com/NC22/Volna42BW-Tools)  
+[Cases examples](https://42volna.ru/boxes/)  
 
-[How to setup connection with external sensor](https://42volna.ru/instructions/external)
-[How to setup sending data to mqtt broker](https://42volna.ru/instructions/mqtt)
-[Trobleshooting](https://42volna.ru/instructions/issues)
-
-# Default UI
-
-![Interface for weatherstation 4.2](_ImagesSrc/previews/ui1.png)
-![Interface for weatherstation 1.5](_ImagesSrc/previews/ui3.png)
+[How to setup connection with external sensor](https://42volna.ru/instructions/external)  
+[How to setup sending data to mqtt broker](https://42volna.ru/instructions/mqtt)  
+[Trobleshooting](https://42volna.ru/instructions/issues)  
 
 # Photos
 
