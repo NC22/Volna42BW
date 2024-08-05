@@ -7,7 +7,7 @@
 
 A weather station project with a monochrome E-Ink display
 
-- E-Ink Waveshare 4.2' display (400x300), Heltect 1.5' (200x200) or equivalents ([List of supported displays](https://42volna.ru/en/instructions/))
+- E-Ink Waveshare 4.2' display (400x300), Heltect 1.5' (200x200) or equivalents ([List of supported displays](https://42volna.ru/displays/))
 - Temperature and humidity sensor - BME280
 - Arduino Framework (C++, PlatformIO); compatible with **ESP8266** and **ESP32**
 - Ability to upload new layouts via web panel
