@@ -1,6 +1,6 @@
 ## Weather station *Volna 2BW42* firmware
 
-[Project homepage](https://42volna.ru/en/instructions/)
+[Project homepage](https://42volna.ru/)
 
 ![Interface for weatherstation 4.2](_ImagesSrc/previews/ui1.png)
 ![Interface for weatherstation 1.5](_ImagesSrc/previews/ui3.png)
@@ -24,7 +24,7 @@ A weather station project with a monochrome E-Ink display
 - Build!
 
 Default [ESP8266 D1 Mini](https://docs.platformio.org/en/latest/boards/espressif8266/d1_mini_lite.html) config - **platformio.esp8266.ini**  
-Default [ESP32-S3-DEVKITC-1](https://docs.platformio.org/en/latest/boards/espressif32/esp32-s3-devkitc-1.html)  - **platformio.esp32.ini**
+Default [ESP32-S3-DEVKITC-1](https://docs.platformio.org/en/latest/boards/espressif32/esp32-s3-devkitc-1.html) config - **platformio.esp32.ini**
 
 Default settings (UserSetting.h)
 
@@ -34,12 +34,17 @@ Password : volnaaccess
 Web-interface : http://192.168.1.1/  
 Firmware Update page : http://192.168.1.1/update (login : admin, password : admin)  
 
-[Full documentation & extended build instructions](https://42volna.ru/instructions/)
+[Full documentation & extended build instructions](https://42volna.ru/instructions/)  
 [Schematics](https://42volna.ru/en/scheme/)
+
+# Developer tools 
+
+[1-bit image converter & icon editor](https://42volna.ru/tools/glypheditor)  
+[Fonts generator](https://42volna.ru/tools/fontconverter) 
+[Tools GitHub repo](https://github.com/NC22/Volna42BW-Tools)  
 
 # Links
 
-[Developer tools : fonts generator & 1-bit image converter](https://github.com/NC22/Volna42BW-Tools)  
 [Cases examples](https://42volna.ru/boxes/)  
 
 [How to setup connection with external sensor](https://42volna.ru/instructions/external)  
