@@ -39,7 +39,7 @@ Firmware Update page : http://192.168.1.1/update (login : admin, password : admi
 
 # Developer tools 
 
-[1-bit image converter & icon editor](https://42volna.ru/tools/glypheditor)  
+[1-bit Image Converter & Icon Editor](https://42volna.ru/tools/glypheditor)  
 [Fonts generator](https://42volna.ru/tools/fontconverter)  
 [Tools GitHub Repo](https://github.com/NC22/Volna42BW-Tools)  
 
