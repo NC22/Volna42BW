@@ -2,9 +2,9 @@
 
 To convert web-data resources to C++ headers files, execute
 
-minify_einkdisplay.bat - on Windows (compile htmlpack in *htmlpack* subfolder, or download htmlpack.exe binary separetly from releases since Windows protection can mark it as unsafe)
+minify_einkdisplay.bat - on Windows (compile htmlpack in *htmlPack* subfolder by yourself, or [download htmlpack.exe binary](https://github.com/NC22/Volna42BW-Tools/releases) separetly from releases - since Windows protection can mark it as unsafe I cant place it here directly)
 
-minify_einkdisplay.sh - on Linux (untested, check the *htmlpack* subfolder to compile the packer tool)
+minify_einkdisplay.sh - on Linux (untested, check the *htmlPack* subfolder to compile the packer tool)
 
 This updates the *.h files in the "Volna42\src\ui\out" folder with the contents of the html, js, css files of the web interface for loading them from the device's FLASH memory later
 
