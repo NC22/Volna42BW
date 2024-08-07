@@ -88,7 +88,7 @@ KellyTools.downloadFile = function(data, name, mime) {
             this.href = url;
             this.download = name;
             
-            setTimeout(function() {  window.URL.revokeObjectURL(url); link.parentElement.removeChild(link);  }, 4000);            
+            setTimeout(function() {  window.URL.revokeObjectURL(url);  }, 4000); // link.parentElement.removeChild(link); 
         };
         
         link.click();

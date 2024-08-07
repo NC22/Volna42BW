@@ -432,7 +432,7 @@ function KellyImgUpl(env) {
         widget.params = "";
         
         var params = gid('widget-' + widget.id +'-params');
-        if (params) widget.params = params;
+        if (params) widget.params = params.value;
         
         ctx.rect(0, 0, screen.width, screen.height);
         ctx.fillStyle = 'rgba(0,0,0,0)';
@@ -919,14 +919,18 @@ function KellyImgUpl(env) {
             for (var i=0; i < widgets.length; i++) {
                 if (widgetsOrder.indexOf(widgets[i].id) == -1) continue;
                 if (!gid('widget-' + widgets[i].id + '-enabled').checked) continue;
-                widgetsData.append("widget-enabled-" + widgets[i].uuid, '1');
-                widgetsData.append("widget-x-" + widgets[i].uuid, gid('widget-' + widgets[i].id + '-x').value);
-                widgetsData.append("widget-y-" + widgets[i].uuid, gid('widget-' + widgets[i].id + '-y').value);
+                var data = '1;' + gid('widget-' + widgets[i].id + '-x').value + ';' + gid('widget-' + widgets[i].id + '-y').value + ';';
                 
                 var params = gid('widget-' + widgets[i].id + '-params');
                 if (params) {
-                    widgetsData.append("widget-params-" + widgets[i].uuid, params.value.substr(0, PARAMS_MAX_SIZE));
-                }
+                    data += params.value.substr(0, PARAMS_MAX_SIZE) + ';'
+                } else data += ';';
+                
+                widgetsData.append("widget-" + widgets[i].uuid, data);
+                // widgetsData.append("widget-x-" + widgets[i].uuid, gid('widget-' + widgets[i].id + '-x').value);
+                // widgetsData.append("widget-y-" + widgets[i].uuid, gid('widget-' + widgets[i].id + '-y').value);
+                
+                
             }
             
             handler.sendPackRequest = KellyTools.cfetch("/api/direct/widgets", {method : 'POST', body : widgetsData, responseType : 'json'}, function(response, error) {
@@ -1027,6 +1031,11 @@ function KellyImgUpl(env) {
                         for (var i = 0; i < sbController.buffer.length; i++) sbController.buffer[i] = result.simpleBuffer[i];
                         for (var i = 0; i < widgets.length; i++) {
                             
+                            var widgetEnabled = gid('widget-' + widgets[i].id + '-enabled');
+                            if (!widgetEnabled) continue;
+                            
+                            widgetEnabled.checked = false;
+                            
                             var key = -1;
                             for (var b = 0; b < result.widgets.length; b++) {
                                 if (result.widgets[b].id == widgets[i].id) key = b;
@@ -1035,7 +1044,7 @@ function KellyImgUpl(env) {
                             if (key == -1) continue;
                             if (widgetsOrder.indexOf(widgets[i].id) == -1) continue;
                             
-                            gid('widget-' + widgets[i].id + '-enabled').checked = result.widgets[key].enabled;
+                            widgetEnabled.checked = result.widgets[key].enabled;
                             gid('widget-' + widgets[i].id + '-x').value = result.widgets[key].x;
                             gid('widget-' + widgets[i].id + '-y').value = result.widgets[key].y;
                             

@@ -1,6 +1,7 @@
 #ifndef CfgDefines_h
 #define CfgDefines_h
 
+#define CUSTOM_UI_MAX_WIDGETS 20
 
 // Default pins for ESP8266 I2C (Temperature & Hum sensor and additions), change for ESP32 if needed
 
@@ -112,7 +113,7 @@
 		#define EPD_CS_PIN   -1  // GND (-1)    
 		#define EPD_CLK_PIN  -1  // Всегда GPIO 13 (MOSI) - SPI
 		#define EPD_DIN_PIN  -1  // Всегда GPIO 14 (SCLK) - SPI  
-
+	
 	/*
 		// НЕ Основная
 		// моя старая алт. распиновка, через резистор

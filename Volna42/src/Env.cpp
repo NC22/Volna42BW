@@ -879,7 +879,7 @@ bool Env::cuiSetWidget(uiWidgetStyle widget) {
 
     if (key == -1) {
 
-      if (cuiWidgets.size() > 10) return false;
+      if (cuiWidgets.size() > CUSTOM_UI_MAX_WIDGETS) return false;
       cuiWidgets.push_back(widget);
 
     } else {

@@ -408,6 +408,8 @@ void WebServerEink::apiDirectWidgets() {
         if (type == uiNone) {            
             Serial.print(F("Unknow widget key ID : ")); Serial.println(intState);
             continue;            
+        } else {
+            Serial.print(F("Widget input key ID : ")); Serial.println(intState);
         }
 
         int widgetKey = -1;
@@ -418,33 +420,69 @@ void WebServerEink::apiDirectWidgets() {
             }
         }
 
-        if (widgetKey == -1) {
-
-            uiWidgetStyle newWidget;
-                          newWidget.x = 0;
-                          newWidget.y = 0;
-                          newWidget.enabled = false;
-                          newWidget.type = type;
-                          newWidget.params = "";
-
-            widgets.push_back(newWidget);
-            widgetKey = widgets.size()-1;
+        if (widgetKey != -1) {
+            Serial.print(F("Duplicate widget setup in request")); 
+            continue;
         }
 
-        if (server->argName(i).indexOf("params") != -1) {
-            widgets[widgetKey].params = server->arg(i);
-        } else {
+        uiWidgetStyle newWidget;
+                      newWidget.x = 0;
+                      newWidget.y = 0;
+                      newWidget.enabled = false;
+                      newWidget.type = type;
+                      newWidget.params = "";
 
-            int intState = 0;
-            if(sscanf(server->arg(i).c_str(), "%d", &intState) != 1) {
-                continue;
+        String rawParam = "";
+        unsigned int inputCursor = 0;
+
+        // widget settings string format
+        // [enabled];[x];[y];[params]
+
+        for (unsigned int b = 0; b < server->arg(i).length(); b++) {
+
+            if (server->arg(i)[b] == ';') {
+
+                if (inputCursor == 0 || inputCursor == 1 || inputCursor == 2) {
+                                        
+                    intState = 0;
+                    if(sscanf(rawParam.c_str(), "%d", &intState) != 1) {
+                        intState = 0;
+                    }
+
+                    // Serial.print(F("Read PARAM_N : ")); Serial.print(inputCursor); Serial.print(F(" RESULT : ")); Serial.print(intState);  Serial.print(F(" RAW : ")); Serial.println(rawParam);
+                    
+                    if (inputCursor == 0) {
+
+                        newWidget.enabled = intState > 0 ? true : false;
+                        if (!newWidget.enabled) break;
+
+                    } else if (inputCursor == 1) {
+                        
+                        newWidget.x = intState;
+
+                    } else if (inputCursor == 2) { 
+                        
+                        newWidget.y = intState;
+                    }
+
+                } else if (inputCursor == 3) {
+
+                    newWidget.params = rawParam;
+
+                } else {
+                    break;
+                }
+                
+                rawParam = "";
+                inputCursor++;
+
+            } else {
+                rawParam += server->arg(i)[b];
             }
-
-            if (server->argName(i).indexOf("-enabled-") != -1) widgets[widgetKey].enabled = (intState > 0 ? true : false);            
-            else if (server->argName(i).indexOf("-x-") != -1) widgets[widgetKey].x = intState;
-            else if (server->argName(i).indexOf("-y-") != -1) widgets[widgetKey].y = intState;
-            else continue;
         }
+
+        if (!newWidget.enabled) continue;
+        widgets.push_back(newWidget);
     } 
 
     if (commit) {
@@ -474,7 +512,7 @@ void WebServerEink::apiDirectWidgets() {
                 if (widgets[b].enabled && env->cuiSetWidget(widgets[b])) {
                     state += " [Success]";
                 } else {
-                    state += " [Fail] Limit - 10";
+                    state += " [Fail] Max widgets limit reached";
                 }
 
                 Serial.println(state);

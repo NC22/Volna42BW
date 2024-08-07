@@ -263,14 +263,25 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
 
     int lkey = env->lastState.lastTelemetrySize-1;
 
+    bool min = false;
+    bool fill = false;
+    bool invert = false;
+    bool border = false;
+
+    if (widget.params.length() > 0) {
+        min = widget.params.indexOf("-m") != -1;
+        fill = widget.params.indexOf("-f") != -1;
+        invert = widget.params.indexOf("-i") != -1;
+    }  
+
     if (widget.type == uiClock) {
 		
       drawClockWidget(
         baseX, 
         baseY, 
-        widget.params.indexOf("-b") != -1, 
-        widget.params.indexOf("-f") != -1, 
-        widget.params.indexOf("-i") != -1, 
+        border, 
+        fill, 
+        invert, 
         widgetWidth, 
         widgetHeight
       );
@@ -320,7 +331,7 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
 
           widgetWidth = text.pixelWidth + 10;
 
-          if (widget.params.indexOf("-f") != -1) {
+          if (fill) {
             screen->drawRoundedSquare(baseX-2, baseY-2, widgetWidth+2, widgetHeight+2, 4, false, 0);
             baseX += 5;
           }
@@ -337,7 +348,7 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
 
         widgetWidth = 80;
         widgetHeight = 20;
-        if (widget.params.indexOf("-f") != -1) {
+        if (fill) {
           screen->drawRoundedSquare(baseX-2, baseY-2, widgetWidth+2, widgetHeight+2, 4, false, 0);
         }
 
@@ -347,8 +358,12 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
         
         widgetWidth = 152;
         widgetHeight = 70;
+
+        if (min) {
+          widgetHeight = 20;
+        }
           
-        if (widget.params.indexOf("-f") != -1) {
+        if (fill) {
           screen->drawRoundedSquare(baseX-2, baseY-2, widgetWidth+2, widgetHeight+2, 4, false, 0);
         }
 
@@ -391,23 +406,47 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
                   screen->drawString(baseX, baseY, "sensor bad data", true);
 
                 } else {
-                    screen->drawString(baseX, baseY, extSens ? FPSTR(locOutdoor) : FPSTR(locIndoor), true);                
-                    screen->setFont(&font44x44Config);
+                    
+                    if (!env->celsius) {
+                      t = env->toFahrenheit(t);
+                    }
 
-                    sprintf(buffer, "%.1f", t);
-                    int twidth = screen->drawString(baseX, baseY + 20, buffer, true);  
+                    if (!min) {
 
-                    // Celsius glyph symbol
-                    screen->drawImage(twidth + 10, baseY + 20 + 4, &cels_39x43bw_settings, true);     
+                      screen->drawString(baseX, baseY, extSens ? FPSTR(locOutdoor) : FPSTR(locIndoor), true);                
+                      screen->setFont(&font44x44Config);
+                      sprintf(buffer, "%.1f", t);
+                      baseX = screen->drawString(baseX, baseY + 20, buffer, true);  
+
+                      // todo - include to font
+                      if (env->celsius) {
+                        screen->drawImage(10 + baseX, baseY + 20 + 4, &cels_39x43bw_settings, true); // Celsius glyph symbol    
+                      } else {
+                        screen->drawImage(6 + baseX, baseY + 20 + 4, &fahr_39x43bw_settings, true); // Fahrenheit glyph symbol    
+                      }
+
+                    } else {
+
+                      if (env->celsius) sprintf(buffer, "%.1fC", t);
+                      else sprintf(buffer, "%.1fF", t);
+                      
+                      screen->drawString(baseX, baseY, buffer, true);
+                    }
+
                 }
 
             } else {
               
               if (h > -1000) {
-                screen->drawString(baseX, baseY, FPSTR(locHumidity), true);                
-                screen->setFont(&font44x44Config);
-                sprintf(buffer, "%.1f%%", h);  
-                screen->drawString(baseX, baseY + 20, buffer, true);
+
+                  if (!min) {
+                     screen->drawString(baseX, baseY, FPSTR(locHumidity), true); 
+                     screen->setFont(&font44x44Config);
+                     baseY += 20;
+                  }
+                  
+                  sprintf(buffer, "%.1f%%", h);  
+                  screen->drawString(baseX, baseY, buffer, true);
               }
             }
         }
@@ -416,7 +455,7 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
         widgetWidth = 102;
         widgetHeight = 36;
         
-        if (widget.params.indexOf("-f") != -1) {
+        if (fill) {
           screen->drawRoundedSquare(baseX-2, baseY-2, widgetWidth+2, widgetHeight+2, 4, false, 0);
         }
 
