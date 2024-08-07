@@ -49,7 +49,9 @@ class KellyEInk {
 
 		unsigned int displayWidth;
 		unsigned int displayHeight;
-		bool partialModeSupport;
+
+		bool colorMode2bitSupport = false;
+		bool partialModeSupport = false;
 
 		unsigned int initPinsDelay = 300;
 		unsigned int dispInitDelay = 100;

@@ -39,6 +39,7 @@
 */
 	#define PARTIAL_UPDATE_INTERVAL 120        
 	#define PARTIAL_UPDATE_SUPPORT  
+	#define COLORMODE_2BIT_SUPPORT
 
   // [Deprecated, Dont use] Не используется - сейчас везде порядок вывода пикселей инициализируется командами на уровне контроллера
   // #define WEB_BUFFER_MOD_FLIPX  // для кастомных картинок экрана - приведение к единому начальному положению интерфейса и чистого буфера, для тестов ENVDATA.screen.bufferMod = "flipx";
@@ -67,17 +68,19 @@
    
 */
 
-	// [Частичное обновление экрана]
+	// [Partial screen update] | [Частичное обновление экрана]
 
 	// B\W displays WeAct - worked & tested
 	// B\W displays WaveShare rev 2.2 - worked & tested
-	// B\W\Red displays WaveShare rev 2.1 - kinda work, but possible artifacts, comment define if you have problems with partial update
+	// B\W\Red displays WaveShare rev 2.1 - kinda work, but possible artifacts
 	// B\W displays WaveShare rev 2.1 - partial buffer push works, but no frame update availabe (orig examples also not works)
+
+	// USE /api/partialtest link to test if partial update works on your display without issues, and comment defines if its not, to prevent unexpected behavior
 
 	#define PARTIAL_UPDATE_INTERVAL 120          // Интервал частичного обновления экрана в секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
 	#define PARTIAL_UPDATE_SUPPORT               // Partial update is configurable in web UI and disabled by default. Used for update clock widget each minute
 	// #define RESET_MINUTE_TIMER_ON_WEB_REQUEST // Display updates could stuck web UI during screen refresh, so this can be usefull if you enter web interface frequently,
-	#define COLORMODE_2BIT_SUPPORT               // Display supports 2-bit output mode - 4 colors (used for custom UI images) 
+	#define COLORMODE_2BIT_SUPPORT               // Allow change image mode (1bit - 2-colors \ 2-bit 4-colors) form web panel if display supports 2-bit output 
 
 	#if defined(WAVESHARE_RY_BW_42_UC8176)
 		//  #define DOUBLE_BUFFER_MODE      // часть элементов может быть окрашена в доп. цвет дисплея (Желтый или Красный), требовательно к оперативке 

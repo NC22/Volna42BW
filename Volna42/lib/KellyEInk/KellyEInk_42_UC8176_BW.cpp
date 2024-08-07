@@ -60,7 +60,7 @@ void KellyEInk_42_UC8176_BW::displayPartial(const unsigned char *Image, unsigned
 	
 	// Controller : UC8176 | WaveShare 4.2 rev2.1 BW || BW + Red or Yellow
 
-	sendCommand( 0x91);     // 0x91
+	sendCommand(0x91);     // 0x91
 	sendCommand(0x90); // 0x90
 	
 	sendData(Xstart >> 8);
@@ -109,6 +109,9 @@ void KellyEInk_42_UC8176_BW::displayPartial(const unsigned char *Image, unsigned
 void KellyEInk_42_UC8176_BW::displayInit(unsigned int bitMode, bool partialMode) {	
 
 	Serial.println(F("e-Paper : [displayInit]"));
+	if (bitMode > 1 && !colorMode2bitSupport) {
+		Serial.println(F("e-Paper : used with [UNSUPPORTED COLOR MODE] 2bit, possible artifacts and wrong output"));
+	}
 
 	if (deepSleep) displayReset();		
 	sendCommand(0x04);  // Power ON (PON)

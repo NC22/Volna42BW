@@ -62,6 +62,7 @@ class Screen1in54UI {
         void drawUILowBat();
         void updatePartialClock();
         void enableClockMode(bool state);
+        bool is4ColorsSupported();
 };
 
 #endif	

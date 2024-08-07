@@ -29,6 +29,9 @@ class KellyEInk_42_UC8176_BW : public KellyEInk {
 		
 		void displaySleep();
 		void displayUpdate();
+
+		bool colorMode2bitSupport = false;
+		bool partialModeSupport = true;
 };
 
 #endif

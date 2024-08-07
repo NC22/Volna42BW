@@ -27,6 +27,15 @@ Screen4in2UI::Screen4in2UI(Env * nenv) {
 
 }
 
+bool Screen4in2UI::is4ColorsSupported() {
+  
+  #if defined(COLORMODE_2BIT_SUPPORT)
+      return displayDriver->colorMode2bitSupport;
+  #endif
+
+  return false;  
+}
+
 bool Screen4in2UI::tick() {
   return false;
 }
@@ -228,7 +237,7 @@ bool Screen4in2UI::drawUIToBufferCustom() {
     
           widgetController->drawWidget(env->cuiWidgets[i]);
         } else 
-          Serial.println(F("skip WIDGET"));  
+          Serial.println(F("SKIP WIDGET"));  
     } 
 
     return true;
@@ -295,7 +304,8 @@ void Screen4in2UI::drawUIToBuffer() {
   
   // bits per pixel identifyed form custom UI file
   if (env->cuiIsEnabled()) {
-
+    
+    Serial.println(F("Draw Custom UI"));  
     if (drawUIToBufferCustom()) return;
   }
 
@@ -693,8 +703,8 @@ void Screen4in2UI::updateScreen() {
   initPins(); 
   
   KellyCanvas * screen = env->getCanvas();
-  if (screen->bitPerPixel == 2) Serial.print(F("2-bit [4 Color mode]"));
-  else Serial.print(F("1-bit [2 Color mode]"));
+  if (screen->bitPerPixel == 2) Serial.println(F("2-bit [4 Color mode]"));
+  else Serial.println(F("1-bit [2 Color mode]"));
 
   displayDriver->displayInit(screen->bitPerPixel);
 

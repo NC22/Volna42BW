@@ -145,8 +145,8 @@ typedef struct {
     u_int8_t lowBatTick;           // times battery sensor detected low battery state, will show sad hangry cat if count enough
     int16_t cuiFileIndex;          // temporary file index - if we need to load once on reboot some specified custom user interface without save to permanent memory
     int cuiTimeCurrent;            // cui timer for loop mode (change custom ui every N seconds, use cuiFileIndex as cursor)
-    bool cuiLoop;
-    bool cuiResetOnReboot;         // needed when we reboot from web ui, but not when move cui loop cursor        
+    bool cuiLoop;                  // todo - exclude from loop [default] cui ?
+    bool cuiResetOnReboot;         // needed when we reboot from web ui, but not when move cui loop cursor and need to reboot for realloc memory by switch form 1-bit to 2-bit mode       
 
     telemetry lastTelemetry[10];   
     externalSensorData extData; 
@@ -311,7 +311,6 @@ class Env {
         int16_t cuiGetNameByIndex(int16_t index, String &name);
         // int16_t cuiGetIndexByName(String &name);
         bool cuiIsEnabled();
-        bool cuiIs4ColorsSupported();
         void cuiSetState(bool state, String sname = "");
         
         String cuiGetListFilesJSON();

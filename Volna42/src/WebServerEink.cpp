@@ -771,7 +771,7 @@ void WebServerEink::showUploadImagePage() {
         currentCfg += "\"bufferMod\":false,";
     #endif
     
-    if (env->cuiIs4ColorsSupported()) {
+    if (env->screen->is4ColorsSupported()) {
         currentCfg += "\"color4\":true,";
     } else {
         currentCfg += "\"color4\":false,";

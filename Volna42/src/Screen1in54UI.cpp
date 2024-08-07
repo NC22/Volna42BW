@@ -11,6 +11,15 @@ Screen1in54UI::Screen1in54UI(Env * nenv) {
     widgetController->setEnv(env);
 }
 
+bool Screen1in54UI::is4ColorsSupported() {
+  
+  #if defined(COLORMODE_2BIT_SUPPORT)
+      return displayDriver->colorMode2bitSupport;
+  #endif
+
+  return false;  
+}
+
 int Screen1in54UI::drawTemp(int theight, String title, float temperature, float humidity, imageDrawModificators & mods) {
   
   KellyCanvas * screen = env->getCanvas();
@@ -123,6 +132,8 @@ void Screen1in54UI::drawUILowBat() {
 // todo separate classes for screens
 
 void Screen1in54UI::drawUIToBuffer() {
+
+  env->cuiApplyLoop();
 
   if (env->cuiIsEnabled()) {
     if (drawUIToBufferCustom()) return;

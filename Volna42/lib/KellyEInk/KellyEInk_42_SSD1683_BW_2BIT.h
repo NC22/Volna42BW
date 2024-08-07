@@ -28,6 +28,9 @@ class KellyEInk_42_SSD1683_BW_2BIT : public KellyEInk {
 		
 		void displaySleep();
 		void displayUpdate();
+
+		bool colorMode2bitSupport = true;
+		bool partialModeSupport = true;
 };
 
 #endif

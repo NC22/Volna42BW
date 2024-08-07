@@ -71,6 +71,7 @@ class Screen4in2UI {
         void updateTestPartial2();
         void updateTestPartial(bool afterWakeup = false);
         void updatePartialClock();
+        bool is4ColorsSupported();
         // void drawUISysNotice(String text, int x, int y, int id);
 };
 

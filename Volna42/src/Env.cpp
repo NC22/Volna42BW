@@ -133,14 +133,24 @@ void Env::begin() {
           
           String restoredName = "";
           cuiGetNameByIndex(lastState.cuiFileIndex, restoredName);
-          cuiSetState(cuiName.length() > 0, restoredName);
           
+          if (restoredName.length() > 0) {
+
+              Serial.print(F("[Direct input] Restore CUI file by index - fileindex : ")); Serial.println(lastState.cuiFileIndex);
+              Serial.println(restoredName);
+
+              cuiSetState(true, restoredName);
+
+          } else {
+            
+            Serial.print(F("[Direct input] Restore CUI file by index - file NOT found by index : ")); Serial.println(lastState.cuiFileIndex);
+            cuiSetState(false);
+          }
+
           if (lastState.cuiResetOnReboot) {
             lastState.cuiResetOnReboot = false;
             lastState.cuiFileIndex = -1;
           }
-
-          Serial.print(F("[Direct input] Restore CUI file by index - fileindex : ")); Serial.println(lastState.cuiFileIndex);
         }
 
       // чистый запуск
@@ -892,15 +902,6 @@ bool Env::cuiSetWidget(uiWidgetStyle widget) {
     return true;
 }
 
-bool Env::cuiIs4ColorsSupported() {
-  
-  #if defined(COLORMODE_2BIT_SUPPORT)
-      return true;
-  #endif
-
-  return false;  
-}
-
 void Env::cuiResetWidgets() {
     cuiWidgets.clear();
 }
@@ -1258,6 +1259,14 @@ void Env::updateScreen() {
     //  screen->drawTestPartial(true);
     //  return;
     // }
+
+    Serial.println("[updateScreen]");
+
+    if (cuiIsEnabled()) Serial.println(cuiName);
+    else {
+        
+      Serial.println("[updateScreen][cui disabled]");
+    }
 
     if (!screen->displayBeasy) {
 
@@ -1875,11 +1884,12 @@ void Env::cuiResetStateByConfig() {
 void Env::cuiApplyLoop() {
   if (lastState.cuiLoop) {
     
-    Serial.println("[LOOP]" + String(lastState.cuiFileIndex)); 
+    Serial.print(F("[LOOP] ")); Serial.println(String(lastState.cuiFileIndex)); 
 
     lastState.cuiFileIndex = cuiGetNameByIndex(lastState.cuiFileIndex, cuiName);
     if (lastState.cuiFileIndex == -1) {
       lastState.cuiFileIndex = cuiGetNameByIndex(-1, cuiName);
+      Serial.print(F("[Custom UI][LOOP Mode] reached end. Reset to index : ")); Serial.println(String(lastState.cuiFileIndex)); 
     }
 
     if (lastState.cuiFileIndex == -1) {
@@ -2040,6 +2050,7 @@ int16_t Env::cuiGetNameByIndex(int16_t searchIndex, String &name) {
     cuiInitFS();
 
     int index = -1;
+    name = "";
     String tmpName;
     #if defined(ESP32)
       
@@ -2096,6 +2107,7 @@ int16_t Env::cuiGetNameByIndex(int16_t searchIndex, String &name) {
 
     #endif
 
+    if (name.length() == 0) index = -1;
     return index;
 }
 
