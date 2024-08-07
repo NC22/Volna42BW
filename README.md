@@ -22,13 +22,14 @@ A weather station project with a monochrome E-Ink display
 - Setup pinouts and defines in UserDefines.h according to your display & overall setup (battery sensor, i2c pins)
 - Setup settings in UserSetting.h
 - Build!
+- First setup from web-panel (access by displayed IP) 
 
 Default [ESP8266 D1 Mini](https://docs.platformio.org/en/latest/boards/espressif8266/d1_mini_lite.html) config - **platformio.esp8266.ini**  
 Default [ESP32-S3-DEVKITC-1](https://docs.platformio.org/en/latest/boards/espressif32/esp32-s3-devkitc-1.html) config - **platformio.esp32.ini**
 
 Default settings (UserSetting.h)
 
-WiFi Access Point (turned on if WiFi settings not settings not specified)  
+WiFi Access Point (Turned On if WiFi settings not specified)  
 Name : VOLNA42-EINK  
 Password : volnaaccess  
 Web-interface : http://192.168.1.1/  
@@ -45,7 +46,7 @@ Firmware Update page : http://192.168.1.1/update (login : admin, password : admi
 
 # Links
 
-[Cases examples](https://42volna.ru/boxes/) 
+[Cases examples](https://42volna.ru/boxes/)  
 [How to setup connection with external sensor](https://42volna.ru/instructions/external)  
 [How to setup sending data to mqtt broker](https://42volna.ru/instructions/mqtt)  
 [Trobleshooting](https://42volna.ru/instructions/issues)  
