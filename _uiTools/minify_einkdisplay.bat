@@ -21,6 +21,7 @@ htmlpack.exe %srcdir%uiEink\initUpload.js %outdir%ui\out\initUpload 0
 htmlpack.exe %srcdir%uiEink\KellyUploader.js %outdir%ui\out\KellyUploader 0
 htmlpack.exe %srcdir%uiEink\KellyUIFileManager.js %outdir%ui\out\KellyUIFileManager 0
 htmlpack.exe %srcdir%uiEink\KellyUploader.js %outdir%ui\out\KellyUploader 0
+htmlpack.exe %srcdir%uiEink\client_uploader.html %outdir%ui\out\client_uploader 0
 htmlpack.exe %srcdir%uiEink\locale\localeEN.js %outdir%ui\out\locale_en\locale 0
 htmlpack.exe %srcdir%uiEink\locale\localeRU.js %outdir%ui\out\locale_ru\locale 0
 

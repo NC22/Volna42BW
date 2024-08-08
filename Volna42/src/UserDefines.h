@@ -15,7 +15,7 @@
 // [Display types] | [Типы дисплеев]
 
 // #define WAVESHARE_BW_42_UC8176          // Waveshare 4.2inch, REV 2.1 [B&W]
-#define WAVESHARE_BW_42_SSD1683            // Waveshare 4.2inch, REV 2.2 | WeAct 4.2inch [B&W, 4-colors grayscale displays]
+#define WAVESHARE_BW_42_SSD1683           // Waveshare 4.2inch, REV 2.2 | WeAct 4.2inch [B&W, 4-colors grayscale displays]
 // #define WAVESHARE_RY_BW_42_UC8176       // Waveshare 4.2inch, REV 2.1 [B&W + Red or B&W + Yellow, 3-colors (separate buffers)]
 // #define HELTEC_BW_15_S810F              // Heltec 1.54inch 200x200 [B&W]
 
@@ -110,9 +110,9 @@
 		#define EPD_DIN_PIN  -1  // Всегда GPIO 14 (SCLK) - SPI  
 	
 	/*
-		// НЕ Основная
+		// [Optional, my old setup] | НЕ Основная
 		// моя старая алт. распиновка, через резистор
-		
+	
 		#define EPD_BUSY_PIN 2   // D4 - GPIO - 2 (+20кОм резистор на VCC)
 		#define EPD_RST_PIN  12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0

@@ -4,6 +4,7 @@
 ./htmlpack uiEink\KellyUploader.js ..\Volna42\src\ui\out\KellyUploader
 ./htmlpack uiEink\KellyUIFileManager.js ..\Volna42\src\ui\out\KellyUIFileManager
 ./htmlpack uiEink\KellyUploader.js ..\Volna42\src\ui\out\KellyUploader
+./htmlpack uiEink\client_uploader.html ..\Volna42\src\ui\out\client_uploader
 ./htmlpack uiEink\locale\localeEN.js ..\Volna42\src\ui\out\locale_en\locale
 ./htmlpack uiEink\locale\localeRU.js ..\Volna42\src\ui\out\locale_ru\locale
 

@@ -48,10 +48,6 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
   if (temperature > 1000 || temperature < -1000) temperature = -1000;
   if (humidity > 1000 || humidity < -1000) humidity = -1000;
 
-  if (!env->celsius) {
-    temperature = env->toFahrenheit(temperature);
-  }
-
   int humMarginX = 178;
   int humMarginY = 0;
   int tempMarginX = 10;
@@ -69,6 +65,13 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
 
     screen->drawString(tempMarginX, theight - 20, FPSTR(locUnavailable), false);
     return theight + 34;
+
+  } else {    
+
+    if (!env->celsius) {
+      temperature = env->toFahrenheit(temperature);
+    }
+    
   }
 
   char buffer[32];
@@ -108,6 +111,12 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
   twidth += 39;
 
   float tempMax = 42.0; float tempMin = -20.0; 
+
+  if (!env->celsius) {
+    tempMax = env->toFahrenheit(tempMax);
+    tempMin = env->toFahrenheit(tempMin);
+  }
+
   float tempPercent = temperature;
 
   if (tempPercent > tempMax) tempPercent = tempMax;
@@ -304,8 +313,6 @@ void Screen4in2UI::drawUIToBuffer() {
   
   // bits per pixel identifyed form custom UI file
   if (env->cuiIsEnabled()) {
-    
-    Serial.println(F("Draw Custom UI"));  
     if (drawUIToBufferCustom()) return;
   }
 

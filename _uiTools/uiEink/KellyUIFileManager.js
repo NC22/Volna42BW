@@ -14,14 +14,14 @@ function KellyUIFM() {
     // #3# - date - выходит за границы
     
     handler.filelist = KellyTools.getSelectWidget({
-        tpl : '#0# #1#кб #2#бит <button href="#" data-action="/api/cui/delete">X</button><button href="#" data-id="toscreen">На экран</button><button href="#" data-id="preview">Превью</button><button href="#" data-id="download">Скачать</button><div class="clear"></div>',
+        tpl : '#0# #1#кб #2#бит <button href="#" data-action="/api/cui/delete">X</button><button href="#" data-id="toscreen">' + lloc('cui_filelist_ascreen') + '</button><button href="#" data-id="preview">' + lloc('cui_filelist_apreview') + '</button><button href="#" data-id="download">' + lloc('cui_filelist_adownload') + '</button><div class="clear"></div>',
         valueIndex : 0,
         onLoadList : function(self, rawData) { return self.getListData(rawData);},        
         onUpdate : function(self) {
             
             KellyTools.showNotice(false);
             if (self.list.length <= 0 && self.lastError === false) {
-                self.containerEl.innerHTML = 'Файлов стилей нет';
+                self.containerEl.innerHTML = lloc('cui_filelist_empty');
                 KellyTools.updateSpoilerBounds();  
                 return;
             }
@@ -58,7 +58,7 @@ function KellyUIFM() {
                      } else if (this.getAttribute('data-id') == 'toscreen') {
                          
                             KellyTools.cLock = true;
-                            KellyTools.showNotice("Загружаю данные... ");  
+                            KellyTools.showNotice(lloc('cui_sending_screen_data'));  
                             
                             var sform = new FormData();
                                 sform.append("filename", item.getAttribute("data-value"));
@@ -67,7 +67,7 @@ function KellyUIFM() {
                                 
                                 if (!response || response.status == "fail") {
                                     
-                                    KellyTools.showNotice("Нет обратной связи с устройством. " + error);  
+                                    KellyTools.showNotice(lloc('cui_sending_fail') + " " + error);  
                                     
                                 } else if (response.reboot_required) {
                             
@@ -75,10 +75,10 @@ function KellyUIFM() {
                                         formData.append('reboot', '1');  
                                         
                                     KellyTools.cfetch("/api/reboot", {method : 'POST', body : formData, responseType : 'json'}, function(response, error) {}); 
-                                    KellyTools.showNotice("Перезагружаюсь для переинициализации буфера экрана!");
+                                    KellyTools.showNotice(lloc('cui_sending_reboot_required'));
                                     
                                 } else {
-                                    KellyTools.showNotice("Готово!");   
+                                    KellyTools.showNotice(lloc('cui_done'));   
                                 }
                                 
                                 KellyTools.cLock = false;
@@ -86,7 +86,7 @@ function KellyUIFM() {
                             
                      } else { // delete
                         
-                        var html = 'Подтвердите удаление файла <a href="#" class="k-important" id="ui-files-confirm-delete" data-action="' + this.getAttribute('data-action') + '" data-value="' + item.getAttribute("data-value") + '">Удалить</a>';
+                        var html = lloc('cui_filelist_confirm_remove') + ' <a href="#" class="k-important" id="ui-files-confirm-delete" data-action="' + this.getAttribute('data-action') + '" data-value="' + item.getAttribute("data-value") + '">' + lloc('cui_filelist_remove') + '</a>';
                         var onNoticeShow = function() {                             
                             gid('ui-files-confirm-delete').onclick = function() {    
                             
@@ -132,7 +132,7 @@ function KellyUIFM() {
         if (handler.downloader) {
             handler.downloader.abort();
             handler.downloader = false;
-            KellyTools.showNotice("Процесс отменен", true);     
+            KellyTools.showNotice(lloc('cui_cancel'), true);     
             return false;
         }
         
@@ -160,7 +160,7 @@ function KellyUIFM() {
                         console.log('Bad response for widgets data'); console.log(error);  
                     } else if (response.indexOf('"status":"fail"') != -1) {
                         console.log('Bad response for widgets data'); console.log(response);
-                        KellyTools.showNotice("Ошибка файловой системы устройства. Невозможно открыть файл", true);     
+                        KellyTools.showNotice(lloc('cui_filelist_readfile_fail'), true);     
                     } else {
                         
                         var strings = response.split("\n");                        
@@ -205,7 +205,7 @@ function KellyUIFM() {
         
         var listInfo = document.getElementById('ui-files-list-info');
         if (rawData.info && listInfo) {
-            listInfo.innerText = "Занято : " + (rawData.info.usedBytes / 1000) + " / " + (rawData.info.totalBytes / 1000) + "кб";            
+            listInfo.innerText = lloc('cui_filelist_left') + " : " + (rawData.info.usedBytes / 1000) + " / " + (rawData.info.totalBytes / 1000) + lloc('cui_kbytes');            
         }
         
         rawData = rawData.list;
@@ -238,7 +238,7 @@ function KellyUIFM() {
         gid('ui-files-save').onclick = function() {
             
              if (!window.ENV.getUploadSettings().uploadReady) {
-                 KellyTools.showNotice('Нечего сохранять');
+                 KellyTools.showNotice(lloc('cui_filelist_save_cui_nothing'));
                  return;
              }
              
@@ -269,7 +269,7 @@ function KellyUIFM() {
                  };
              };
              
-             KellyTools.showNotice('Введите название файла <input type="text" id="ui-files-newname" value="' + defaultName + '"> <a href="#" id="ui-files-save-ok">OK</a>', false, onNoticeShow);
+             KellyTools.showNotice(lloc('cui_filelist_enter_filename') + ' <input type="text" id="ui-files-newname" value="' + defaultName + '"> <a href="#" id="ui-files-save-ok">OK</a>', false, onNoticeShow);
         };
         
         if (gid('ui-files-format')) gid('ui-files-format').onclick = function() {
@@ -285,9 +285,9 @@ function KellyUIFM() {
                         KellyTools.cLock = false;
                         
                         if (!response) {
-                            KellyTools.showNotice("Устройство не отвечает", true); 
+                            KellyTools.showNotice(lloc('cui_device_is_not_responding'), true); 
                         } else {
-                            KellyTools.showNotice("Готово!");
+                            KellyTools.showNotice(lloc('cui_done'));
                             setTimeout(getList, 100);
                         }
                     });
@@ -295,7 +295,7 @@ function KellyUIFM() {
                 };
             };
              
-            KellyTools.showNotice('Подтвердите полную очистку памяти <a href="#" class="k-important" id="ui-format-confirm">Форматировать</a>', false, onNoticeShow);
+            KellyTools.showNotice(lloc('cui_filelist_format_confirm') + ' <a href="#" class="k-important" id="ui-format-confirm">' + lloc('cui_filelist_format') + '</a>', false, onNoticeShow);
         };
         
         KellyTools.initSpoilers();

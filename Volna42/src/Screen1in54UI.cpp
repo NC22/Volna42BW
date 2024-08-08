@@ -34,6 +34,12 @@ int Screen1in54UI::drawTemp(int theight, String title, float temperature, float 
     title = "no data";
     humidity = 0.0;
     temperature = -10;
+  } else {
+
+    if (!env->celsius) {
+      temperature = env->toFahrenheit(temperature);
+    }
+    
   }
 
   int twidthTitle = 178;
@@ -45,7 +51,7 @@ int Screen1in54UI::drawTemp(int theight, String title, float temperature, float 
   screen->drawString(10, theight - 20, title, false);
   
   if (humidity > -1000) {
-    screen->drawString(10, theight + 70 - 20, "влажность", false);
+    screen->drawString(10, theight + 70 - 20,  FPSTR(locHumidity), false);
   }
 
   // big letters metrics
@@ -55,7 +61,11 @@ int Screen1in54UI::drawTemp(int theight, String title, float temperature, float 
   sprintf(buffer, "%.1f", temperature);
   int twidth = screen->drawString(10, theight, buffer, false);  
 
-  screen->drawImage(10 + twidth, theight + 4, &cels_39x43bw_settings, false); // Celsius glyph symbol
+  if (env->celsius) {
+    screen->drawImage(10 + twidth, theight + 4, &cels_39x43bw_settings, false); // Celsius glyph symbol
+  } else {
+    screen->drawImage(6 + twidth, theight + 4, &fahr_39x43bw_settings, false); // Fahrenheit glyph symbol    
+  }
 
   if (humidity > -1000) {
       sprintf(buffer, "%.1f%%", humidity);  
@@ -67,6 +77,12 @@ int Screen1in54UI::drawTemp(int theight, String title, float temperature, float 
   twidth += 39;
 
   float tempMax = 42.0; float tempMin = -20.0; 
+
+  if (!env->celsius) {
+    tempMax = env->toFahrenheit(tempMax);
+    tempMin = env->toFahrenheit(tempMin);
+  }
+
   float tempPercent = temperature;
 
   if (tempPercent > tempMax) tempPercent = tempMax;
@@ -126,7 +142,7 @@ void Screen1in54UI::drawUILowBat() {
 
   if (clearRequired) screen->clear();
 
-  screen->drawString(10, 10, "Низкий заряд", true);
+  screen->drawString(10, 10, FPSTR(locLowBat), true);
 }
 
 // todo separate classes for screens
@@ -182,7 +198,7 @@ void Screen1in54UI::drawUIToBuffer() {
 
       // sensors 
 
-      theight += drawTemp(theight, "температура", env->lastState.lastTelemetry[lkey].temperature, env->lastState.lastTelemetry[lkey].humidity, mods);
+      theight += drawTemp(theight, FPSTR(locTemp), env->lastState.lastTelemetry[lkey].temperature, env->lastState.lastTelemetry[lkey].humidity, mods);
 
       // battery
 
@@ -209,8 +225,8 @@ void Screen1in54UI::drawUIToBuffer() {
 
           batPosX = 48;
           screen->drawString(batPosX - 39, theight, String(chargeLvl) + "%", true);
-          techInfo += String(env->lastState.lastTelemetry[lkey].bat) + "V";
-          techInfo += " #" + String(env->lastState.connectTimes) + " " + env->getFormattedExtSensorLastSyncTime();
+          // techInfo += String(env->lastState.lastTelemetry[lkey].bat) + "V";
+          // techInfo += " #" + String(env->lastState.connectTimes) + " " + env->getFormattedExtSensorLastSyncTime();
 
           screen->drawString(10, theight, techInfo, true);
 
@@ -239,7 +255,7 @@ void Screen1in54UI::drawUIToBuffer() {
 
   } else {
 
-      theight += drawTemp(theight, "ошибка инициализации", -1, 0, mods);
+      theight += drawTemp(theight, FPSTR(locUnavailable), -1, 0, mods);
   }
 
   // time & date

@@ -391,8 +391,10 @@ function KellyEnv(env) {
             }
         };
         gid('commit').onclick = saveForm;
+        
         gid('device-info-refresh').onclick = showDeviceInfo;
-            
+        gid('device-info-refresh').innerText = lloc('getinfo_refresh');
+        
         KellyTools.initSpoilers();
         initActions();
         initCommitable();
@@ -511,7 +513,7 @@ function KellyEnv(env) {
                  
              } else {
                  console.log(error);
-                 panel.innerText = lloc('sys_getinfo_fail');
+                 panel.innerText = lloc('getinfo_fail');
              }
          });
          

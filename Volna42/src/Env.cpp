@@ -1260,13 +1260,12 @@ void Env::updateScreen() {
     //  return;
     // }
 
-    Serial.println("[updateScreen]");
+    // Serial.println("[updateScreen]");
 
-    if (cuiIsEnabled()) Serial.println(cuiName);
-    else {
-        
-      Serial.println("[updateScreen][cui disabled]");
-    }
+    // if (cuiIsEnabled()) Serial.println(cuiName);
+    // else {        
+    //  Serial.println("[updateScreen][cui disabled]");
+    // }
 
     if (!screen->displayBeasy) {
 
@@ -2113,8 +2112,8 @@ int16_t Env::cuiGetNameByIndex(int16_t searchIndex, String &name) {
 
 
 /*
-  ToDo на ESP8266 нужна плановая перезагрузка при смене битности
-  сейчас стоит проверка + рестарт с указанием инструкции к применению оформления, чтобы устройство не ушло memory overflow
+  на ESP8266 нужна плановая перезагрузка при смене битности - см cuiPrepareRebootIfNeeded - проверка и подготовка к перезагрузке,
+  на этапе рендера через драйвер в Screen4in2UI
 */
 
 bool Env::cuiReadStorageFile(bool widgetsOnly) {
@@ -2273,7 +2272,7 @@ bool Env::cuiReadStorageFile(bool widgetsOnly) {
 
         }
 
-      Serial.print(F("READ : ")); Serial.println(widgetParam);
+      // Serial.print(F("READ : ")); Serial.println(widgetParam);
       widgetParam = "";
       paramN++;
 
@@ -2317,7 +2316,7 @@ bool Env::cuiReadStorageFile(bool widgetsOnly) {
   }
 
   Serial.print(F("Successfull readed | Buffer size : ")); Serial.print(canvas->bufferWidth);
-  Serial.print(F(" | Widgets : ")); Serial.println(cuiWidgets.size());
+  Serial.print(F(" | Widgets found : ")); Serial.println(cuiWidgets.size());
   //Serial.println("---------------------" + String(ESP.getFreeHeap()));
 
   file.close();

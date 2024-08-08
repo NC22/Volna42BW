@@ -643,7 +643,7 @@ function KellyImgUpl(env) {
     }
         
     function initWidgets() {
-        var html = '<div><label><input type="checkbox" id="widgets-hidden-params-show"> Показывать скрытые параметры</label></div>';
+        var html = '<div><label><input type="checkbox" id="widgets-hidden-params-show"> ' + lloc('widgets_show_hidden_params') + '</label></div>';
         for (var i = 0; i < widgetsOrder.length; i++) {
             var widget = handler.getWidgetByKey(widgetsOrder[i]);
             

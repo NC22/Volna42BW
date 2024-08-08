@@ -103,36 +103,36 @@
                     </p>
                     <p>
                         <label>
-                            <input type="checkbox" id="img-up-invert-color"><span data-loc="cui_convert_invert_color">Инвертировать цвет картинки</span>
+                            <input type="checkbox" id="img-up-invert-color"> <span data-loc="cui_convert_invert_color">Инвертировать цвет картинки</span>
                         </label>
                     </p>
                     <p>
                         <label>
-                            <input type="checkbox" id="img-up-matkinson-auto"><span data-loc="cui_convert_matkinson_auto">Ненастраиваемый дизеринг</span> 
+                            <input type="checkbox" id="img-up-matkinson-auto"> <span data-loc="cui_convert_matkinson_auto">Ненастраиваемый дизеринг</span> 
                         </label>
                     </p>
                 </div>
                 <div id="bit-2-bit" >
                     <p>
                         <label>
-                            <input type="radio" id="img-up-mbestmatch" name="img-up-method" value="bestmatch"> По ближайшим соответствиям
+                            <input type="radio" id="img-up-mbestmatch" name="img-up-method" value="bestmatch"> <span data-loc="cui_convert_mbestmatch">По ближайшим соответствиям</span> 
                         </label>
                     </p> 
                 </div>
                 <p>
                     <label>
-                        <input type="radio" id="img-up-matkinson" name="img-up-method" value="atkinson" checked> Алгоритм Аткинсона (дизеринг)
+                        <input type="radio" id="img-up-matkinson" name="img-up-method" value="atkinson" checked> <span data-loc="cui_convert_matkinson">Алгоритм Аткинсона (дизеринг)</span>
                                 
-                        <div>Интенсивность <input type="range" id="img-up-matkinson-coefficient" min="0" max="1" step="0.1" value="0.125"></div>
-                        <div><label><input type="checkbox" id="img-up-gs"> Доп. преобразования в оттенки серого</label></div>
-                        <div><label><input type="checkbox" id="img-up-matkinson-drawp"> Учитывать доп. цвета</label></div>
+                        <div><span data-loc="cui_convert_matkinson_coefficient">Интенсивность</span> <input type="range" id="img-up-matkinson-coefficient" min="0" max="1" step="0.1" value="0.125"></div>
+                        <div><label><input type="checkbox" id="img-up-gs"> <span data-loc="cui_convert_gs">Доп. преобразования в оттенки серого</span></label></div>
+                        <div><label><input type="checkbox" id="img-up-matkinson-drawp"> <span data-loc="cui_convert_matkinson_drawp">Учитывать доп. цвета</span></label></div>
                     </label>
                 </p>
                 <p>
-                    <label><input type="checkbox" id="img-up-invert-bg-color">Инвертировать цвет фона</label>
+                    <label><input type="checkbox" id="img-up-invert-bg-color"> <span data-loc="cui_convert_invert_bg">Инвертировать цвет фона</span></label>
                 </p>   
                 <p>
-                    <label>Смещение по X <input type="text" id="img-up-offset-x" value="0" data-step="1"> Y <input type="text" id="img-up-offset-y" value="0" data-step="1"></label>
+                    <label><span data-loc="cui_convert_offset_x">Смещение по X</span> <input type="text" id="img-up-offset-x" value="0" data-step="1"> Y <input type="text" id="img-up-offset-y" value="0" data-step="1"></label>
                 </p>
                 
              </div>
@@ -152,21 +152,21 @@
     
         <div class="ui-files-manager">
         
-            <div id="ui-files-list">Список файлов не загружен</div>
+            <div id="ui-files-list" data-loc="cui_filelist_not_loaded">Список файлов не загружен</div>
             <div id="ui-files-list-info"></div>
-            <div><button id="ui-files-format"><span>Очистить память</span></button></div>
+            <div><button id="ui-files-format"><span data-loc="cui_filelist_format">Очистить память</span></button></div>
             <!--div class="list-half"><div><button id="ui-files-load-list"><span>Загрузить список файлов</span></button></div><div><button id="ui-files-format"><span>Очистить память</span></button></div></div-->
             <!--div style="clear : both;"></div-->
             
-            <button id="ui-files-save" class="k-important">Сохранить оформление</button>
+            <button id="ui-files-save" class="k-important" data-loc="cui_filelist_save_cui">Сохранить оформление</button>
         </div>
         
     </div>     
     <button class="k-options-additions-show" data-for="disp-cui-download" data-loc="cui_download_preview">▼ Скачать предпросмотр</button>
     <div class="k-options-additions-wrap" id="disp-cui-download">
         <div>
-            <button id="img-up-save"><span>Картинку (BIN)</span></button>
-            <button id="img-up-save-all"><span>Настройки и картинку (JSON)</span></button>
+            <button id="img-up-save"><span data-loc="cui_download_preview_as_bin">Картинку (BIN)</span></button>
+            <button id="img-up-save-all"><span data-loc="cui_download_preview_as_json">Настройки и картинку (JSON)</span></button>
         </div> 
     </div> 
     <button class="k-options-additions-show" data-for="disp-commit-options" data-loc="cui_send_to_screen_options">▼ Отправка на экран</button>
@@ -174,7 +174,7 @@
 
         <div>
             <button id="img-up-upload" class="k-important"><span data-loc="cui_send_to_screen">Вывести на экран</span></button>
-            <button id="img-up-reset"><span>Сбросить экран</span></button>
+            <button id="img-up-reset"><span data-loc="cui_reset_screen">Сбросить экран</span></button>
         </div> 
     </div> 
     <button id="img-up-show-preview" class="k-important" data-loc="cui_preview">Предпросмотр</button>
