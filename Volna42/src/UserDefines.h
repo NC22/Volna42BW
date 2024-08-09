@@ -15,7 +15,7 @@
 // [Display types] | [Типы дисплеев]
 
 // #define WAVESHARE_BW_42_UC8176          // Waveshare 4.2inch, REV 2.1 [B&W]
-#define WAVESHARE_BW_42_SSD1683           // Waveshare 4.2inch, REV 2.2 | WeAct 4.2inch [B&W, 4-colors grayscale displays]
+#define WAVESHARE_BW_42_SSD1683            // Waveshare 4.2inch, REV 2.2 | WeAct 4.2inch [B&W, 4-colors grayscale displays]
 // #define WAVESHARE_RY_BW_42_UC8176       // Waveshare 4.2inch, REV 2.1 [B&W + Red or B&W + Yellow, 3-colors (separate buffers)]
 // #define HELTEC_BW_15_S810F              // Heltec 1.54inch 200x200 [B&W]
 

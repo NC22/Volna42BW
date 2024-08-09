@@ -1,14 +1,13 @@
 /*
-	Basic ESP WebServerBase by nradiowave
+	Basic ESP WebServer
 	
-	v1.0 - 08.07.24
+	v1.0 - 08.07.24,  by nradiowave
 		
-    Common class used to implement base web-server service + JS + HTML user interface in Volna 42 \ LED clock project
+    Common class used to implement base web-server service + JS + HTML user interface (_uiTools/ui) in Volna 42 and other projects
 	Require several Env methods for work with config variables
 	
-	Extendable by child classes
+	Extendable by child classes, but needs to be reworked a bit to move env calls outside, to make it more flexible and independent
 	
-    test
     todo - replace Env direct calls by struct with function void referenses \ callbacks & check them by null pointer to prevent crashes
     option to get sys messages separatly
 */
@@ -103,8 +102,9 @@ void WebServerBase::runConfigured() {
     */
 
     server->begin(); 
+    // manual routing -> more flexible, less memory use on bind every route
     server->onNotFound([this]() { this->router(); });
-    // server->onNotFound(std::bind(&WebServerBase::router, this)); -- binds crashed on ESP32
+    // server->onNotFound(std::bind(&WebServerBase::router, this)); 
 }
 
 void WebServerBase::getEnvJS() {
