@@ -12,8 +12,6 @@
 
 extern const cfgOption cfgOptions[];
 extern const size_t cfgOptionsSize PROGMEM;
-extern const cfgOptionKeys cfgOptionsExclude[] PROGMEM;
-extern const size_t cfgOptionsExcludeSize PROGMEM;
 extern const char defaultLocale[] PROGMEM;
 extern const char productVersion[] PROGMEM;
 

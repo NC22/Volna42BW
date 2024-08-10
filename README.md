@@ -1,20 +1,21 @@
 ## Weather station *Volna 2BW42* firmware
 
-[Project homepage](https://42volna.ru/)
+[Project homepage](https://volna42.com/)
 
 ![Interface for weatherstation 4.2](_ImagesSrc/previews/ui1.png)
 ![Interface for weatherstation 1.5](_ImagesSrc/previews/ui3.png)
 
 A weather station project with a monochrome E-Ink display
 
-- E-Ink Waveshare 4.2' display (400x300), Heltect 1.5' (200x200) or equivalents ([List of supported displays](https://42volna.ru/displays/))
+- E-Ink displays 4.2' (400x300), 1.5' (200x200)  
+  (Waveshare, WeAct, Heltec or equivalents - [List of supported displays](https://volna42.com/displays/))
 - Temperature and humidity sensor - BME280
 - Arduino Framework (C++, PlatformIO); compatible with **ESP8266** and **ESP32**
-- Ability to upload new layouts via web panel
+- Create and upload your own design through the web panel
 - Autonomous mode - the device wakes up every 10 minutes (default) and updates the screen. A 2000 mAh 18650 battery lasts for several months
 - Partial update mode for the clock area - every 1-2 minutes
 - Sensor data transmission via MQTT, receiving data from an external sensor through **Home Assistant** or **Domoticz**
-- Language : English or Russian (any other translations welcome)
+- Language : English or Russian (any other translations are welcome)
 
 # How to build
 
@@ -35,21 +36,21 @@ Password : volnaaccess
 Web-interface : http://192.168.1.1/  
 Firmware Update page : http://192.168.1.1/update (login : admin, password : admin)  
 
-[Full documentation & extended build instructions](https://42volna.ru/instructions/)  
-[Schematics](https://42volna.ru/en/scheme/)
+[Full documentation & extended build instructions](https://volna42.com/instructions/)  
+[Schematics](https://volna42.com/scheme/)
 
 # Developer tools 
 
-[1-bit Image Converter & Icon Editor](https://42volna.ru/tools/glypheditor)  
-[Fonts generator](https://42volna.ru/tools/fontconverter)  
+[1-bit Image Converter & Icon Editor](https://volna42.com/tools/glypheditor)  
+[Fonts generator](https://volna42.com/tools/fontconverter)  
 [Tools GitHub Repo](https://github.com/NC22/Volna42BW-Tools)  
 
 # Links
 
-[Cases examples](https://42volna.ru/boxes/)  
-[How to setup connection with external sensor](https://42volna.ru/instructions/external)  
-[How to setup sending data to mqtt broker](https://42volna.ru/instructions/mqtt)  
-[Trobleshooting](https://42volna.ru/instructions/issues)  
+[Cases examples](https://volna42.com/boxes/)  
+[How to setup connection with external sensor](https://volna42.com/instructions/external)  
+[How to setup sending data to mqtt broker](https://volna42.com/instructions/mqtt)  
+[Trobleshooting](https://volna42.com/instructions/issues)  
 
 # Photos
 

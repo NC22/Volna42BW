@@ -69,6 +69,7 @@ var ENVDATA = {
       "_/screen" : null,
       "_device" : null,
       
+          "resetntp" : {"ftype" : "action", "action" : "/api/ntp/reset"},
           "reboot" : {"ftype" : "action"},
           "restore" : {"ftype" : "action"},
 

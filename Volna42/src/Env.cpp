@@ -1,5 +1,6 @@
 #include "Env.h"
 
+
 #if defined(ESP32)
   #include <FS.h>
   #include <SPIFFS.h>
@@ -328,6 +329,21 @@ bool Env::isSyncRequired() {
     } 
 }
 
+void Env::restartNTP() {
+    
+    ntp = false;
+    lastError = "";
+
+    setenv("TZ", timezone.c_str(), 1);
+    tzset();
+
+    timeval tv = { 0, 0 };
+    settimeofday(&tv, nullptr);
+
+    yield();
+    setupNTP();
+}
+
 bool Env::setupNTP() {
     if (ntp) return true;
 
@@ -347,7 +363,7 @@ bool Env::setupNTP() {
       configTime(timezone.c_str(), ntpServer);
     #endif
 
-
+    yield();
     Serial.print(F("Waiting for NTP time sync: "));
 
     int i = 0;
@@ -889,7 +905,7 @@ bool Env::cuiSetWidget(uiWidgetStyle widget) {
 
     if (key == -1) {
 
-      if (cuiWidgets.size() > CUSTOM_UI_MAX_WIDGETS) return false;
+      if (cuiWidgets.size() > CUI_MAX_WIDGETS) return false;
       cuiWidgets.push_back(widget);
 
     } else {
@@ -2456,19 +2472,24 @@ void Env::validateConfig(unsigned int version, std::vector<cfgOptionKeys> * upda
     if (cfg.cfgValues[cToFahrenheit].length() > 0) {
 
         celsius = !cfg.getBool(cToFahrenheit);
-        if (cfg.sanitizeError) celsius = true;
+
+        if (cfg.sanitizeError) {
+
+          celsius = pgm_read_byte(&cfgCelsius) > 0;
+
+        }
 
     } else {
-        celsius = true;
+        celsius = pgm_read_byte(&cfgCelsius) > 0;
     }
 
     if (cfg.cfgValues[cTimeFormat12].length() > 0) {
 
         hour12 = cfg.getBool(cTimeFormat12);
-        if (cfg.sanitizeError) hour12 = false;
+        if (cfg.sanitizeError) hour12 = pgm_read_byte(&cfg12HourFormat) > 0;
 
     } else {
-        hour12 = false;
+        hour12 = pgm_read_byte(&cfg12HourFormat) > 0;
     }
 
     if (cfg.cfgValues[cScreenLandscape].length() > 0) {

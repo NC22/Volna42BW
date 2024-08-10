@@ -52,6 +52,9 @@ extern const unsigned int cdConfigVersion PROGMEM;
 extern const uiWidgetDefaults widgetsDefaults[] PROGMEM;
 extern const size_t widgetsDefaultsSize PROGMEM;
 
+extern const uint8_t cfgCelsius PROGMEM;	
+extern const uint8_t cfg12HourFormat PROGMEM;	
+
 typedef struct {
     
     unsigned int size;
@@ -302,7 +305,7 @@ class Env {
         void validateConfig(unsigned int version = -1, std::vector<cfgOptionKeys> * updatedKeys = NULL);
         void restart(String reason = "");
         bool resetConfig(bool resetWifi = false);
-        
+        void restartNTP();
         
         // custom UI
 

@@ -5,12 +5,12 @@
    @license        GPLv3
    @version        v0.6
 	
-	Part of Volna 42 project  |  https://42volna.ru/
+	Part of Volna 42 project  |  https://42volna.com/
 
 	Light weight library for use in my personal projects based on collected examples from WaveShare, Good Display, Heltec, GxEPD2 for compiling 
 	with only E-INK displays that I have and can test
 
-	Display list : https://42volna.ru/ru/displays/
+	Display list : https://42volna.com/ru/displays/
 
 	WeAct 4.2'          - OK
 	WaveShare 4.2'      - OK

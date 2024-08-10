@@ -101,6 +101,9 @@ void WebServerEink::router() {
         apiPartialTest();
     } else if (server->uri().indexOf("/api/cui/select") != -1) {
         apiCuiSelect();
+    } else if (server->uri().indexOf("/api/ntp/reset") != -1) {
+        env->restartNTP();
+        server->send(200, "application/json", "{\"status\":\"ok\"}"); 
     } else if (server->uri().indexOf("/api/delete/notification") != -1) {
         env->lastError = "";
         server->send(200, "application/json", "{\"status\":\"ok\"}"); 

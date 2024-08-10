@@ -1,2 +1,2 @@
-const char webdata_init_js[] PROGMEM = "var loadPool = ['core.js', 'tools.js', 'language.js', 'env.js'];var ENVINIT = function(result) {  if (result) {  ENVDATA.cfgSaved = ENVCFG;  window.ENV = new KellyEnv(ENVDATA); window.ENV.init();  } else console.log('load page fail'); };load();";
-const unsigned int webdataSize_init_js PROGMEM = 244;
+const char webdata_init_js[] PROGMEM = "var loadPool = ['core.js', 'tools.js', 'language.js', 'env.js', 'style.css'];var ENVINIT = function(result) {  if (result) {  ENVDATA.cfgSaved = ENVCFG;  window.ENV = new KellyEnv(ENVDATA); window.ENV.init();  } else console.log('load page fail'); };load();";
+const unsigned int webdataSize_init_js PROGMEM = 257;

@@ -46,7 +46,7 @@ var ENVLOCALE = {
     "form_text_send" : "Send",
 
     "help" : "Tip",
-    "title" : "Metestation Volna 42 2BW42",
+    "title" : "Weather Station Volna 42 2BW42",
     "wifiSearch" : "Network search",
     "save" : "Save changes",
     "save_skip" : "Dont save to constant memory",
@@ -54,6 +54,7 @@ var ENVLOCALE = {
     "cfg__device" : "Device control",
 
     "reboot" : "Restart device",
+    "resetntp" : "Reset Time Sync (NTP)",
     "restore" : "Restore defaults",  
     "refresh" : "Refresh screen",
     "clear" : "Clear screen",

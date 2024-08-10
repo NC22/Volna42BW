@@ -351,6 +351,10 @@ String Config::getOptionsJSON() {
     json += FPSTR(productVersion);
     json += "\",";
 
+    json += "\"__V\":\"";
+    json += version; // used for mark web-resources revision, to prevent old cache shown
+    json += "\",";
+
     json += "\"__EXCLUDE\":[";   
     for(size_t b = 0; b < excludeOptions.size(); b++) json += "\"" + getKeyName(excludeOptions[b]) + "\"";
     json += "],";
