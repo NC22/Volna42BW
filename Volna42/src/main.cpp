@@ -1,3 +1,12 @@
+
+/* 
+	Volna 2BW42 firmware
+	nradiowave | https://42volna.com/
+
+  Configuration files : UserDefines.h & UserSettings.h
+
+*/
+
 #include <Arduino.h>
 #include <stdlib.h>
 #include <WebServerEink.h>
@@ -33,7 +42,7 @@ WiFiManager wifi = WiFiManager();
 
 void setup()
 {
-	Serial.begin(115200);
+  Serial.begin(115200);
 
   env.canvas = &canvas;
   env.screen = &screenController;
