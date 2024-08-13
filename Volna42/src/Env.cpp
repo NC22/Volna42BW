@@ -242,6 +242,7 @@ void Env::initDefaultTime() {
         t = mktime(&tm);
         defaultTime = t;
         Serial.println(F("Default time reassigned by user config"));
+        Serial.println(defaultTime);
       }
 
     } else {
@@ -1268,6 +1269,13 @@ bool Env::isOnBattery() {
     return lastState.onBattery;
 }
 
+/* 
+  Full UI redraw
+
+   1. Update formatted time 
+   2. Draw current UI layout according to this time to buffer
+   3. Send buffer to screen
+*/
 void Env::updateScreen() {
 
     // if (lastState.partialUpdateTest) {
@@ -2534,8 +2542,27 @@ void Env::validateConfig(unsigned int version, std::vector<cfgOptionKeys> * upda
                 lastState.connectTimes = 0;
                 lastState.wakeUps = 0;
 
-            } else if (key == cScreenLandscape || key == cScreenRotate) {
+            } else if (key == cScreenLandscape || key == cScreenRotate || key == cImagePreset) {
+              
                 resetPartialData();
+
+            } else if (key == cTimestamp) {
+              
+                #if defined(ESP32)
+                  if(sntp_enabled()) sntp_stop();
+                #else 
+                  sntp_stop();
+                #endif  
+                yield();
+                
+                Serial.println(F("Force manual timestamp set. NTP connection stopped."));    
+                lastState.timeConfigured = false;
+                initDefaultTime();
+
+                lastState.timeConfigured = true;
+
+                yield();
+                break;
             }
         }
     }

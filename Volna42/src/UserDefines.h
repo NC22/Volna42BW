@@ -109,10 +109,10 @@
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
 	
-	/*
 		// [Optional, my old setup] | НЕ Основная
 		// моя старая алт. распиновка, через резистор
 	
+	/*
 		#define EPD_BUSY_PIN 2   // D4 - GPIO - 2 (+20кОм резистор на VCC)
 		#define EPD_RST_PIN  12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0

@@ -131,7 +131,7 @@ void setup()
       if (env.lastState.lowBatTick < 100) {
         env.lastState.lowBatTick = 100;
         env.screen->drawUILowBat();
-        env.updateScreen();
+        env.screen->updateScreen();
       }
 
       Serial.println(F("[On battery] LOW POWER or wrong detect voltage - [power off]"));

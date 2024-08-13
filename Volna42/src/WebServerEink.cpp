@@ -948,13 +948,35 @@ void WebServerEink::apiTestData() {
 
             env->lastState.extData.isDataValid = true;
             env->lastState.extData.t = time(nullptr);
-        } 
+
+        } else if (server->arg(i) == "ext_summer" || server->arg(i) == "ext_winter"){
+
+            if (server->arg(i) == "ext_winter") {
+
+                env->getConfig()->cfgValues[cTimestamp] = "2024-02-03 12:32:04";
+                env->lastState.extData.temperature = -21.12f;
+                env->lastState.extData.humidity = 67.8f;
+
+            } else {
+
+                env->lastState.extData.temperature = 27.12f;
+                env->lastState.extData.humidity = 50.7f;
+                env->getConfig()->cfgValues[cTimestamp] = "2024-06-12 15:44:04";
+            }
+
+            env->lastState.extData.bat = 68;  
+            env->lastState.extData.isDataValid = true;
+            env->lastState.extData.t = time(nullptr);
+
+            std::vector<cfgOptionKeys> updatedKeys;
+            updatedKeys.push_back(cTimestamp);
+            env->validateConfig(-1, &updatedKeys);
+        }
 
         break;
     }
 
-    env->screen->drawUIToBuffer();
-    env->screen->updateScreen();
+    env->updateScreen();
     server->send(200, "application/json", "{\"status\":\"ok\"}");
 
 }

@@ -6,6 +6,7 @@
 #include <time.h>      // time() ctime()
 #include "sys/time.h"
 
+
 #include <UserDefines.h>
 #include <WidgetTypes.h>
 #include "Config.h"
@@ -14,9 +15,11 @@
 
 #if defined(ESP32)
     #include <HTTPClient.h>
+    #include "esp_sntp.h"
     // #include <thirdparty/TZ.h>
 #else 
     #include <ESP8266HTTPClient.h>
+    #include "sntp.h"
     // #include <TZ.h>
 #endif
 
