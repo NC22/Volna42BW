@@ -58,6 +58,10 @@ extern const size_t widgetsDefaultsSize PROGMEM;
 extern const uint8_t cfgCelsius PROGMEM;	
 extern const uint8_t cfg12HourFormat PROGMEM;	
 
+extern const uint8_t textDateFormat PROGMEM;	
+extern const char longDateFormat[] PROGMEM;
+extern const char shortDateFormat[] PROGMEM;
+
 typedef struct {
     
     unsigned int size;

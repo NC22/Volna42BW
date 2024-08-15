@@ -31,6 +31,11 @@ const char productVersion[] PROGMEM = "0.88";
 const char defaultWifiAP[] PROGMEM = "VOLNA42-EINK";  // SSIDs can reach up to 32 characters in length
 const char defaultWifiAPP[] PROGMEM = "volnaaccess";  // A Valid Password is 8 - 63 Characters long
 
+
+const char shortDateFormat[] PROGMEM = "%d.%m.%y";  // date & time string date part format for 1.54'
+const char longDateFormat[] PROGMEM = "%d.%m.%y";   // Date string format (2-string of [Clock & Date widget] used in 4.2')
+
+const uint8_t textDateFormat PROGMEM = 0;			// Short text date format : 0 - [15 August, Thu], 1 - [August 15, Thu] (3-string of [Clock & Date widget] used in 4.2')
 const uint8_t cfgCelsius PROGMEM = 1;               // 0-1 | Use Celsius instead of Fahrenheit by default
 const uint8_t cfg12HourFormat PROGMEM = 0;			// 0-1 | Use 12 hour PM / AM clock format by default 
 

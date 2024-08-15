@@ -242,7 +242,7 @@ void Env::initDefaultTime() {
         t = mktime(&tm);
         defaultTime = t;
         Serial.println(F("Default time reassigned by user config"));
-        Serial.println(defaultTime);
+        // Serial.println(defaultTime);
       }
 
     } else {
@@ -1492,10 +1492,12 @@ void Env::updateTime(time_t dt) {
     String tmp = "";
     int tmpN;
 
-    strftime(buffer, sizeof(buffer), "%d.%m.%y", &stnow);
+    tmp = FPSTR(longDateFormat);
+    strftime(buffer, sizeof(buffer), tmp.c_str(), &stnow);
     fTime.date = buffer;
 
-    strftime(buffer, sizeof(buffer), "%d.%m.%Y", &stnow);
+    tmp = FPSTR(shortDateFormat);
+    strftime(buffer, sizeof(buffer), tmp.c_str(), &stnow); 
     fTime.dateShort = buffer;
 
     strftime(buffer, sizeof(buffer), "%H:%M:%S", &stnow);
@@ -1594,7 +1596,11 @@ void Env::updateTime(time_t dt) {
 
     strftime(buffer, sizeof(buffer), "%d", &stnow);
     tmp = buffer;
-    fTime.monthText = tmp + " " + fTime.monthText;
+    if (pgm_read_byte(&textDateFormat) == 0) {
+      fTime.monthText = tmp + " " + fTime.monthText;
+    } else if (pgm_read_byte(&textDateFormat) == 1) {
+      fTime.monthText = fTime.monthText + " " + tmp;
+    }
 
     strftime(buffer, sizeof(buffer), "%H", &stnow);
     tmp = buffer;
