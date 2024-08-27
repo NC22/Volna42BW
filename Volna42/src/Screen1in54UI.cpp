@@ -282,7 +282,7 @@ void Screen1in54UI::drawClock() {
   screen->setFont(&font18x18Config);
   screen->setRotate(90);
 
-  screen->drawImage(0, 0, &frog_174x139bw_settings, true);
+  screen->drawImage(0, 0, &frog_magic_hat_186x141bw_settings, true);  // frog_new_year_hat174x139_settings
 
   clockFormatted dt = env->getFormattedTime();
   uText dateShortText = screen->getUText(dt.monthText);

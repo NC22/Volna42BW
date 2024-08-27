@@ -13,7 +13,8 @@
 #include "tiles/cat_watch.h"
 
 #if defined(HELTEC_BW_15_S810F)
-    #include "tiles/frog174x139.h"
+    // #include "tiles/frog_new_year_hat174x139.h"
+    #include "tiles/frog_magic_hat186x141.h"
 #endif
 
 #include "tiles/weather_effects.h"

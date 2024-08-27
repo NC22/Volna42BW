@@ -20,6 +20,7 @@ class Config {
     private :
         
         // password type fields cant contain first space for security reasons (it used as placeholder, hides pass on client side)
+        // toogle "secured" boolean value to false in EnvConfigOptions.h, to exclude this hide values logic
         char protectChar = (char) 0x20; // replaces password characters and used as placeholder
         char cfgDelimiterChar = (char) 0x01; // used to split variables of saved cfg raw string
 

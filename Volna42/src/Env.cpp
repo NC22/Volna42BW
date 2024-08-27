@@ -194,7 +194,7 @@ void Env::setDefaultLastStateData() {
     Serial.println(F("[Boot] Reset all stats"));
 
     /*
-      states for :
+      default states for :
 
       -- sleepTime
       -- sleepTimeCurrent
@@ -203,7 +203,7 @@ void Env::setDefaultLastStateData() {
       -- cuiLoop
       -- cuiTimeCurrent
 
-      applyed during config validation by applyConfigToRTC or on RTC read fail reset
+      applyed during config validation by applyConfigToRTC or on RTC read fail when wake up in restoreRTCmem
     */
     
     lastState.cuiResetOnReboot = false;
@@ -320,7 +320,7 @@ bool Env::isSyncRequired() {
     // triggers ON :
     // - NTP time is incorrect
     // - first time start (wakeUps = 0)
-    // - wakeuped needed times and its sync time (syncEvery - setuped by user config, default 6) 
+    // - wakeups counter reaches "syncEvery" config value (default 6) 
     // [removed] telemetry cache size is overflow - lastState.lastTelemetrySize >= telemetryBufferMax
 
     if (lastState.wakeUps == 0 || lastState.wakeUps >= syncEvery || lastState.t < 1000000000) {        
@@ -2460,6 +2460,8 @@ void Env::validateConfig(unsigned int version, std::vector<cfgOptionKeys> * upda
     if (cfg.cfgValues[cTimezone].length() <= 0) {
         cfg.cfgValues[cTimezone] = FPSTR(cdTimezone);
     }  
+
+    timezone = cfg.cfgValues[cTimezone];
 
     if (cfg.cfgValues[cNtpHosts].length() <= 0) {
        cfg.cfgValues[cNtpHosts] = FPSTR(cdNtpHosts);

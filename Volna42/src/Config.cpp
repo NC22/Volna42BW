@@ -2,10 +2,6 @@
 
 // v 1.03 22.06.24
 
-// todo - check uniord replace with & - use reference, not create a copy
-// moved variables to extern - envconfigoptions included once in main.cpp
-// added productVersion in json
-
 Config::Config() {
     
     cfgSize = cfgOptionsSize;

@@ -9,7 +9,8 @@ extern const fontManifest font44x44Config PROGMEM;
 #if defined(HELTEC_BW_15_S810F) 
 extern imageData temp_15x48bw_settings PROGMEM;
 extern imageData temp_meter_15x48bw_settings PROGMEM;
-extern imageData frog_174x139bw_settings PROGMEM;
+// extern imageData frog_new_year_hat174x139_settings PROGMEM;
+extern imageData frog_magic_hat_186x141bw_settings PROGMEM;
 #endif
 
 extern imageData cels_39x43bw_settings PROGMEM;
