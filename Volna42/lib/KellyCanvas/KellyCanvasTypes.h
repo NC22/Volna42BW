@@ -15,6 +15,7 @@ typedef struct {
   int code;
 } uCharCode;
 
+/*
 typedef struct {
   int fromX;
   int width;
@@ -22,6 +23,7 @@ typedef struct {
   int fromY;
   int enabled;
 } drawFrame;
+*/
 
 typedef struct {
   int offsetXb;

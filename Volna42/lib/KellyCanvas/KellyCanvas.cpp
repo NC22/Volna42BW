@@ -14,7 +14,7 @@ KellyCanvas::KellyCanvas(int iwidth, int iheight) {
     
     bitPerPixel = 1;
 
-    drawFrameEt.enabled = false;
+    // drawFrameEt.enabled = false;
     colorMerged = bitPerPixel > 1 ? true : false;
     // setBitsPerPixel(bitPerPixel);
 
@@ -28,12 +28,12 @@ void KellyCanvas::setFont(const fontManifest * fontSettings) {
     font = fontSettings;
 }
 
-void KellyCanvas::setBitsPerPixel(unsigned int bits) {
+void KellyCanvas::setBitsPerPixel(unsigned int bits, bool skipRealloc) {
 
     bitPerPixel = bits;
     int newWidth = (int) ceil(((float) (width * height) / 8) * bitPerPixel);
 
-    if (newWidth != bufferWidth) {
+    if (!skipRealloc && newWidth != bufferWidth) {
 
       bufferWidth = newWidth;
       //removeBuffer();
@@ -42,6 +42,10 @@ void KellyCanvas::setBitsPerPixel(unsigned int bits) {
 
       Serial.println(F("[Screen buffer reallocated] : BitsPerPixel : ")); Serial.print(bitPerPixel);
       Serial.print(F(" | Size : ")); Serial.println(bufferWidth);
+    } else {
+
+        bufferWidth = newWidth;        
+        Serial.println(F("[Screen buffer] [Unsafe Skip memory realloc] : BitsPerPixel : ")); Serial.println(bitPerPixel);
     }
 }
 
@@ -483,6 +487,7 @@ int KellyCanvas::getHeight() {
     return height;
 }
 
+/*
 void KellyCanvas::setDrawFrame(int fromX, int width, int fromY, int height) {
 
     if (fromX < 0) {
@@ -499,6 +504,7 @@ void KellyCanvas::setDrawFrame(int fromX, int width, int fromY, int height) {
 
     }
 }
+*/
 
 void KellyCanvas::setRotate(int nrotation) {
 
@@ -552,6 +558,7 @@ void KellyCanvas::applyXYMods(int & x, int & y) {
         }
     }  
 
+    /*
     if (x < 0 || y < 0) return;
     if (x >= getWidth() || y >= getHeight()) return;
 
@@ -564,10 +571,7 @@ void KellyCanvas::applyXYMods(int & x, int & y) {
             return;
         }
     }
-
-    // #ifdef HELTEC_BW_15_S810F
-    //    x = getWidth() - x;
-    // #endif
+    */
 }
 
 // from 1 to screenWidth \ screenHeight
@@ -579,6 +583,7 @@ void KellyCanvas::drawPixel(int x, int y, bool state) {
 
     applyXYMods(x, y);
     if (x < 0 || y < 0) return;
+    if (x >= getWidth() || y >= getHeight()) return;
 
     moveBufferCursor(x, y);    
 

@@ -48,6 +48,8 @@ class Screen4in2UI {
 
         // For partial mode skip draw some of UI parts (temp & hum widget & cat image) during drawUIToBuffer to update only clock widget and possible bottom layer
         bool partial = false; 
+        int returnBitPerPixel = -1;
+        
         WidgetController * widgetController;
 
         void initPins();

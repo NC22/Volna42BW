@@ -29,8 +29,8 @@ void WidgetController::partialDataSet(int x, int y, unsigned int width, unsigned
     if (x < 0) x = 0;
     if (y < 0) y = 0;
     
-    if (y > localHeight) y = localHeight;
-    if (x > localWidth) x = localWidth;
+    //if (y > localHeight) y = localHeight;
+    //if (x > localWidth) x = localWidth;
 
     clockPartial.yStart = y - (y % 8);
     clockPartial.yEnd = y + height;
@@ -40,11 +40,12 @@ void WidgetController::partialDataSet(int x, int y, unsigned int width, unsigned
     clockPartial.xEnd = x + width;
     clockPartial.xEnd = clockPartial.xEnd + (8 - (clockPartial.xEnd % 8));
 
-    if (clockPartial.xEnd > localWidth) {
+    // clockPartial struct contains absolute coordinats, order must be the same as in SPI driver
+    if (clockPartial.xEnd > screen->width) {
       clockPartial.xEnd = localWidth;
     }
 
-    if (clockPartial.yEnd > localHeight) {
+    if (clockPartial.yEnd > screen->height) {
       clockPartial.yEnd = localHeight;
     }
     
@@ -54,12 +55,14 @@ void WidgetController::partialDataSet(int x, int y, unsigned int width, unsigned
       Serial.println(F("Bad partial data position - out of bounds, move widget"));  
     }
 
-    /*
-        Serial.println("-------0000--------");  
+        Serial.println("-------0000--------"); 
+        Serial.println(screen->rotation);  
         Serial.println(x);  
         Serial.println(y);   
         Serial.println(width);  
         Serial.println(height);  
+        Serial.println(localWidth);  
+        Serial.println(localHeight);  
         Serial.println("---------------");  
 
         Serial.println("-------11111--------");  
@@ -68,7 +71,7 @@ void WidgetController::partialDataSet(int x, int y, unsigned int width, unsigned
         Serial.println(clockPartial.yStart);  
         Serial.println(clockPartial.yEnd);  
         Serial.println("---------------");  
-    */
+    
    
     if (env->lastState.lastPartialPos.xStart == -1 && env->lastState.lastPartialPos.xEnd == -1) {
         env->lastState.lastPartialPos = clockPartial;

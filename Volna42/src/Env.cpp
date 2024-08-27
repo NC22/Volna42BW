@@ -2144,8 +2144,10 @@ int16_t Env::cuiGetNameByIndex(int16_t searchIndex, String &name) {
 /*
   на ESP8266 нужна плановая перезагрузка при смене битности - см cuiPrepareRebootIfNeeded - проверка и подготовка к перезагрузке,
   на этапе рендера через драйвер в Screen4in2UI
-*/
 
+  widgetsOnly - ignore canvas init, load only enabled cui widgets and screen orientation config params
+  
+*/
 bool Env::cuiReadStorageFile(bool widgetsOnly) {
 
   if (cuiName.length() <= 0) {
@@ -2216,16 +2218,19 @@ bool Env::cuiReadStorageFile(bool widgetsOnly) {
             if (!widgetParam) widgetParam = "0";
             if (paramN == 0) {
 
-              bitsPerPixel = 1;
-              if(sscanf(widgetParam.c_str(), "%d", &bitsPerPixel) != 1) {
+              if (!widgetsOnly) {
+
                   bitsPerPixel = 1;
+                  if(sscanf(widgetParam.c_str(), "%d", &bitsPerPixel) != 1) {
+                      bitsPerPixel = 1;
+                  }
+
+                  if (bitsPerPixel <= 0 || bitsPerPixel > 2) bitsPerPixel = 1;
+
+                  getCanvas()->setBitsPerPixel(bitsPerPixel);
+                  getCanvas()->setRotate(0);
+                  getCanvas()->clear();
               }
-
-              if (bitsPerPixel <= 0 || bitsPerPixel > 2) bitsPerPixel = 1;
-
-              getCanvas()->setBitsPerPixel(bitsPerPixel);
-              getCanvas()->setRotate(0);
-              getCanvas()->clear();
 
               // getCanvas()->setBitsPerPixel(1);
               //cuiBits = bitsPerPixel;

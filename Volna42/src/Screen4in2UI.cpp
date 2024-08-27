@@ -232,10 +232,27 @@ bool Screen4in2UI::drawUIToBufferCustom() {
       }
     */
 
-    if (!env->cuiReadStorageFile()) {
-        // env->getCanvas()->drawString(20, 20, "Not found :" + env->cuiName, true);
-        return false;
+    // We cant partial update 2-bit data, so we skip redraw \ reinit bit mode to redraw background, update and load only widgets
+    if (partial && returnBitPerPixel > 1) {
+
+        Serial.println(F("Redraw in partial mode with only widgets"));  
+        env->canvas->setRotate(0);
+        env->canvas->clear();
+
+        if (!env->cuiReadStorageFile(true)) {
+            return false;
+        }
+
+    } else {
+
+        if (!env->cuiReadStorageFile()) {
+            // env->getCanvas()->drawString(20, 20, "Not found :" + env->cuiName, true);
+            return false;
+        }
+
     }
+
+
 
     for(unsigned int i=0; i < env->cuiWidgets.size(); i++) {
         
@@ -377,7 +394,11 @@ void Screen4in2UI::drawUIToBuffer() {
 
 void Screen4in2UI::updatePartialClock() {
 	
-    if (env->canvas->bitPerPixel > 1) return;
+    returnBitPerPixel = -1;
+    if (env->canvas->bitPerPixel > 1) {
+        returnBitPerPixel = env->canvas->bitPerPixel;
+        env->canvas->setBitsPerPixel(1, true);
+    }
     
     /*
       // bit hacky 
@@ -395,7 +416,7 @@ void Screen4in2UI::updatePartialClock() {
     drawUIToBuffer();
     partial = false;
 
-    if (  widgetController->clockPartial.xStart == -1 && widgetController->clockPartial.xEnd == -1) {
+    if (widgetController->clockPartial.xStart == -1 && widgetController->clockPartial.xEnd == -1) {
         Serial.println(F("[drawTestPartial] no clock data"));  
         return;
     }
@@ -418,7 +439,8 @@ void Screen4in2UI::updatePartialClock() {
 
     widgetController->partialDataApplyMaxBounds();
 
-    // for proper refresh background
+
+    // for proper refresh background, inverted buffer draw
     #if defined(WAVESHARE_BW_42_SSD1683)
     displayDriver->displayPartial(
       screen->bufferBW, 
@@ -450,6 +472,10 @@ void Screen4in2UI::updatePartialClock() {
       env->lastState.lastPartialPos.xEnd, 
       env->lastState.lastPartialPos.yEnd
     );
+
+    if (returnBitPerPixel > 0) {
+      env->canvas->setBitsPerPixel(returnBitPerPixel, true);
+    }
 
     env->lastState.lastPartialPos = widgetController->clockPartial;
     displayDriver->displaySleep();

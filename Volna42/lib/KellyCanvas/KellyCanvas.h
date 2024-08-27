@@ -57,7 +57,7 @@ class KellyCanvas {
         unsigned char *bufferRY = NULL;
         int bufferWidth = 0;
 
-        drawFrame drawFrameEt;
+        // drawFrame drawFrameEt;
         
         tColor color = tBLACK; // in separate mode - tBLACK | tRY
 
@@ -87,7 +87,7 @@ class KellyCanvas {
         bool getPixel(int x, int y, int bufferN = 0);        
 
        // void removeBuffer();
-        void setBitsPerPixel(unsigned int bits);
+        void setBitsPerPixel(unsigned int bits, bool skipRealloc = false);
         void initBuffer(uint8_t n);
         void initCanvas(int iwidth = 400, int iheight = 300, bool isecondBuffer = true, int ibitPerPixel = 1);
 
@@ -98,7 +98,7 @@ class KellyCanvas {
 
         void transitionScreen(int x = 1, int y = 1, int width = -1, int height = -1);        
 
-        void setDrawFrame(int fromX = -1, int width = -1, int fromY = -1, int height = -1);
+        // void setDrawFrame(int fromX = -1, int width = -1, int fromY = -1, int height = -1);
 
         void clearDisplay(int addr);
         
