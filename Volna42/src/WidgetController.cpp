@@ -54,7 +54,7 @@ void WidgetController::partialDataSet(int x, int y, unsigned int width, unsigned
       clockPartial.xStart = -1;
       Serial.println(F("Bad partial data position - out of bounds, move widget"));  
     }
-
+    /*
         Serial.println("-------0000--------"); 
         Serial.println(screen->rotation);  
         Serial.println(x);  
@@ -70,9 +70,9 @@ void WidgetController::partialDataSet(int x, int y, unsigned int width, unsigned
         Serial.println(clockPartial.xEnd);   
         Serial.println(clockPartial.yStart);  
         Serial.println(clockPartial.yEnd);  
-        Serial.println("---------------");  
-    
-   
+        Serial.println("---------------");      
+   */
+  
     if (env->lastState.lastPartialPos.xStart == -1 && env->lastState.lastPartialPos.xEnd == -1) {
         env->lastState.lastPartialPos = clockPartial;
     } 
