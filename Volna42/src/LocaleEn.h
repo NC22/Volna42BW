@@ -1,4 +1,5 @@
 #define LOCALE_CONFIGURED
+#define LOCALE_EN
 
 const char defaultLocale[] PROGMEM = "en";
 

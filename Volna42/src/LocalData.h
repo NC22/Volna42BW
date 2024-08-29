@@ -1,7 +1,12 @@
 
 
-#include "fonts/KellyFontC44x44.h"
-#include "fonts/KellyFontC18x18.h"
+#if defined(LOCALE_JA)
+    #include "fonts/KellyFontC44x44JA.h"
+    #include "fonts/KellyFontC18x18JA.h"
+#else 
+    #include "fonts/KellyFontC44x44.h"
+    #include "fonts/KellyFontC18x18.h"
+#endif
 
 // #include "tiles/cat115x125snowflakes.h" // old format
 

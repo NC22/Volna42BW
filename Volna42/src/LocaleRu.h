@@ -1,4 +1,5 @@
 #define LOCALE_CONFIGURED
+#define LOCALE_RU
 
 const char defaultLocale[] PROGMEM = "ru";
 

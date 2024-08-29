@@ -23,6 +23,14 @@
 // #include <LocaleEn.h>
 // #include <ui/out/locale_en/locale.h>
 
+// [Japan]
+// #include <LocaleJa.h>
+// #include <ui/out/locale_en/locale.h>
+
+// [German]
+// #include <LocaleDe.h>
+// #include <ui/out/locale_en/locale.h>
+
 const char productVersion[] PROGMEM = "0.90";
 
 // [Режим точки доступа в случае отсутствия возможности подключится к Wifi]
@@ -35,7 +43,22 @@ const char defaultWifiAPP[] PROGMEM = "volnaaccess";  // A Valid Password is 8 -
 const char shortDateFormat[] PROGMEM = "%d.%m.%y";  // date & time string date part format for 1.54'
 const char longDateFormat[] PROGMEM = "%d.%m.%y";   // Date string format (2-string of [Clock & Date widget] used in 4.2')
 
-const uint8_t textDateFormat PROGMEM = 0;           // Short text date format : 0 - [15 August, Thu], 1 - [August 15, Thu] (3-string of [Clock & Date widget] used in 4.2')
+/*
+ Short text date format : 
+ 
+ 0 - [15 August, Thu], 
+ 1 - [August 15, Thu] (3-string of [Clock & Date widget] used in 4.2')
+ 2 - [8月15日(木)]
+*/
+
+#if defined(LOCALE_JA)
+    const uint8_t textDateFormat PROGMEM = 2; 
+#elif defined(LOCALE_RU)
+    const uint8_t textDateFormat PROGMEM = 0; 
+#else
+    const uint8_t textDateFormat PROGMEM = 1; 
+#endif
+
 const uint8_t cfgCelsius PROGMEM = 1;               // 0-1 | Use Celsius instead of Fahrenheit by default
 const uint8_t cfg12HourFormat PROGMEM = 0;          // 0-1 | Use 12 hour PM / AM clock format by default 
 

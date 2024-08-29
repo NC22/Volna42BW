@@ -18,9 +18,9 @@
 #endif
 
 #include <EnvConfigOptions.h>
-#include <LocalData.h>
 #include <UserDefines.h>
 #include <UserSettings.h>
+#include <LocalData.h>
 #include <KellyCanvas.h>
 #include <Env.h>
 

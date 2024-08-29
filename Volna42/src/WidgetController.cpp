@@ -103,10 +103,19 @@ void WidgetController::drawClockWidget(int baseX, int baseY, bool border, bool f
   clockFormatted dt = env->getFormattedTime();
 
 	screen->setFont(&font18x18Config);
-	uText dateText = screen->getUText(dt.monthText + ", " + dt.dayText);
+
+	uText dateText;
+  if (pgm_read_byte(&textDateFormat) == 2) {
+    dateText = screen->getUText(dt.monthText + "(" + dt.dayText + ")");
+  } else {
+    dateText = screen->getUText(dt.monthText + ", " + dt.dayText);
+  }
+ 
 	uText dateShortText = screen->getUText(dt.date);
 
 	resultWidth = dateText.pixelWidth + 20;
+  if (resultWidth < 114) resultWidth = 114;
+
 	resultHeight = 92;
 
 	if (fill) screen->drawRoundedSquare(baseX, baseY, resultWidth, resultHeight, 4, colorBg, borderWidth);

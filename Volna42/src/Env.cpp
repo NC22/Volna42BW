@@ -1597,9 +1597,17 @@ void Env::updateTime(time_t dt) {
     strftime(buffer, sizeof(buffer), "%d", &stnow);
     tmp = buffer;
     if (pgm_read_byte(&textDateFormat) == 0) {
+
       fTime.monthText = tmp + " " + fTime.monthText;
+
     } else if (pgm_read_byte(&textDateFormat) == 1) {
+
       fTime.monthText = fTime.monthText + " " + tmp;
+
+    } else if (pgm_read_byte(&textDateFormat) == 2) {
+
+      fTime.monthText = fTime.monthText + tmp;
+      fTime.monthText += "日";
     }
 
     strftime(buffer, sizeof(buffer), "%H", &stnow);
