@@ -949,13 +949,19 @@ void WebServerEink::apiTestData() {
             env->lastState.extData.isDataValid = true;
             env->lastState.extData.t = time(nullptr);
 
-        } else if (server->arg(i) == "ext_summer" || server->arg(i) == "ext_winter"){
+        } else if (server->arg(i) == "ext_summer" || server->arg(i) == "ext_winter" || server->arg(i) == "ext_overheat"){
 
             if (server->arg(i) == "ext_winter") {
 
                 env->getConfig()->cfgValues[cTimestamp] = "2024-02-03 12:32:04";
                 env->lastState.extData.temperature = -21.12f;
                 env->lastState.extData.humidity = 67.8f;
+
+            } else if (server->arg(i) == "ext_overheat") {
+
+                env->getConfig()->cfgValues[cTimestamp] = "2024-02-03 15:32:04";
+                env->lastState.extData.temperature = 40.12f;
+                env->lastState.extData.humidity = 10.8f;
 
             } else {
 

@@ -27,6 +27,7 @@ extern imageData cat_watch_85x120bw_settings PROGMEM;
 extern imageData cat_ball_40x40bw_settings PROGMEM;
 extern imageData cat_night_96x72bw_settings PROGMEM;
 extern imageData cat_winter_93x97bw_settings PROGMEM;
+extern imageData cat_heat_110x159bw_settings PROGMEM;
 extern imageData cat_happy_80x94bw_settings PROGMEM;
 extern imageData snowflakes_116x39bw_settings PROGMEM;
 extern imageData moon_clear_93x63bw_settings PROGMEM;

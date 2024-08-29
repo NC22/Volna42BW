@@ -632,8 +632,8 @@ int Screen4in2UI::drawCat(bool land) {
 
   // currently simple logic - may be be more complex later, by pressure table
   
-  // cat at home after 10pm - no check cold, show sleepy cat & moon icon
-  Serial.println("[TEST]: " + String(dt.h));  
+  // cat at home after 12pm - no check cold, show sleepy cat & moon icon
+  // Serial.println("[TEST]: " + String(dt.h));  
     
   if (dt.h >= 0 && dt.h <=  7) {
 
@@ -652,7 +652,7 @@ int Screen4in2UI::drawCat(bool land) {
 
       if (env->lastState.extData.isDataValid) {
 
-          if (env->lastState.extData.temperature < 5) {
+          if (env->lastState.extData.temperature < 5) { // wear warm clothes
 
               hpad = 97 + 2;
               marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 105;
@@ -661,6 +661,15 @@ int Screen4in2UI::drawCat(bool land) {
               hpad -= 20;
               catShown = true;
               hpad = drawWeaterIcon(screen, true, false, hpad, land);
+
+          } else if (env->lastState.extData.temperature > 35) { // overheat
+
+              hpad = 159 + 2;
+              if (!land) hpad += 2;
+              marginX = land ? calcMarginMiddle(localWidth/2, 110) : localWidth - 130;
+
+              screen->drawImage(marginX, localHeight - hpad, &cat_heat_110x159bw_settings, true);
+              catShown = true;
           }
 
       } 
