@@ -7,7 +7,7 @@
 */
 
 /* 
-    Translation
+    Translation. [Keep only one uncommented]
 
     New translations is also welcome, but can require additionaly convert font with proper set of symbols
     Actual version of font converter tool can be found here https://42volna.com/tools/fontconverter
@@ -31,7 +31,7 @@
 // #include <LocaleDe.h>
 // #include <ui/out/locale_en/locale.h>
 
-const char productVersion[] PROGMEM = "0.90";
+const char productVersion[] PROGMEM = "0.91";
 
 // [Режим точки доступа в случае отсутствия возможности подключится к Wifi]
 

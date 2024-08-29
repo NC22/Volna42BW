@@ -15,7 +15,8 @@ A weather station project with a monochrome E-Ink display
 - Autonomous mode - the device wakes up every 10 minutes (default) and updates the screen. A 2000 mAh 18650 battery lasts for several months
 - Partial update mode for the clock area - every 1-2 minutes
 - Sensor data transmission via MQTT, receiving data from an external sensor through **Home Assistant** or **Domoticz**
-- Language : English or Russian (any other translations are welcome)
+- UI Language : English, Russian, Japanese, German (any other translations are welcome)
+- Settings panel language : English, Russian
 
 # How to build
 

@@ -7,8 +7,8 @@ const char noWiFi[] PROGMEM = "WLAN-Verbindung verloren";
 
 const char locIndoor[] PROGMEM = "innen";
 const char locOutdoor[] PROGMEM = "außen";
-const char locHumidity[] PROGMEM = "Luftfeuchte";
-const char locTemp[] PROGMEM = "Temperatur";
+const char locHumidity[] PROGMEM = "luftfeuchte";
+const char locTemp[] PROGMEM = "temperatur";
 const char locUnavailable[] PROGMEM = "Sensor nicht verfügbar";
 const char locLowBat[] PROGMEM = "Niedriger Batteriestand";
 
