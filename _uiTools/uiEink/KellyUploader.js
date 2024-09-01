@@ -15,10 +15,10 @@ function KellyImgUpl(env) {
     var widgets = [
         {uuid : 1, id : "uiClock", width : 102, height : 80, x : 20, y : 20}, 
         {uuid : 2, id : "uiInfo", width : 200, height : 40, x : 10, y : 220}, 
-        {uuid : 3, id : "uiTemp", width : 152, height : 80, x : 10, y : 200},
-        {uuid : 4, id : "uiHum", width : 152, height : 80, x : 10, y : 200},
-        {uuid : 5, id : "uiTempRemote", width : 152, height : 80, x : 10, y : 200},
-        {uuid : 6, id : "uiHumRemote", width : 152, height : 80, x : 10, y : 200},
+        {uuid : 3, id : "uiTemp", width : 152, height : 80, x : 10, y : 200, mwidth : 60, mheight : 20,},
+        {uuid : 4, id : "uiHum", width : 152, height : 80, x : 10, y : 200, mwidth : 60, mheight : 20,},
+        {uuid : 5, id : "uiTempRemote", width : 152, height : 80, x : 10, y : 200, mwidth : 60, mheight : 20,},
+        {uuid : 6, id : "uiHumRemote", width : 152, height : 80, x : 10, y : 200, mwidth : 60, mheight : 20,},
         {uuid : 7, id : "uiBatRemote", width : 100, height : 20, x : 20, y : 90}, 
         {uuid : 8, id : "uiBat", width : 100, height : 20, x : 20, y : 100},
         {uuid : 9, id : "uiInfoIP", width : 80, height : 20, x : 20, y : 110},
@@ -27,7 +27,8 @@ function KellyImgUpl(env) {
         {uuid : 12, id : "uiInfoSyncNumRemote", width : 60, height : 20, x : 20, y : 140},
         {uuid : 13, id : "uiInfoMessage", width : 100, height : 20, x : 20, y : 150},
         {uuid : 14, id : "uiShortInfoSyncRemote", width : 100, height : 20, x : 20, y : 160},
-        
+        {uuid : 15, id : "uiPressure", width : 100, height : 20, x : 20, y : 160},
+        {uuid : 16, id : "uiDate", width : 100, height : 20, x : 20, y : 160},    
     ];
     
     var widgetsOrder  = [
@@ -45,6 +46,9 @@ function KellyImgUpl(env) {
         'uiLastSyncRemote',
         'uiInfoSyncNumRemote',
         'uiShortInfoSyncRemote',
+        
+        'uiPressure',
+        'uiDate',
         // 'uiInfoMessage', // custom sign - text parametrs editing not implemented now
     ];
     
@@ -433,6 +437,11 @@ function KellyImgUpl(env) {
         
         var params = gid('widget-' + widget.id +'-params');
         if (params) widget.params = params.value;
+        
+        if (widget.params && widget.params.indexOf('-m') != -1 && widget.mwidth) {
+            width = widget.mwidth;
+            height = widget.mheight;
+        }
         
         ctx.rect(0, 0, screen.width, screen.height);
         ctx.fillStyle = 'rgba(0,0,0,0)';

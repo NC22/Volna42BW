@@ -12,6 +12,20 @@
 #define CUI_MAX_WIDGETS 20
 #define CUI_LOOP_INTERVAL 14400            // Интервал смены оформления в режиме -loop - смена кастомных оформлений по порядку из того что загружено раз в 4 часа (тестовый функционал) 
 
+// Определение дождливой погоды иконкой возможно по косвенным признакам (низкое давление + повышеная влажность). Можно расскоментировать \ подкоректировать пороговые значения
+// [давление <= 1010hPa (758 мм.рт.ст) + влажность >= 60%] пока активно не проверялось
+
+// #define ICON_RAIN_DETECT 			
+#define ICON_RAIN_DETECT_HPA 1010   	   
+#define ICON_RAIN_DETECT_HUM 60 
+
+// [Language]
+
+#define LOCALE_RU  // Русский
+// #define LOCALE_JA  // Japan
+// #define LOCALE_EN  // English
+// #define LOCALE_DE  // German
+
 // [Display types] | [Типы дисплеев]
 
 // #define WAVESHARE_BW_42_UC8176          // Waveshare 4.2inch, REV 2.1 [B&W]
@@ -109,10 +123,10 @@
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
 	
-	/*
 		// [Optional, my old setup] | НЕ Основная
 		// моя старая алт. распиновка, через резистор
 	
+	/*
 		#define EPD_BUSY_PIN 2   // D4 - GPIO - 2 (+20кОм резистор на VCC)
 		#define EPD_RST_PIN  12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0

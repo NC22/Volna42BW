@@ -66,6 +66,8 @@ const uiWidgetDefaults widgetsDefaults[] PROGMEM = {
     {12, uiInfoSyncNumRemote}, 
     {13, uiInfoMessage}, 
     {14, uiShortInfoSyncRemote}, 
+    {15, uiPressure}, 
+    {16, uiDate}, 
 };
 
 const size_t widgetsDefaultsSize PROGMEM = sizeof(widgetsDefaults) / sizeof(widgetsDefaults[0]);

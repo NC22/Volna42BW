@@ -163,7 +163,7 @@ void WidgetController::drawSystemInfoWidget(int baseX, int baseY) {
         } else {
           
           int lkey = env->lastState.lastTelemetrySize-1;
-          String techInfo = String(env->lastState.lastTelemetry[lkey].bat) + "V";
+          String techInfo = String(env->lastState.lastTelemetry[lkey].bat) + FPSTR(locVoltage);
           screen->drawString(baseX, baseY, techInfo, true);
 
           baseY += 20;
@@ -303,7 +303,9 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
           widget.type == uiInfoVoltage || 
           widget.type == uiLastSyncRemote || 
           widget.type == uiShortInfoSyncRemote || 
-          widget.type == uiInfoSyncNumRemote
+          widget.type == uiInfoSyncNumRemote || 
+          widget.type == uiPressure ||
+          widget.type == uiDate
       ) {
       
       widgetHeight = 20;
@@ -315,12 +317,45 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
 	        result = "IP : " + env->wifiInfo;
         }
 
+      } else if (widget.type == uiPressure) {
+        
+        if (lkey > -1) {
+
+          bool hpa = true;
+          #if defined(LOCALE_RU)
+              hpa = false;
+          #endif
+
+          if (widget.params.indexOf("-hpa") != -1) hpa = true;
+
+          if (!hpa) {
+
+            result = String((int) ((env->lastState.lastTelemetry[lkey].pressure / 100.0f) * 0.750062f));
+            result += FPSTR(locPressureMM);
+
+          } else {
+
+            result = String((int) (env->lastState.lastTelemetry[lkey].pressure / 100.0f));
+            result += FPSTR(locPressureHPA);
+          }
+
+        } else {
+          result = "-.-";
+        }
+          
+      } else if (widget.type == uiDate) {   
+
+        clockFormatted dt = env->getFormattedTime();
+        result = dt.date;
+
       } else if (widget.type == uiInfoVoltage) {
         
         if (lkey > -1) {
-          result = String(env->lastState.lastTelemetry[lkey].bat) + "V";      
+          result = String(env->lastState.lastTelemetry[lkey].bat);
+          result += FPSTR(locVoltage);      
         } else {
-          result = "-.-V";
+          result = "-.-";
+          result += FPSTR(locVoltage);
         }
 
       } else if (widget.type == uiLastSyncRemote) {

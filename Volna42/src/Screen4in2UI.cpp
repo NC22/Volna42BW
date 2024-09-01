@@ -652,7 +652,31 @@ int Screen4in2UI::drawCat(bool land) {
 
       if (env->lastState.extData.isDataValid) {
 
-          if (env->lastState.extData.temperature < 5) { // wear warm clothes
+          bool possibleRainy = false;
+
+          #if defined(ICON_RAIN_DETECT)
+
+            if (env->lastState.extData.temperature > 0 && env->lastState.lastTelemetrySize) {
+
+                if ((env->lastState.lastTelemetry[env->lastState.lastTelemetrySize-1].pressure / 100.0f) < ICON_RAIN_DETECT_HPA ) {
+                    if (env->lastState.extData.humidity > ICON_RAIN_DETECT_HUM) {
+                      possibleRainy = true;
+                    }
+                }
+
+            }
+          #endif
+
+          if (possibleRainy) {
+
+              hpad += 128; 
+              marginX = land ? calcMarginMiddle(localWidth/2, 122) : localWidth - 122;
+              screen->drawImage(marginX + 18, localHeight - hpad - 25, &rain_93x52bw_settings, true);
+              
+              screen->drawImage(marginX, localHeight - hpad, &cat_rain_127x125bw_settings, true);
+              catShown = true;
+              
+          } else if (env->lastState.extData.temperature < 5) { // wear warm clothes
 
               hpad = 97 + 2;
               marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 105;

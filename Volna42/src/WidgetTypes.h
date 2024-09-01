@@ -18,6 +18,8 @@ enum uiWidgetType {
 	uiInfoSyncNumRemote, 
 	uiShortInfoSyncRemote, 
 	uiInfoMessage, 
+	uiPressure, 
+	uiDate,
 	uiNone 
 };
 

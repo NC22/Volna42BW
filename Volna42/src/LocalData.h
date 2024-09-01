@@ -15,6 +15,7 @@
 #include "tiles/cat_winter.h"
 #include "tiles/cat_happy.h"
 #include "tiles/cat_vampi.h"
+#include "tiles/cat_rain.h"
 #include "tiles/cat_watch.h"
 #include "tiles/cat_heat.h"
 

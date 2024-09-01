@@ -114,11 +114,13 @@ var ENVLOCALE = {
     "widgets_show_hidden_params" : "Show hidden options",
 
     "widget_uiClock": "Date & Time",
+    "widget_uiDate": "Date",
     "widget_uiBat": "Battery",
     "widget_uiBatRemote": "Battery (External Sensor)",
     "widget_uiInfo": "Additional Information & Wifi",
     "widget_uiTemp": "Temperature",
     "widget_uiHum": "Humidity",
+    "widget_uiPressure" : "Pressure",
     "widget_uiTempRemote": "[External] Temperature",
     "widget_uiHumRemote": "[External] Humidity",
 

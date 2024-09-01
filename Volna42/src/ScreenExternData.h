@@ -29,6 +29,8 @@ extern imageData cat_night_96x72bw_settings PROGMEM;
 extern imageData cat_winter_93x97bw_settings PROGMEM;
 extern imageData cat_heat_110x159bw_settings PROGMEM;
 extern imageData cat_happy_80x94bw_settings PROGMEM;
+extern imageData cat_rain_127x125bw_settings PROGMEM;
+extern imageData rain_93x52bw_settings PROGMEM;
 extern imageData snowflakes_116x39bw_settings PROGMEM;
 extern imageData moon_clear_93x63bw_settings PROGMEM;
 extern imageData sun_clear_68x66bw_settings PROGMEM;
@@ -47,6 +49,10 @@ extern const char locShortThursday[] PROGMEM;
 extern const char locShortFriday[] PROGMEM;
 extern const char locShortSaturday[] PROGMEM;
 extern const char locShortSunday[] PROGMEM;
+
+extern const char locPressureMM[] PROGMEM;
+extern const char locPressureHPA[] PROGMEM;
+extern const char locVoltage[] PROGMEM;
 
 extern const char locMonth1January[] PROGMEM;
 extern const char locMonth2February[] PROGMEM;

@@ -1,5 +1,4 @@
 #define LOCALE_CONFIGURED
-#define LOCALE_EN
 
 const char defaultLocale[] PROGMEM = "en";
 
@@ -19,6 +18,10 @@ const char locShortThursday[] PROGMEM = "Thu";
 const char locShortFriday[] PROGMEM = "Fri";
 const char locShortSaturday[] PROGMEM = "Sat";
 const char locShortSunday[] PROGMEM = "Sun";
+
+const char locPressureMM[] PROGMEM = "mm.mr";
+const char locPressureHPA[] PROGMEM = "hPa";
+const char locVoltage[] PROGMEM = "V";
 
 const char locMonth1January[] PROGMEM = "January";
 const char locMonth2February[] PROGMEM = "February";

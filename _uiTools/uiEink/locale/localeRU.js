@@ -112,11 +112,13 @@ var ENVLOCALE = {
     "widgets_show_hidden_params" : "Показывать скрытые параметры",
     
     "widget_uiClock" : "Дата & Время",
+    "widget_uiDate": "Дата",
     "widget_uiBat" : "Состояние аккумулятора",
     "widget_uiBatRemote" : "[Внешний] Состояние аккумулятора",
     "widget_uiInfo" : "Доп. информация & Wifi",
     "widget_uiTemp" : "Температура",
     "widget_uiHum" : "Влажность",
+    "widget_uiPressure" : "Давление",
     "widget_uiTempRemote" : "[Внешний] Температура",
     "widget_uiHumRemote" : "[Внешний] Влажность",
 
