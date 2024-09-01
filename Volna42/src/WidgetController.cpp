@@ -330,12 +330,12 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
 
           if (!hpa) {
 
-            result = String((int) ((env->lastState.lastTelemetry[lkey].pressure / 100.0f) * 0.750062f));
+            result = String((int) ((env->lastState.lastTelemetry[lkey].pressure / 100.0f) * 0.750062f)) + " ";
             result += FPSTR(locPressureMM);
 
           } else {
 
-            result = String((int) (env->lastState.lastTelemetry[lkey].pressure / 100.0f));
+            result = String((int) (env->lastState.lastTelemetry[lkey].pressure / 100.0f)) + " ";
             result += FPSTR(locPressureHPA);
           }
 
