@@ -36,10 +36,11 @@ void Env::begin() {
   #endif
   cfg.excludeOptions.push_back(cScreenRotate); 
 
-  validateConfig(getConfig()->loadEEPROM());
-  
-  initSensors();    
+  #if !defined(SAVE_MODE)
+    validateConfig(getConfig()->loadEEPROM());
+  #endif
 
+  initSensors();
 
   #if defined(ESP32)
       esp_reset_reason_t reason = esp_reset_reason();
@@ -519,6 +520,7 @@ void Env::validateExtTelemetryData(externalSensorData & newData, String tt) {
   newData.temperature = -1000;
   newData.humidity = -1000;
   newData.bat = -1000;
+  newData.pressure = -1000;
 
   String sensorData = "";
 
@@ -923,71 +925,6 @@ void Env::cuiResetWidgets() {
     cuiWidgets.clear();
 }
 
-bool Env::collectJSONFieldDataRaw(int paramStart, int len, String & data, String & storage) {
-
-      // paramStart cursor must be at delimiter - ":" at start
-      // param:"...."
-      paramStart++;
-
-      bool isString = false;
-      for (int i = paramStart; i < len; i++) {
-               if (data[i] == ' ' || data[i] == '\t' || data[i] == '\n' || data[i] == '\r') continue;
-          else if (data[i] == '"') {
-            isString = true;
-            paramStart = i+1;
-            break;  
-          } else {
-            paramStart = i;
-            break;            
-          }
-      }
-
-      unsigned char c;
-      for (int i = paramStart; i < len; i++) {
-
-        c = data[i];
-        // Serial.print(c);
-
-          if (isString) {
-
-            if (c == '"') return true;
-            if (storage.length() > 128) {
-              return true;
-            }
-
-          } else {
-
-            if (c == ' ') continue;
-            if ((unsigned int) c < 45 || (unsigned int) c > 57) return true; // allowed chars 0123456789.-
-            
-            if (storage.length() > 16) {
-              return true;
-            }
-          }
-
-          storage += (char) c;
-    }
-
-    return true; 
-}
-
-bool Env::collectJSONFieldData(String fieldName, String & payload, String & storage) {
-    storage = "";
-    int len = payload.length();
-    int dataPos = payload.indexOf("\"" + fieldName + "\"");
-
-    if (dataPos != -1) {
-        dataPos += fieldName.length();
-        for (int i = dataPos; i < dataPos + 255; i++) {
-            if (i < len-1 && payload[i] == ':') {  
-                return collectJSONFieldDataRaw(i, len, payload, storage);
-            }
-        }
-    }
-
-    return false;
-}
-
 String Env::sanitizeResponse(String var) {
   
   int responseLength = var.length();
@@ -1025,6 +962,42 @@ String Env::sanitizeResponse(String var) {
   return sanitized;
 }
 
+void Env::updateExtIconState() {
+
+    lastState.extData.icon = kowUnknown;
+
+    // openweather or other accurate method chached weather state
+    if (lastOWstate != kowUnknown) {
+
+        lastState.extData.icon = lastOWstate;
+
+    } else {
+      
+      if (lastState.extData.isDataValid && lastState.lastTelemetrySize > 0) {
+          
+        #if defined(ICON_RAIN_DETECT)
+
+          if (lastState.extData.temperature > 0) {
+
+              if ((lastState.lastTelemetry[lastState.lastTelemetrySize-1].pressure / 100.0f) <= ICON_RAIN_DETECT_RAINY_HPA ) {
+
+                  if (lastState.extData.humidity >= ICON_RAIN_DETECT_RAINY_HUM) {
+                    lastState.extData.icon = kowRain;
+                  }
+
+              } else if ((lastState.lastTelemetry[lastState.lastTelemetrySize-1].pressure / 100.0f) <= ICON_RAIN_DETECT_CLOUDY_HPA ) {
+
+                  if (lastState.extData.humidity >= ICON_RAIN_DETECT_CLOUDY_HUM) {
+                    lastState.extData.icon = kowFewClouds;
+                  }
+              }
+          }
+        #endif
+
+      }
+    }
+}
+
 /*
   reciew data from remote sensor if configured
 */
@@ -1034,10 +1007,44 @@ bool Env::updateExtSensorData() {
     String &url = getConfig()->cfgValues[cExtSensorLink]; 
     String &login = getConfig()->cfgValues[cExtSensorLogin]; 
     String &pass = getConfig()->cfgValues[cExtSensorPassword]; 
-
+    lastOWstate = kowUnknown;
 
     if (url.length() <= 0 || url.equals(F("off"))) {
       Serial.print(F("updateExtSensorData - external sensor not configured or disabled. INPUT : ")); Serial.println(url);
+      return false;
+    }
+
+    if (url.indexOf("openweather") != -1) {
+
+      KellyOpenWeather openWeatherLoader = KellyOpenWeather(url);  
+      
+      Serial.println(F("OpenWeather parser"));
+
+      if (openWeatherLoader.loadCurrent()) {    
+        Serial.println(F("OpenWeather parser - success"));
+        Serial.println(openWeatherLoader.temp);
+        Serial.println(openWeatherLoader.hum);
+        Serial.println(openWeatherLoader.pressure);
+
+        lastState.extData.isDataValid = true;
+        lastState.extData.temperature = openWeatherLoader.temp;
+        lastState.extData.pressure = openWeatherLoader.pressure;
+        lastState.extData.humidity = openWeatherLoader.hum;
+        lastState.extData.t = time(nullptr);
+
+        lastOWstate = openWeatherLoader.weatherType;
+        lastState.connectTimes++;
+
+      } else {
+        
+        Serial.println(F("OpenWeather parser - error"));
+        Serial.println(lastError);
+
+        // lastState.extData.isDataValid = false;
+        lastError = openWeatherLoader.error;
+      }
+    
+      openWeatherLoader.end();
       return false;
     }
 
@@ -1091,7 +1098,7 @@ bool Env::updateExtSensorData() {
             "friendly_name": "Датчик почвы (каланхое спальня) Влага"
           */
 
-          if (!collectJSONFieldData("temperature", payload, collectedData)) {
+          if (!KellyOWParserTools::collectJSONFieldData("temperature", payload, collectedData)) {
             
               Serial.print(F("Bad data : ")); Serial.println(payload.substring(0, 255));
               lastError = F("External sensor error : ");
@@ -1100,11 +1107,11 @@ bool Env::updateExtSensorData() {
           } else {
               
               resultData += collectedData + " C";
-              if (collectJSONFieldData("humidity", payload, collectedData)) {
+              if (KellyOWParserTools::collectJSONFieldData("humidity", payload, collectedData)) {
                 resultData += F(", "); resultData += collectedData; resultData += F(" %");
               }
 
-              if (collectJSONFieldData("battery", payload, collectedData)) {
+              if (KellyOWParserTools::collectJSONFieldData("battery", payload, collectedData)) {
                 resultData += F(", "); resultData += collectedData;
               }
 
@@ -1123,7 +1130,7 @@ bool Env::updateExtSensorData() {
             "Humidity" : 36.0,
           */
 
-          if (!collectJSONFieldData("Data", payload, collectedData)) {
+          if (!KellyOWParserTools::collectJSONFieldData("Data", payload, collectedData)) {
 
             Serial.print(F("Bad data : ")); Serial.println(payload.substring(0, 255));
             lastError = "External sensor error : " + sanitizeResponse(payload);
@@ -1131,7 +1138,7 @@ bool Env::updateExtSensorData() {
           } else {
 
             resultData = collectedData;
-            if (collectJSONFieldData("BatteryLevel", payload, collectedData)) {
+            if (KellyOWParserTools::collectJSONFieldData("BatteryLevel", payload, collectedData)) {
               resultData += F(", "); resultData += collectedData;
             }
 
@@ -2373,9 +2380,9 @@ void Env::applyConfigToRTC() {
     Serial.println(F("[applyConfigToRTC] apply config values to RTC memory")); 
 
     if (cfg.cfgValues[cSleepTime].length() > 0) {
-
-        lastState.sleepTime = cfg.getInt(cTempOffset) * 60;
-        if (cfg.sanitizeError) lastState.sleepTime = 10 * 60;
+        
+        lastState.sleepTime = cfg.getInt(cSleepTime) * 60;
+        if (cfg.sanitizeError || lastState.sleepTime <= 0) lastState.sleepTime = 10 * 60;
 
     } else {
         lastState.sleepTime = 10 * 60;

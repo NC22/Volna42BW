@@ -967,8 +967,8 @@ void WebServerEink::apiTestData() {
 
                 env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 15:32:04";
                 env->lastState.extData.temperature = 25.12f;
-                env->lastState.extData.humidity = 70.8f;                
-                env->lastState.lastTelemetry[env->lastState.lastTelemetrySize-1].pressure = 1005.0f * 100.0f;
+                env->lastState.extData.humidity = ICON_RAIN_DETECT_RAINY_HUM+1;                
+                env->lastState.lastTelemetry[env->lastState.lastTelemetrySize-1].pressure = (ICON_RAIN_DETECT_RAINY_HPA-10) * 100.0f;
 
             }  else {
 
@@ -988,7 +988,8 @@ void WebServerEink::apiTestData() {
 
         break;
     }
-
+    
+    env->updateExtIconState();
     env->updateScreen();
     server->send(200, "application/json", "{\"status\":\"ok\"}");
 

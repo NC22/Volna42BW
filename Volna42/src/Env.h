@@ -12,6 +12,7 @@
 #include "Config.h"
 
 #include <KellyCanvas.h>
+#include <KellyOpenWeather.h>
 
 #if defined(ESP32)
     #include <HTTPClient.h>
@@ -107,6 +108,7 @@ typedef struct {
     float pressure;
     float humidity;
     int bat;
+    KellyOWIconType icon;
     time_t t; // last successfull sync time
 
 } externalSensorData;
@@ -211,8 +213,6 @@ class Env {
         
         void keepTelemetry(int key);
 
-        bool collectJSONFieldDataRaw(int paramStart, int len, String & data, String & storage);
-        bool collectJSONFieldData(String fieldName, String & data, String & storage);
         void validateExtTelemetryData(externalSensorData & extData, String tt);
         float validateExtTelemetryVal(String val);
         String sanitizeResponse(String var);
@@ -224,6 +224,7 @@ class Env {
 
         clockFormatted fTime;
         float tempOffset = 0.0;
+        KellyOWIconType lastOWstate = kowUnknown;
 
     public:
         String timezone = "MSK-3";
@@ -273,6 +274,7 @@ class Env {
         void initDefaultTime();
         void resetTimers(bool minuteTimerOnly = false);
         void resetPartialData();
+        void updateExtIconState();
 
         void sleep();
         void begin();

@@ -652,22 +652,7 @@ int Screen4in2UI::drawCat(bool land) {
 
       if (env->lastState.extData.isDataValid) {
 
-          bool possibleRainy = false;
-
-          #if defined(ICON_RAIN_DETECT)
-
-            if (env->lastState.extData.temperature > 0 && env->lastState.lastTelemetrySize) {
-
-                if ((env->lastState.lastTelemetry[env->lastState.lastTelemetrySize-1].pressure / 100.0f) < ICON_RAIN_DETECT_HPA ) {
-                    if (env->lastState.extData.humidity > ICON_RAIN_DETECT_HUM) {
-                      possibleRainy = true;
-                    }
-                }
-
-            }
-          #endif
-
-          if (possibleRainy) {
+          if (env->lastState.extData.icon == kowRain || env->lastState.extData.icon == kowShowerRain) {
 
               hpad += 128; 
               marginX = land ? calcMarginMiddle(localWidth/2, 122) : localWidth - 122;
@@ -675,6 +660,8 @@ int Screen4in2UI::drawCat(bool land) {
               
               screen->drawImage(marginX, localHeight - hpad, &cat_rain_127x125bw_settings, true);
               catShown = true;
+          
+          // todo - add clouds
               
           } else if (env->lastState.extData.temperature < 5) { // wear warm clothes
 

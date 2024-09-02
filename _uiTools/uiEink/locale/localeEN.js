@@ -122,6 +122,7 @@ var ENVLOCALE = {
     "widget_uiHum": "Humidity",
     "widget_uiPressure" : "Pressure",
     "widget_uiTempRemote": "[External] Temperature",
+    "widget_uiPressureRemote": "[External] Pressure",
     "widget_uiHumRemote": "[External] Humidity",
 
     "widget_uiInfoIP": "IP address info (in constant mode)",

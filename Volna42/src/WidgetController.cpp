@@ -305,6 +305,7 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
           widget.type == uiShortInfoSyncRemote || 
           widget.type == uiInfoSyncNumRemote || 
           widget.type == uiPressure ||
+          widget.type == uiPressureRemote ||
           widget.type == uiDate
       ) {
       
@@ -317,32 +318,40 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
 	        result = "IP : " + env->wifiInfo;
         }
 
-      } else if (widget.type == uiPressure) {
+      } else if (widget.type == uiPressure || widget.type == uiPressureRemote) {
         
-        if (lkey > -1) {
+        float pressure = -1000;
+        if (widget.type == uiPressure) {
+          if (lkey > -1) {
+            pressure = env->lastState.lastTelemetry[lkey].pressure;
+          }
+        } else {
+          if (env->lastState.extData.isDataValid) {
+            pressure = env->lastState.extData.pressure;
+          }
+        }
 
-          bool hpa = true;
-          #if defined(LOCALE_RU)
-              hpa = false;
-          #endif
+        bool hpa = true;
+        #if defined(LOCALE_RU)
+            hpa = false;
+        #endif
 
-          if (widget.params.indexOf("-hpa") != -1) hpa = true;
+        if (widget.params.indexOf("-hpa") != -1) hpa = true;
+
+        if (pressure != -1000) {
 
           if (!hpa) {
-
-            result = String((int) ((env->lastState.lastTelemetry[lkey].pressure / 100.0f) * 0.750062f)) + " ";
-            result += FPSTR(locPressureMM);
-
+            result = String((int) ((pressure / 100.0f) * 0.750062f)) + " ";
           } else {
-
-            result = String((int) (env->lastState.lastTelemetry[lkey].pressure / 100.0f)) + " ";
-            result += FPSTR(locPressureHPA);
+            result = String((int) (pressure / 100.0f)) + " ";
           }
 
         } else {
-          result = "-.-";
+          result = "-.- ";          
         }
-          
+
+        result += hpa ? FPSTR(locPressureHPA) : FPSTR(locPressureMM);
+
       } else if (widget.type == uiDate) {   
 
         clockFormatted dt = env->getFormattedTime();

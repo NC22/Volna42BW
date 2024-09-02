@@ -89,6 +89,7 @@ void setup()
 
         env.setupNTP();
         env.updateExtSensorData();
+        env.updateExtIconState();
         env.mqttSendCurrentData();
         env.wifiInfo = env.isSleepRequired() ? "" : wifi.getIP().toString(); 
 

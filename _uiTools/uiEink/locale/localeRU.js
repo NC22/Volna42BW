@@ -120,6 +120,7 @@ var ENVLOCALE = {
     "widget_uiHum" : "Влажность",
     "widget_uiPressure" : "Давление",
     "widget_uiTempRemote" : "[Внешний] Температура",
+    "widget_uiPressureRemote": "[Внешний] Давление",
     "widget_uiHumRemote" : "[Внешний] Влажность",
 
     "widget_uiInfoIP": "IP адрес (в режиме сервера)",

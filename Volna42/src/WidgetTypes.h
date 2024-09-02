@@ -20,6 +20,7 @@ enum uiWidgetType {
 	uiInfoMessage, 
 	uiPressure, 
 	uiDate,
+	uiPressureRemote,
 	uiNone 
 };
 
