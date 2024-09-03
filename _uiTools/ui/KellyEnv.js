@@ -454,10 +454,12 @@ function KellyEnv(env) {
                     
                     sensors++;
                     var kkey = key.indexOf('__') != -1 ? key.substring(0, key.indexOf('__')) : key;
+                    var subkey = key.indexOf('__') != -1 ? key.split('__')[1] : false;
+                    
                     if (!counter[kkey]) counter[kkey] = 1;
                     else counter[kkey]++;
                     
-                    var cStr = counter[kkey] > 1 ? ' (' + lloc('getinfo_sensor') + ' ' + counter[kkey] + ')' : '';
+                    var cStr = subkey ? ' (' + lloc('getinfo_sensor') + ' ' + subkey + ')' : '';
                     var fstr = '';
                     
                     if (key.indexOf('temperature') != -1) {

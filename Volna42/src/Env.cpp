@@ -36,7 +36,7 @@ void Env::begin() {
   #endif
   cfg.excludeOptions.push_back(cScreenRotate); 
 
-  #if !defined(SAVE_MODE)
+  #if !defined(SAFE_MODE)
     validateConfig(getConfig()->loadEEPROM());
   #endif
 
@@ -1022,9 +1022,9 @@ bool Env::updateExtSensorData() {
 
       if (openWeatherLoader.loadCurrent()) {    
         Serial.println(F("OpenWeather parser - success"));
-        Serial.println(openWeatherLoader.temp);
-        Serial.println(openWeatherLoader.hum);
-        Serial.println(openWeatherLoader.pressure);
+        // Serial.println(openWeatherLoader.temp);
+        // Serial.println(openWeatherLoader.hum);
+        // Serial.println(openWeatherLoader.pressure);
 
         lastState.extData.isDataValid = true;
         lastState.extData.temperature = openWeatherLoader.temp;
@@ -1035,6 +1035,9 @@ bool Env::updateExtSensorData() {
         lastOWstate = openWeatherLoader.weatherType;
         lastState.connectTimes++;
 
+        openWeatherLoader.end();
+        return true;
+        
       } else {
         
         Serial.println(F("OpenWeather parser - error"));
@@ -1042,10 +1045,10 @@ bool Env::updateExtSensorData() {
 
         // lastState.extData.isDataValid = false;
         lastError = openWeatherLoader.error;
+        openWeatherLoader.end();
+        return false;
       }
     
-      openWeatherLoader.end();
-      return false;
     }
 
     WiFiClient client;

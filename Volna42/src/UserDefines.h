@@ -21,7 +21,7 @@
 #define ICON_RAIN_DETECT_RAINY_HPA 950   	   
 #define ICON_RAIN_DETECT_RAINY_HUM 60 
 
-// #define SAVE_MODE // игнорировать настройки сохраненные в EEPROM при запуске - на случай если по каким-то причинам конфиг вызывает зависания при запуске или иные проблемы
+// #define SAFE_MODE // игнорировать настройки сохраненные в EEPROM при запуске - на случай если по каким-то причинам конфиг вызывает зависания при запуске или иные проблемы
 
 // [Language]
 
@@ -126,7 +126,7 @@
 		#define EPD_CS_PIN   -1  // GND (-1)    
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-	
+		
 		// [Optional, my old setup] | НЕ Основная
 		// моя старая алт. распиновка, через резистор
 	

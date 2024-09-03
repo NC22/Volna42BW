@@ -855,8 +855,17 @@ String WebServerEink::getInfo() {
 
         if (lastState.lastTelemetrySize > 0) {
             json += "\"temperature\":" + String(lastState.lastTelemetry[lkey].temperature) + ",";
-            json += "\"pressure\":" + String(lastState.lastTelemetry[lkey].pressure) + ",";
             json += "\"humidity\":" + String(lastState.lastTelemetry[lkey].humidity) + ",";
+            json += "\"pressure\":" + String(lastState.lastTelemetry[lkey].pressure) + ",";
+
+            if (lastState.extData.isDataValid) {
+
+                json += "\"temperature__external\":" + String(lastState.extData.temperature) + ",";
+                json += "\"humidity__external\":" + String(lastState.extData.humidity) + ",";
+                if (lastState.extData.pressure > -1000) {
+                    json += "\"pressure__external\":" + String(lastState.extData.pressure) + ",";
+                }
+            }
 
             json += "\"battery_sensor_v\":" + String(batTest) + ",";
             json += "\"battery_sensor_percent\":" + String((int) round(env->getBatteryLvlfromV(batTest))) + ",";

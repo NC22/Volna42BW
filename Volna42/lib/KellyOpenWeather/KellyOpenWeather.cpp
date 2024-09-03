@@ -104,6 +104,11 @@ bool KellyOpenWeather::loadCurrent() {
                   hum = KellyOWParserTools::validateFloatVal(collectedData);
                   KellyOWParserTools::collectJSONFieldData("pressure", tmp, collectedData);
                   pressure = KellyOWParserTools::validateFloatVal(collectedData);
+                  if (pressure <= -1000) {
+
+                  } else {
+                    pressure = pressure * 100.0f;
+                  }
 
                   if (temp <= -1000) {                    
                       error = "Parse Temp fail";
