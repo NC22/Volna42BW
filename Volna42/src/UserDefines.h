@@ -120,6 +120,7 @@
 	
 		// [https://42volna.com/scheme/] Основная распиновка, с освобождением ножки CS
 	
+	
 		#define EPD_BUSY_PIN 12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_RST_PIN  15  // D8 - GPIO - 15 (CS)
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0

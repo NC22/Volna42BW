@@ -1,8 +1,6 @@
 /*
 	Basic ESP WebServer
 	
-	v1.0 - 08.07.24,  by nradiowave
-		
     Common class used to implement base web-server service + JS + HTML user interface (_uiTools/ui) in Volna 42 and other projects
 	Require several Env methods for work with config variables
 	
@@ -43,6 +41,10 @@ bool WebServerBase::defaultRoute(bool return404) {
         getCoreJs();
     } else if (server->uri().indexOf("/out/tools.js") != -1) {
         getToolsJS();
+    } else if (server->uri().indexOf("/out/tools.list.js") != -1) {
+        getToolsListJS();
+    } else if (server->uri().indexOf("/out/tools.select.js") != -1) {
+        getToolsSelectJS();
     } else if (server->uri().indexOf("/api/reset") != -1) {
         apiResetConfig();
     } else if (server->uri().indexOf("/api/reboot") != -1) {
@@ -198,8 +200,7 @@ void WebServerBase::getToolsJS() {
         
         server->send(200, "text/javascript", "");
 
-        // должно быть оптимальней - если просто все разом кидать - крешь - стало нехватать памяти 
-        // CONTENT_LENGTH_UNKNOWN - можно попробовать с webdataSize_KellyTools_js но могут быть разночтения
+        // CONTENT_LENGTH_UNKNOWN 
         
         outputROMData(webdata_KellyTools_js, webdataSize_KellyTools_js);
         server->sendContent("");
@@ -211,6 +212,33 @@ void WebServerBase::getToolsJS() {
         server->send(200, "text/css; charset=utf-8", FPSTR(webdata_KellyTools_js)); 
     }
 }
+
+void WebServerBase::getToolsListJS() {   
+
+    if (ramFriendlyMode) {
+
+        server->sendHeader("Cache-Control", "max-age=31536000");
+        server->setContentLength(webdataSize_KellyTools_list_widget_js);
+        
+        server->send(200, "text/javascript", "");
+        outputROMData(webdata_KellyTools_list_widget_js, webdataSize_KellyTools_list_widget_js);
+        server->sendContent("");
+
+    } else {
+
+        server->sendHeader("Cache-Control", "max-age=31536000");
+        server->setContentLength(webdataSize_KellyTools_list_widget_js);
+        server->send(200, "text/css; charset=utf-8", FPSTR(webdata_KellyTools_list_widget_js)); 
+    }
+}
+
+void WebServerBase::getToolsSelectJS() {   
+
+    server->sendHeader("Cache-Control", "max-age=31536000");
+    // server->setContentLength(webdataSize_KellyTools_select_widget_js);
+    server->send(200, "text/css; charset=utf-8", FPSTR(webdata_KellyTools_select_widget_js)); 
+}
+
 
 void WebServerBase::apiGetInfo() {
     server->send(200, "application/json", "{" + getInfo() + "}"); 

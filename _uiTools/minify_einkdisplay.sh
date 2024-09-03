@@ -4,12 +4,16 @@
 ./htmlpack uiEink\KellyUploader.js ..\Volna42\src\ui\out\KellyUploader
 ./htmlpack uiEink\KellyUIFileManager.js ..\Volna42\src\ui\out\KellyUIFileManager
 ./htmlpack uiEink\KellyUploader.js ..\Volna42\src\ui\out\KellyUploader
+./htmlpack uiEink\KellyUploader.tools.js ..\Volna42\src\ui\out\KellyUploader_tools
 ./htmlpack uiEink\client_uploader.html ..\Volna42\src\ui\out\client_uploader
 ./htmlpack uiEink\locale\localeEN.js ..\Volna42\src\ui\out\locale_en\locale
 ./htmlpack uiEink\locale\localeRU.js ..\Volna42\src\ui\out\locale_ru\locale
+./htmlpack uiEink\style.uploader.css ..\Volna42\src\ui\out\style_uploader
 
 ./htmlpack ui\client.html ..\Volna42\src\ui\out\client
 ./htmlpack ui\client_end.html ..\Volna42\src\ui\out\client_end
 ./htmlpack ui\KellyEnv.js ..\Volna42\src\ui\out\KellyEnv
 ./htmlpack ui\KellyTools.js ..\Volna42\src\ui\out\KellyTools
+./htmlpack ui\KellyTools.select.widget.js ..\Volna42\src\ui\out\KellyTools_select_widget
+./htmlpack ui\KellyTools.list.widget.js ..\Volna42\src\ui\out\KellyTools_list_widget
 ./htmlpack ui\style.css ..\Volna42\src\ui\out\style

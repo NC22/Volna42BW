@@ -29,6 +29,8 @@ typedef struct {
 #include <ui/out/init.h>
 #include <ui/out/KellyEnv.h>
 #include <ui/out/KellyTools.h>
+#include <ui/out/KellyTools_select_widget.h>
+#include <ui/out/KellyTools_list_widget.h>
 #include <ui/out/style.h>
 #include <ui/out/env.h>
 
@@ -37,6 +39,8 @@ class WebServerBase {
 
         void getEnvJS();
         void getToolsJS();
+        void getToolsListJS();
+        void getToolsSelectJS();
         void getCoreJs();
         void getStyleCss();
      

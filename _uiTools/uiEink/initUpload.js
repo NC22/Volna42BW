@@ -1,4 +1,4 @@
-var loadPool = ['uploaderfm.js', 'uploader.js', 'language.js', 'tools.js', 'env.js', 'style.css'];
+var loadPool = ['uploaderfm.js', 'uploader.js', 'uploader.tools.js', 'language.js', 'tools.select.js', 'tools.js',  'env.js', 'style.uploader.css', 'style.css'];
 var ENVINIT = function(result) {
     
     if (result) {

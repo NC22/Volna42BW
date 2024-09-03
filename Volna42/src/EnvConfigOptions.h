@@ -30,7 +30,7 @@ const cfgOption cfgOptions[] = {
     {cTimestamp, ctypeString, false, "timestamp", false},
 
     {cWifiNetworkFallback, ctypeString, false, "wifiNetworkFallback", false},
-    {cWifiPasswordFallback, ctypeString, false, "wifiPasswordFallback", false},
+    {cWifiPasswordFallback, ctypeString, true, "wifiPasswordFallback", false},
 
     {cImagePreset, ctypeString, false, "imagePreset", false},
 

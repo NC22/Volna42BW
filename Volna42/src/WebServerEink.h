@@ -14,6 +14,8 @@ extern const char webdata_locale_js[] PROGMEM;
 
 #include <ui/out/initUpload.h>
 #include <ui/out/client_uploader.h>
+#include <ui/out/style_uploader.h>
+#include <ui/out/KellyUploader_tools.h>
 #include <ui/out/KellyUploader.h>
 #include <ui/out/KellyUIFileManager.h>
 
@@ -60,7 +62,9 @@ class WebServerEink:public WebServerBase {
         void apiTestLowPower(); // test low power screen
         void apiPartialTest(); // test low power screen
         void showUploadImagePage();
+        void getUploaderToolsJs();
         void getUploaderJs();
+        void getUploaderCss();
         void getUploaderFMJs();
         void getLanguageJs();
         

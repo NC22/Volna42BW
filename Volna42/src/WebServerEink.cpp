@@ -73,10 +73,14 @@ void WebServerEink::router() {
 
     if (server->uri().indexOf("/out/uploader.js") != -1) {
         getUploaderJs();
-    } else if (server->uri().indexOf("/out/uploaderfm.js") != -1) {
+    } else if (server->uri().indexOf("/out/uploader.tools.js") != -1) {
+        getUploaderToolsJs();
+    }  else if (server->uri().indexOf("/out/uploaderfm.js") != -1) {
         getUploaderFMJs();
     } else if (server->uri().indexOf("/out/language.js") != -1) {
         getLanguageJs();
+    } else if (server->uri().indexOf("/out/style.uploader.css") != -1) {
+        getUploaderCss();
     } else if (server->uri().indexOf("/upload/image") != -1) {
         showUploadImagePage();
     } else if (server->uri().indexOf("/api/testlowpower") != -1) {
@@ -700,7 +704,7 @@ void WebServerEink::getUploaderFMJs() {
 
         server->send(200, "text/javascript; charset=utf-8", "");
         
-        outputROMData(webdata_KellyUIFileManager_js, webdataSize_KellyUploader_js);
+        outputROMData(webdata_KellyUIFileManager_js, webdataSize_KellyUIFileManager_js);
 
        server->sendContent("");
     } else {
@@ -730,6 +734,35 @@ void WebServerEink::getLanguageJs() {
         server->sendHeader("Cache-Control", "max-age=31536000");
         server->setContentLength(webdataSize_locale_js);
         server->send(200, "text/javascript; charset=utf-8", FPSTR(webdata_locale_js)); 
+    }
+}
+
+void WebServerEink::getUploaderCss() {    
+    
+    server->sendHeader("Cache-Control", "max-age=31536000");
+    server->setContentLength(webdataSize_style_uploader_css);
+    server->send(200, "text/css; charset=utf-8", FPSTR(webdata_style_uploader_css)); 
+}
+
+
+void WebServerEink::getUploaderToolsJs() {    
+    
+    if (ramFriendlyMode) {
+    
+        server->sendHeader("Cache-Control", "max-age=31536000");
+        server->setContentLength(webdataSize_KellyUploader_tools_js);
+
+        server->send(200, "text/javascript; charset=utf-8", "");
+        
+        outputROMData(webdata_KellyUploader_tools_js, webdataSize_KellyUploader_tools_js);
+
+        server->sendContent("");
+    } else {
+
+
+        server->sendHeader("Cache-Control", "max-age=31536000");
+        server->setContentLength(webdataSize_KellyUploader_tools_js);
+        server->send(200, "text/javascript; charset=utf-8", FPSTR(webdata_KellyUploader_tools_js)); 
     }
 }
 
@@ -799,7 +832,6 @@ void WebServerEink::showUploadImagePage() {
                             webdataSize_client_uploader_html + 
                             webdataSize_client_end_html + 
                             webdataSize_initUpload_js);
-
 
     if (ramFriendlyMode) {
 

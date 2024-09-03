@@ -289,6 +289,7 @@ bool Config::restoreFromBinary(unsigned char * cfg, unsigned int size) {
 
     Serial.print(F("max index : ")); Serial.print(index); Serial.print(F(" string lenght : ")); Serial.println(size);
 
+    /*
     Serial.println(F("----------Restore data from config---------------"));
 
     for(size_t i=0; i < cfgSize; i++) {
@@ -301,7 +302,7 @@ bool Config::restoreFromBinary(unsigned char * cfg, unsigned int size) {
     }   
 
     Serial.println(F("----------Restore data from config--END---------------"));
-
+    */
     return true;
 }
 
@@ -404,15 +405,15 @@ unsigned int Config::loadEEPROM() {
 
         unsigned char * configStr = new unsigned char[cfgSize];
         
-        Serial.println(F("------EEPROM-DAT-----"));
+        // Serial.println(F("------EEPROM-DAT-----"));
         for (int i = 0; i < cfgSize; i++) {
             configStr[i] = EEPROM.read(address);        
-            Serial.print(" ["); Serial.print((int) configStr[i]); Serial.print("]");
+            // Serial.print(" ["); Serial.print((int) configStr[i]); Serial.print("]");
             address++;
         }
 
-        Serial.println();
-        Serial.println(F("------EEPROM-DAT-END-----"));
+        // Serial.println();
+        // Serial.println(F("------EEPROM-DAT-END-----"));
 
         restoreFromBinary(configStr, cfgSize);
         delete[] configStr;

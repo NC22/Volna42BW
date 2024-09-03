@@ -1,4 +1,4 @@
-var loadPool = ['core.js', 'tools.js', 'language.js', 'env.js', 'style.css'];
+var loadPool = ['core.js', 'tools.select.js', 'tools.js', 'language.js', 'env.js', 'style.css'];
 
 var ENVINIT = function(result) {
     
