@@ -24,6 +24,7 @@ class WidgetController {
 	void partialDataApplyMaxBounds();
 	void partialDataSet(int x, int y, unsigned int width, unsigned int height);
 	void drawWidget(uiWidgetStyle widget);
+	String getPressureFormattedString(float pressure, bool hpa);
 	int drawBatWidget(int baseX, int baseY, bool invert, bool ext, bool shortFormat);
 	void drawClockWidget(int baseX, int baseY, bool border, bool fill, bool invert, int & resultWidth, int resultHeight); // todo - font size config
 	void drawSystemInfoWidget(int baseX, int baseY);

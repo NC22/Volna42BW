@@ -40,7 +40,7 @@ bool Screen4in2UI::tick() {
   return false;
 }
 
-int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float humidity, imageDrawModificators & mods, bool land) {
+int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float humidity, float pressure, imageDrawModificators & mods, bool land) {
   
   KellyCanvas * screen = env->getCanvas();
   screen->color = tBLACK;
@@ -83,9 +83,21 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
     widgetController->drawBatWidget(textMarginX + 2, theight - 28, true, true, true);
   }
 
-  
-  if (humidity > -1000) {
-    screen->drawString(humMarginX, theight - 20 + humMarginY, FPSTR(locHumidity), false);
+  bool showPressure = false;
+  if (pressure > -1000) {
+    if (indoor) {
+      showPressure = DUI_PRESSURE_HOME;
+    } else {
+      showPressure = DUI_PRESSURE_OUTDOOR;
+    }
+  } 
+
+  if (showPressure) {
+    screen->drawString(humMarginX, theight - 20 + humMarginY, widgetController->getPressureFormattedString(pressure, PRESSURE_HPA), false);
+  } else {
+    if (humidity > -1000) {
+      screen->drawString(humMarginX, theight - 20 + humMarginY, FPSTR(locHumidity), false);
+    }
   }
 
   // big letters metrics
@@ -284,14 +296,14 @@ void Screen4in2UI::drawUIToBufferLand() {
 
         // sensors 
 
-        drawTemp(theight, true, env->lastState.lastTelemetry[lkey].temperature, env->lastState.lastTelemetry[lkey].humidity, mods, true);
+        drawTemp(theight, true, env->lastState.lastTelemetry[lkey].temperature, env->lastState.lastTelemetry[lkey].humidity, env->lastState.lastTelemetry[lkey].pressure, mods, true);
                   
         if (env->lastState.extData.isDataValid) {
           
           screen->drawRect(localWidth / 2, localHeight / 2, localWidth / 2, 2, false);  // split line
           theight = (localHeight / 2) + 26;
 
-          drawTemp(theight, false, env->lastState.extData.temperature, env->lastState.extData.humidity, mods, true);
+          drawTemp(theight, false, env->lastState.extData.temperature, env->lastState.extData.humidity, env->lastState.extData.pressure, mods, true);
           
           //uText timeText = screen->getUText(dt.timeText); pixelWidth
           
@@ -303,7 +315,7 @@ void Screen4in2UI::drawUIToBufferLand() {
 
     } else {
 
-      drawTemp(theight, true, -1000, 0, mods);
+      drawTemp(theight, true, -1000, 0, 0, mods, true);
     }
 
   }
@@ -358,22 +370,25 @@ void Screen4in2UI::drawUIToBuffer() {
     if (env->lastState.lastTelemetrySize > 0) {
 
         // sensors 
-        theight += drawTemp(theight, true, env->lastState.lastTelemetry[lkey].temperature, env->lastState.lastTelemetry[lkey].humidity, mods);
+        theight += drawTemp(theight, true, env->lastState.lastTelemetry[lkey].temperature, env->lastState.lastTelemetry[lkey].humidity, env->lastState.lastTelemetry[lkey].pressure, mods);
                   
         if (env->lastState.extData.isDataValid) {
           
           screen->drawRect(0, theight, 2, localWidth, false);  // split line
-          drawTemp(theight + 34, false, env->lastState.extData.temperature, env->lastState.extData.humidity, mods);
+          drawTemp(theight + 34, false, env->lastState.extData.temperature, env->lastState.extData.humidity, env->lastState.extData.pressure, mods);
         }
 
         theight = localHeight / 2 + 2;
         int batPosX = localWidth - 17 - 40;
         widgetController->drawBatWidget(batPosX, theight - 7, false, false, false);
-        widgetController->drawSystemInfoWidget(10, theight);
-        
+
+        if (DUI_TECH_INFO) {
+          widgetController->drawSystemInfoWidget(10, theight);
+        }
+
     } else {
         
-        drawTemp(theight, true, -1000, 0, mods);
+        drawTemp(theight, true, -1000, 0, 0, mods);
     }
 
   }
@@ -661,9 +676,9 @@ int Screen4in2UI::drawCat(bool land) {
               screen->drawImage(marginX, localHeight - hpad, &cat_rain_127x125bw_settings, true);
               catShown = true;
           
-          // todo - add clouds
+          // todo - add clouds, drawWeaterIcon - controll only clouds + sunny \ moon, draw snow just with icon
               
-          } else if (env->lastState.extData.temperature < 5) { // wear warm clothes
+          } else if (env->lastState.extData.icon == kowSnow || env->lastState.extData.temperature < 5) { // wear warm clothes
 
               hpad = 97 + 2;
               marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 105;

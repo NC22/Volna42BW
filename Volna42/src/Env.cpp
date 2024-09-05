@@ -500,83 +500,6 @@ String Env::getTelemetryJSON() {
   return "{\"id\":\"4in2einkTermometr\",\"data\":" + json + "}";
 }
 
-float Env::validateExtTelemetryVal(String v) {
-
-    if (v.length() <= 0) return -1000;
-
-    float nv = -1000;
-    if(sscanf(v.c_str(), "%f", &nv) != 1) {
-        return -1000; 
-    }
-
-    return nv;
-}
-
-void Env::validateExtTelemetryData(externalSensorData & newData, String tt) {
-
-  int len = tt.length();
-  int itemN = 0;
-
-  newData.temperature = -1000;
-  newData.humidity = -1000;
-  newData.bat = -1000;
-  newData.pressure = -1000;
-
-  String sensorData = "";
-
-  for (int i = 0; i < len; i++) {
-
-      unsigned char chr = (unsigned char) tt[i];
-      if (chr >= 45 && chr <= 57 && chr != 47) { // 0-9 . - 
-          sensorData += tt[i];
-      }
-
-      if (tt[i] == ',' || i == len-1) {
-
-        Serial.println(F("Telemetry item : "));
-        Serial.println(sensorData);
-
-        if (itemN == 0) {
-
-            newData.temperature = validateExtTelemetryVal(sensorData);            
-            Serial.println(newData.temperature);
-
-        } else if (itemN == 1) {
-
-            newData.humidity = validateExtTelemetryVal(sensorData);
-            Serial.println(newData.humidity);
-
-        } else if (itemN == 2) {
-
-            newData.bat = -1000;
-            if(sscanf(sensorData.c_str(), "%d", &newData.bat) != 1) {
-                newData.bat = -1000;
-            }
-
-                 if (newData.bat > 100) newData.bat = 100;
-            else if (newData.bat < 0) newData.bat = -1000;
-
-            Serial.println(newData.bat);
-        }
-
-        itemN++;        
-        sensorData = "";
-        if (itemN <= 2) continue;else break;
-      }
-  }
-
-  if (newData.temperature > -1000) {
-
-      newData.isDataValid = true;      
-      newData.t = time(nullptr);
-
-  } else {      
-
-      newData.isDataValid = false;
-      Serial.println(F("validateExtTelemetryData fail"));
-  }
-}
-
 void Env::mqttMessageReceivedCallback(char* topic, uint8_t* payload, unsigned int length) {
  
     Serial.print("Message arrived [");
@@ -1040,11 +963,13 @@ bool Env::updateExtSensorData() {
         
       } else {
         
-        Serial.println(F("OpenWeather parser - error"));
-        Serial.println(lastError);
+        Serial.println(F("OpenWeather parser - error"));        
 
         // lastState.extData.isDataValid = false;
+
         lastError = openWeatherLoader.error;
+        Serial.println(lastError);
+        
         openWeatherLoader.end();
         return false;
       }
@@ -1056,6 +981,11 @@ bool Env::updateExtSensorData() {
 
     externalSensorData newData;
     newData.isDataValid = false;
+    newData.temperature = -1000;
+    newData.humidity = -1000;
+    newData.bat = -1000;
+    newData.pressure = -1000;
+    newData.t = time(nullptr);
 
     http.setTimeout(5000);
     client.setTimeout(5000); // double check for esp32 - can be in seconds, not milisec
@@ -1065,7 +995,6 @@ bool Env::updateExtSensorData() {
     if (login.length() > 0) {
 
       http.setAuthorization(login.c_str(), pass.c_str());
-
       Serial.println(F("[AUTH] Basic auth mode"));
 
     } else if (pass.length() > 0) {
@@ -1085,70 +1014,60 @@ bool Env::updateExtSensorData() {
     int httpResponseCode = http.GET();
     String payload = http.getString(); 
 
-    if (httpResponseCode > 0) {      
+    if (httpResponseCode > 0) {
         String collectedData;
         String resultData = "";
-
-        if (url.indexOf("/api/states") != -1) {
-            
-          Serial.println(F("Home Assist parser"));
+        bool homeAssistant = false;
+        if (url.indexOf("/api/states") != -1) homeAssistant = true;
+        Serial.println(homeAssistant ? F("[HomeAssistant] parser") : F("[Domoticz] parser"));
 
           /*
+            Domoticz
+
+            "BatteryLevel" : 89,
+            "Data" : "34.8 C, 36 %",
+            "Name" : "\u0414\u0430\u0442\u0447\u0438\u043a ... \u043a (Temperature + Humidity)",
+            "Humidity" : 36.0,
+
+            HA
+
             "battery": 87,
             "battery_low": false,
             "humidity": 40.85,
             "temperature": 26.32,
             "friendly_name": "Датчик почвы (каланхое спальня) Влага"
           */
-
-          if (!KellyOWParserTools::collectJSONFieldData("temperature", payload, collectedData)) {
-            
-              Serial.print(F("Bad data : ")); Serial.println(payload.substring(0, 255));
-              lastError = F("External sensor error : ");
-              lastError += sanitizeResponse(payload);
-
-          } else {
-              
-              resultData += collectedData + " C";
-              if (KellyOWParserTools::collectJSONFieldData("humidity", payload, collectedData)) {
-                resultData += F(", "); resultData += collectedData; resultData += F(" %");
-              }
-
-              if (KellyOWParserTools::collectJSONFieldData("battery", payload, collectedData)) {
-                resultData += F(", "); resultData += collectedData;
-              }
-
-              Serial.print(F("[Home Assistant] collected data :")); Serial.println(resultData);  
-              validateExtTelemetryData(newData, resultData);
-          }
-
-        } else {
-
-          Serial.println(F("Domoticz parser"));
-
-          /*
-            "BatteryLevel" : 89,
-            "Data" : "34.8 C, 36 %",
-            "Name" : "\u0414\u0430\u0442\u0447\u0438\u043a ... \u043a (Temperature + Humidity)",
-            "Humidity" : 36.0,
-          */
-
-          if (!KellyOWParserTools::collectJSONFieldData("Data", payload, collectedData)) {
+          
+          int maxLength = 12;
+          if (!KellyOWParserTools::collectJSONFieldData(homeAssistant ? "temperature" : "Temp", payload, collectedData, maxLength)) {
 
             Serial.print(F("Bad data : ")); Serial.println(payload.substring(0, 255));
             lastError = "External sensor error : " + sanitizeResponse(payload);
 
           } else {
-
-            resultData = collectedData;
-            if (KellyOWParserTools::collectJSONFieldData("BatteryLevel", payload, collectedData)) {
-              resultData += F(", "); resultData += collectedData;
+            
+            newData.temperature = KellyOWParserTools::validateFloatVal(collectedData);
+            if (newData.temperature <= -1000) {   
+               Serial.print(F("Bad data : no temperature")); Serial.println(payload.substring(0, 255));
+               lastError = "External sensor error : no temperature data";
+            } else {
+                newData.isDataValid = true;
+                
+                KellyOWParserTools::collectJSONFieldData(homeAssistant ? "humidity" : "Humidity", payload, collectedData, maxLength);
+                newData.humidity = KellyOWParserTools::validateFloatVal(collectedData);
+                KellyOWParserTools::collectJSONFieldData(homeAssistant ? "pressure" : "Barometer", payload, collectedData, maxLength);
+                newData.pressure = KellyOWParserTools::validateFloatVal(collectedData);
+                if (newData.pressure > -1000) {
+                    newData.pressure = newData.pressure * 100.0f;
+                }
+                KellyOWParserTools::collectJSONFieldData(homeAssistant ? "battery" : "BatteryLevel", payload, collectedData, maxLength);
+                newData.bat = KellyOWParserTools::validateFloatVal(collectedData);
+                      if (newData.bat > 100) newData.bat = 100;
+                 else if (newData.bat < 0) newData.bat = -1000;
             }
-
-            Serial.print(F("[Domoticz] collected data :")); Serial.println(resultData);            
-            validateExtTelemetryData(newData, resultData);
+            
+            Serial.println(F("Collect data - OK, Result :")); 
           }
-        }
 
     } else {
 
@@ -1158,13 +1077,19 @@ bool Env::updateExtSensorData() {
          lastError = "External sensor error : Error code: " + String(httpResponseCode) + ", Response : " + sanitizeResponse(payload);
       }
 
-      Serial.print("Error code: "); Serial.println(httpResponseCode);
+      Serial.print(F("Error code: ")); Serial.println(httpResponseCode);
       // logReport("cant get ext sensor data " + String(httpResponseCode))
     }
 
     http.end();
     
     if (newData.isDataValid) {
+      
+      Serial.print(F("temperature: ")); Serial.println(newData.temperature);
+      Serial.print(F("humidity: ")); Serial.println(newData.humidity);
+      Serial.print(F("pressure: ")); Serial.println(newData.pressure);
+      Serial.print(F("bat: ")); Serial.println(newData.bat);
+
       lastState.extData = newData;
       lastState.connectTimes++;
       // lastState.syncT = time(nullptr);

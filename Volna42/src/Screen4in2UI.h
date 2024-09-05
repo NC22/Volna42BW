@@ -30,7 +30,7 @@ class Screen4in2UI {
         KellyEInk_42_UC8176_RBW * displayDriver  = NULL;
         #endif
         
-        int drawTemp(int theight, bool indoor, float temperature, float humidity, imageDrawModificators & mods, bool land = false);        
+        int drawTemp(int theight, bool indoor, float temperature, float humidity, float pressure, imageDrawModificators & mods, bool land = false);        
         int drawCat(bool land = false);        
         void drawWidget(uiWidgetStyle & widget);
         void drawBat(int baseX, int baseY, bool invert, bool ext, bool shortFormat);

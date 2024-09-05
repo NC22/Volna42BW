@@ -8,6 +8,7 @@ const char locIndoor[] PROGMEM = "дом";
 const char locOutdoor[] PROGMEM = "улица";
 const char locHumidity[] PROGMEM = "влажность";
 const char locTemp[] PROGMEM = "температура";
+const char locPressure[] PROGMEM = "давление";
 const char locUnavailable[] PROGMEM = "датчик не доступен";
 const char locLowBat[] PROGMEM = "Низкий заряд";
 

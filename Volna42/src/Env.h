@@ -213,8 +213,6 @@ class Env {
         
         void keepTelemetry(int key);
 
-        void validateExtTelemetryData(externalSensorData & extData, String tt);
-        float validateExtTelemetryVal(String val);
         String sanitizeResponse(String var);
         void setDefaultLastStateData();
         bool restoreRTCmem();

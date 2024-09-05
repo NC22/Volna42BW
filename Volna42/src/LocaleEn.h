@@ -8,6 +8,7 @@ const char locIndoor[] PROGMEM = "indoor";
 const char locOutdoor[] PROGMEM = "outdoor";
 const char locHumidity[] PROGMEM = "humidity";
 const char locTemp[] PROGMEM = "temperature";
+const char locPressure[] PROGMEM = "pressure";
 const char locUnavailable[] PROGMEM = "sensor unavailable";
 const char locLowBat[] PROGMEM = "Low Battery";
 
@@ -19,7 +20,7 @@ const char locShortFriday[] PROGMEM = "Fri";
 const char locShortSaturday[] PROGMEM = "Sat";
 const char locShortSunday[] PROGMEM = "Sun";
 
-const char locPressureMM[] PROGMEM = "mm.mr";
+const char locPressureMM[] PROGMEM = "mmHg";
 const char locPressureHPA[] PROGMEM = "hPa";
 const char locVoltage[] PROGMEM = "V";
 

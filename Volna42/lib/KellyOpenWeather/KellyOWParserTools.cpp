@@ -1,6 +1,18 @@
 #include "KellyOWParserTools.h"
 
 
+int KellyOWParserTools::validateIntVal(String v) {
+
+    if (v.length() <= 0) return -1000;
+
+    int nv = -1000;
+    if(sscanf(v.c_str(), "%d", &nv) != 1) {
+        return -1000; 
+    }
+
+    return nv;
+}
+
 float KellyOWParserTools::validateFloatVal(String v) {
 
     if (v.length() <= 0) return -1000;
@@ -104,7 +116,7 @@ bool KellyOWParserTools::collectJSONFieldData(String fieldName, String & payload
         dataPos += fieldName.length();
         for (int i = dataPos; i < dataPos + 255; i++) {
             if (i < len-1 && payload[i] == ':') {  
-                return collectJSONFieldDataRaw(i, len, payload, storage);
+                return collectJSONFieldDataRaw(i, len, payload, storage, maxLength);
             }
         }
     }

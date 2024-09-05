@@ -9,15 +9,24 @@
 #define DEFAULT_I2C_SDA 4 // I2C SDA [ESP8266] dont edit, no variations
 #endif
 
-#define CUI_MAX_WIDGETS 20
+#define CUI_MAX_WIDGETS 20				   // Максимально возможное кол-во выводимых виджетов для кастомного интерфейса
 #define CUI_LOOP_INTERVAL 14400            // Интервал смены оформления в режиме -loop - смена кастомных оформлений по порядку из того что загружено раз в 4 часа (тестовый функционал) 
 
-// Определение дождливой погоды иконкой возможно по косвенным признакам (низкое давление + повышеная влажность). Можно расскоментировать \ подкоректировать пороговые значения
-// [давление <= 1000hPa (750 мм.рт.ст) + влажность >= 60%] пока активно не проверялось
+#define PRESSURE_HPA false   // pressure in hPa (default - mmHg - мм.рт.ст)
 
-#define ICON_RAIN_DETECT 
+// [ 4.2' Default interface ] [Оформление интерфейса по умолчанию]
+
+#define DUI_TECH_INFO true // Показывать техническую информацию мелким шрифтом (вольтаж батареи \ кол-во успешных синхронизаций с внешним датчиком, дата последней синх.) 
+#define DUI_PRESSURE_HOME false  // Показывать давление вместо надписи "влажность" если датчик поддерживает 
+#define DUI_PRESSURE_OUTDOOR true // тоже для улицы, если данные доступны
+
+// Определение дождливой погоды по косвенным признакам (низкое давление + повышеная влажность)
+// закомментить если не нужно, если данные с OpenWeather, то тоже не используется
+#define ICON_RAIN_DETECT  
+// облачно, пока не задействовано
 #define ICON_RAIN_DETECT_CLOUDY_HPA 1000   	   
-#define ICON_RAIN_DETECT_CLOUDY_HUM 60 			
+#define ICON_RAIN_DETECT_CLOUDY_HUM 60 	
+// идет дождь [давление <= 1000hPa (750 мм.рт.ст) + влажность >= 60%]		
 #define ICON_RAIN_DETECT_RAINY_HPA 950   	   
 #define ICON_RAIN_DETECT_RAINY_HUM 60 
 
@@ -121,24 +130,24 @@
 		// [https://42volna.com/scheme/] Основная распиновка, с освобождением ножки CS
 	
 	
+	/*
 		#define EPD_BUSY_PIN 12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_RST_PIN  15  // D8 - GPIO - 15 (CS)
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0
 		#define EPD_CS_PIN   -1  // GND (-1)    
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-		
+	*/	
 		// [Optional, my old setup] | НЕ Основная
 		// моя старая алт. распиновка, через резистор
 	
-	/*
 		#define EPD_BUSY_PIN 2   // D4 - GPIO - 2 (+20кОм резистор на VCC)
 		#define EPD_RST_PIN  12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0
 		#define EPD_CS_PIN   15  // D8 - GPIO - 15 (CS) или опционально GND (-1)
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-	*/
+	
 		
 	#endif
 

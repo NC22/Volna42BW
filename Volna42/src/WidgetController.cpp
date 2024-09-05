@@ -259,6 +259,26 @@ int WidgetController::drawBatWidget(int baseX, int baseY, bool invert, bool ext,
     }
 }
 
+String WidgetController::getPressureFormattedString(float pressure, bool hpa) {
+
+    String result = "";
+    if (pressure != -1000) {
+
+      if (!hpa) {
+        result = String((int) ((pressure / 100.0f) * 0.750062f)) + " ";
+      } else {
+        result = String((int) (pressure / 100.0f)) + " ";
+      }
+
+    } else {
+      result = "-.- ";          
+    }
+
+    result += hpa ? FPSTR(locPressureHPA) : FPSTR(locPressureMM);
+
+    return result;
+} 
+
 void WidgetController::drawWidget(uiWidgetStyle widget) {
 	
     KellyCanvas * screen = env->getCanvas();
@@ -331,26 +351,9 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
           }
         }
 
-        bool hpa = true;
-        #if defined(LOCALE_RU)
-            hpa = false;
-        #endif
-
+        bool hpa = PRESSURE_HPA;
         if (widget.params.indexOf("-hpa") != -1) hpa = true;
-
-        if (pressure != -1000) {
-
-          if (!hpa) {
-            result = String((int) ((pressure / 100.0f) * 0.750062f)) + " ";
-          } else {
-            result = String((int) (pressure / 100.0f)) + " ";
-          }
-
-        } else {
-          result = "-.- ";          
-        }
-
-        result += hpa ? FPSTR(locPressureHPA) : FPSTR(locPressureMM);
+        result = getPressureFormattedString(pressure, hpa);
 
       } else if (widget.type == uiDate) {   
 
