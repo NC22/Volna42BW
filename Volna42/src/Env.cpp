@@ -1389,6 +1389,15 @@ clockFormatted & Env::getFormattedTime() {
     return fTime;
 }
 
+String Env::getFormattedSensorTitle(bool indoor) {
+  
+  String title = getConfig()->getString(indoor ? cTitleIndoor : cTitleExternal);
+  if (title.length() <= 0) title = FPSTR(indoor ? locIndoor : locOutdoor);
+  if (title.equals(F("off"))) title = "";
+  
+  return title;
+}
+
 String Env::getFormattedExtSensorLastSyncTime(bool full) {
     if (lastState.extData.isDataValid == false) {
         return "--:--";

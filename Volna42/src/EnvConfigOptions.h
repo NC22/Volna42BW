@@ -44,6 +44,8 @@ const cfgOption cfgOptions[] = {
     {cTimeFormat12, ctypeBool, false, "timeFormat12", false},
 
     {cUpdateMinutes, ctypeBool, false, "updateMinutes", false},
+    {cTitleIndoor, ctypeString, false, "titleIndoor", false},
+    {cTitleExternal, ctypeString, false, "titleExternal", false},
 };
 
 const size_t cfgOptionsSize PROGMEM = sizeof(cfgOptions) / sizeof(cfgOptions[0]);

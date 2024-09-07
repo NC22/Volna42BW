@@ -10,7 +10,9 @@ var ENVLOCALE = {
     "cfg_timezone" : "Часовой пояс",
     "cfg_toFahrenheit" : "Единицы измерения температуры (0 - Цельсий, 1 - Фаренгейт)",
     "cfg_timeFormat12" : "12-часовой формат (0-1)",
-    "cfg_updateMinutes" : "Обновлять минуты (0-1)",
+    "cfg_updateMinutes" : "Обновлять минуты (0-1)",    
+    "cfg_titleIndoor" : "Заголовок датчика помещения",
+    "cfg_titleExternal" : "Заголовок внешнего датчика",
     "cfg_timestamp" : "Дата & Время",
     "cfg_tempOffset" : "Корректировка температуры (от -10℃ до 10℃)",  
     "cfg_ntpHosts" : "NTP сервер (off - не использовать)",
@@ -38,7 +40,7 @@ var ENVLOCALE = {
 
     "cfg__screen" : "Управление экраном",
     "cfg_screenRotate" : "Перевернуть экран (0-1)",
-    "cfg_screenLandscape" : "Ландшафтный режим (0-1)",
+    "cfg_screenLandscape" : "Альбомный режим (0-1)",
 
     "cfg__imageFeed" : "Свое оформление",
     "cfg_imagePreset" : "Пресет (-loop - по порядку)",

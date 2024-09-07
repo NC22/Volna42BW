@@ -523,7 +523,6 @@ void WebServerBase::apiUpdateConfig() {
 void WebServerBase::showDefaultPage() {
     
     String currentCfg = env->getConfig()->getOptionsJSON();
-           
     server->setContentLength(currentCfg.length() + webdataSize_client_html + webdataSize_client_end_html + webdataSize_init_js);
 
     if (ramFriendlyMode) {
@@ -532,12 +531,15 @@ void WebServerBase::showDefaultPage() {
             
             server->send(200, "text/html", "");
             
-            outputROMData(webdata_client_html, webdataSize_client_html);
+            // outputROMData(webdata_client_html, webdataSize_client_html);
             
+            server->sendContent(FPSTR(webdata_client_html));
             server->sendContent(currentCfg);
             
-            outputROMData(webdata_init_js, webdataSize_init_js);
-            outputROMData(webdata_client_end_html, webdataSize_client_end_html);
+            server->sendContent(FPSTR(webdata_init_js));
+            server->sendContent(FPSTR(webdata_client_end_html));
+            // outputROMData(webdata_init_js, webdataSize_init_js);
+            // outputROMData(webdata_client_end_html, webdataSize_client_end_html);
             
             server->sendContent("");
 

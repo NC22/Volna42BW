@@ -58,9 +58,7 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
     humMarginX = tempMarginX;
     humMarginY = 70;
   }
-
-  String title = FPSTR(indoor ? locIndoor : locOutdoor); // todo - optionaly custom string by config possible
-
+  
   if (temperature <= -1000) {
 
     screen->drawString(tempMarginX, theight - 20, FPSTR(locUnavailable), false);
@@ -78,8 +76,9 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
 
   // titles
   screen->setFont(&font18x18Config);
-  int textMarginX = screen->drawString(tempMarginX, theight - 20, title, false);
-  if (!indoor) {    
+  int textMarginX = screen->drawString(tempMarginX, theight - 20, env->getFormattedSensorTitle(indoor), false);
+
+  if (!indoor && (textMarginX - tempMarginX <= 89)) {    
     widgetController->drawBatWidget(textMarginX + 2, theight - 28, true, true, true);
   }
 
@@ -88,7 +87,7 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
     if (indoor) {
       showPressure = DUI_PRESSURE_HOME;
     } else {
-      showPressure = DUI_PRESSURE_OUTDOOR;
+      showPressure = DUI_PRESSURE_EXTERNAL;
     }
   } 
 

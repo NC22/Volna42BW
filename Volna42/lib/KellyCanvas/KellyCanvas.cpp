@@ -424,6 +424,9 @@ int KellyCanvas::drawString(int screenX, int screenY, String text, bool fontColo
     return drawStringUtext(screenX, screenY, utext, fontColor);
 }
 
+/*
+    Draw text to screen canvas and return end position from screenX
+*/
 int KellyCanvas::drawStringUtext(int screenX, int screenY, uText & utext, bool fontColor, std::vector<int> * xPositions) {
  
     if (utext.pixelWidth <= 0) return 0;

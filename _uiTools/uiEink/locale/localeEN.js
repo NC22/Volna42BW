@@ -11,6 +11,8 @@ var ENVLOCALE = {
     "cfg_toFahrenheit" : "Temperature units (0 - Celsius, 1 - Fahrenheit)",
     "cfg_timeFormat12" : "12-hours format (0-1)",
     "cfg_updateMinutes" : "Update minutes (0-1)",
+    "cfg_titleIndoor" : "Indoor title",
+    "cfg_titleExternal" : "Outdoor title",
     "cfg_timestamp" : "Date & Time",
     "cfg_tempOffset" : "Temperature offset (from -10℃ to 10℃)",
     "cfg_ntpHosts" : "NTP Server (off - for disable)",

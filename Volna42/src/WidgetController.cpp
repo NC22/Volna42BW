@@ -472,7 +472,7 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
 
                     if (!min) {
 
-                      screen->drawString(baseX, baseY, extSens ? FPSTR(locOutdoor) : FPSTR(locIndoor), true);                
+                      screen->drawString(baseX, baseY, env->getFormattedSensorTitle(!extSens), true);                
                       screen->setFont(&font44x44Config);
                       sprintf(buffer, "%.1f", t);
                       baseX = screen->drawString(baseX, baseY + 20, buffer, true);  

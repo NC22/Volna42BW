@@ -44,6 +44,9 @@ enum cfgOptionKeys {
     cTimeFormat12,
     cUpdateMinutes,
 
+    cTitleIndoor,
+    cTitleExternal,
+
     cNull,
 };
 

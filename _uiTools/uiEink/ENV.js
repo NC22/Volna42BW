@@ -37,6 +37,8 @@ var ENVDATA = {
           "syncEvery" : {"filter" : "string"}, 
           "timeFormat12" : {"filter" : "string"},
 		  "toFahrenheit" : {"filter" : "string"},
+		  "titleIndoor" : {"filter" : "string"},
+		  "titleExternal" : {"filter" : "string"},
 		  
       "_/general" : null,  
 

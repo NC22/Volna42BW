@@ -297,6 +297,8 @@ class Env {
         // externalSensorData readExternalData();
         
         String getFormattedExtSensorLastSyncTime(bool full = false);
+        String getFormattedSensorTitle(bool indoor);
+         
         clockFormatted & getFormattedTime();
         // telemetry & getLatestTelemetry();
         rtcData & getCurrentState();
