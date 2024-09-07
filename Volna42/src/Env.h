@@ -268,7 +268,7 @@ class Env {
 
         void updateTelemetry();
         void updateScreen();
-        bool updateExtSensorData();
+        bool updateExtSensorData(unsigned int attempt = 1);
         void initDefaultTime();
         void resetTimers(bool minuteTimerOnly = false);
         void resetPartialData();

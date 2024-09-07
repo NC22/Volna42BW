@@ -92,7 +92,10 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
   } 
 
   if (showPressure) {
+
+    if (!land) humMarginX -= 10;
     screen->drawString(humMarginX, theight - 20 + humMarginY, widgetController->getPressureFormattedString(pressure, PRESSURE_HPA), false);
+
   } else {
     if (humidity > -1000) {
       screen->drawString(humMarginX, theight - 20 + humMarginY, FPSTR(locHumidity), false);

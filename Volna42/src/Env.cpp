@@ -925,7 +925,7 @@ void Env::updateExtIconState() {
   reciew data from remote sensor if configured
 */
 
-bool Env::updateExtSensorData() {
+bool Env::updateExtSensorData(unsigned int attempt) {
 
     String &url = getConfig()->cfgValues[cExtSensorLink]; 
     String &login = getConfig()->cfgValues[cExtSensorLogin]; 
@@ -987,8 +987,13 @@ bool Env::updateExtSensorData() {
     newData.pressure = -1000;
     newData.t = time(nullptr);
 
-    http.setTimeout(5000);
-    client.setTimeout(5000); // double check for esp32 - can be in seconds, not milisec
+    #if defined(ESP32)
+        http.setTimeout(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
+        client.setTimeout(EXTERNAL_SENSOR_CONNECT_TIMEOUT / 1000);
+    #else 
+        http.setTimeout(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
+        client.setTimeout(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
+    #endif
 
     http.begin(client, url);
 
@@ -1013,6 +1018,15 @@ bool Env::updateExtSensorData() {
 
     int httpResponseCode = http.GET();
     String payload = http.getString(); 
+
+    if (httpResponseCode < 0) {
+      Serial.println(F("Fail to connect ext sensor..."));
+      if (attempt < EXTERNAL_SENSOR_CONNECT_ATTEMPTS) {
+        delay(100);
+        Serial.println(F("Retry to connect ext sensor..."));
+        return updateExtSensorData(attempt + 1);
+      }
+    }
 
     if (httpResponseCode > 0) {
         String collectedData;

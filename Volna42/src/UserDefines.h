@@ -14,6 +14,8 @@
 
 #define PRESSURE_HPA false   // pressure in hPa (default - mmHg - мм.рт.ст)
 // #define SAFE_MODE // игнорировать настройки сохраненные в EEPROM при запуске - на случай если по каким-то причинам конфиг вызывает зависания при запуске или иные проблемы
+#define EXTERNAL_SENSOR_CONNECT_ATTEMPTS 3 // Reconnect attempts on HTTP GET external data fail (HA & Domoticz)
+#define EXTERNAL_SENSOR_CONNECT_TIMEOUT 5000 // Connection timeout in milliseconds (HA & Domoticz)
 
 // [Language] - заголовки "улица" \ "дом" вынесен в настройки веб-интерфейса в раздел "Общие настройки"
 
@@ -113,24 +115,24 @@
 		// [https://42volna.com/scheme/] Основная распиновка, с освобождением ножки CS
 	
 
+	/*	
 		#define EPD_BUSY_PIN 12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_RST_PIN  15  // D8 - GPIO - 15 (CS)
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0
 		#define EPD_CS_PIN   -1  // GND (-1)    
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-	
+	*/
 		// [Optional, my old setup] | НЕ Основная
 		// моя старая алт. распиновка, через резистор
 		
-	/*	
 		#define EPD_BUSY_PIN 2   // D4 - GPIO - 2 (+20кОм резистор на VCC)
 		#define EPD_RST_PIN  12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0
 		#define EPD_CS_PIN   15  // D8 - GPIO - 15 (CS) или опционально GND (-1)
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-	*/	
+		
 		
 	#endif
 
