@@ -1,8 +1,9 @@
 #include "KellyOpenWeather.h"
 
-KellyOpenWeather::KellyOpenWeather(String nurl) {
+KellyOpenWeather::KellyOpenWeather(String nurl, int timeout) {
 
     url = nurl;
+    connectionTimeout = timeout;
     // parser = new JsonStreamingParser();
     // KellyOWParserListener parseListener = KellyOWParserListener();
 
@@ -15,7 +16,17 @@ void KellyOpenWeather::end() {
   // free resources
 }
 
-bool KellyOpenWeather::loadCurrent() {
+/*
+  Get data from OpenWeather API
+
+  result code : 
+  200 - success
+  -1 - fail to connect to url
+  -2 - fail to parse url
+  1-4 - response parsing errors
+  5 - response "cod" value != 200
+*/
+int KellyOpenWeather::loadCurrent() {
   
   weatherLoaded = false;
   error = "";
@@ -39,8 +50,18 @@ bool KellyOpenWeather::loadCurrent() {
     
     if (https) {
       clientSecure = new WiFiClientSecure;
+      #if defined(ESP32)
+        clientSecure->setTimeout(connectionTimeout / 1000);
+      #else 
+        clientSecure->setTimeout(connectionTimeout);
+      #endif
     } else {
-      client = new WiFiClient;
+      client = new WiFiClient;   
+      #if defined(ESP32)
+        client->setTimeout(connectionTimeout / 1000);
+      #else 
+        client->setTimeout(connectionTimeout);
+      #endif
     }
 
     bool connected = false;
@@ -71,7 +92,7 @@ bool KellyOpenWeather::loadCurrent() {
           break;
         }
       }
-
+      
       tmp = "";
       while ((https ? clientSecure : client)->available()) {
         tmp += (https ? clientSecure : client)->readStringUntil('\n');
@@ -86,7 +107,7 @@ bool KellyOpenWeather::loadCurrent() {
           if (collectedData != "200") {
               KellyOWParserTools::collectJSONFieldData("message", tmp, collectedData);
               error = collectedData;
-              return false;
+              return 5;
           } 
 
           weatherType = kowUnknown;
@@ -112,23 +133,23 @@ bool KellyOpenWeather::loadCurrent() {
 
                   if (temp <= -1000) {                    
                       error = "Parse Temp fail";
-                      return false;
+                      return 4;
                   } else {
                       weatherLoaded = true;
                   }
 
               } else {
                 error = "Temp read fail";
-                return false;
+                return 3;
               }
           } else {
               error = "Main block not found";
-              return false;
+              return 2;
           }
 
       } else {
-        error = "Response not contain result code number";
-        return false;
+        error = "Response not contain code number";
+        return 1;
       }
 
       if (https) {
@@ -143,16 +164,16 @@ bool KellyOpenWeather::loadCurrent() {
         }
       }
 
-      return true;
+      return 200;
       
     } else {
       Serial.println(F("Connection failed!"));
-      return false;
+      return -1;
     }
     
   } else {
     Serial.println(F("Failed to parse URL"));
-    return false;
+    return -2;
   }
   
 }

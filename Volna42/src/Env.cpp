@@ -939,11 +939,11 @@ bool Env::updateExtSensorData(unsigned int attempt) {
 
     if (url.indexOf("openweather") != -1) {
 
-      KellyOpenWeather openWeatherLoader = KellyOpenWeather(url);  
+      KellyOpenWeather openWeatherLoader = KellyOpenWeather(url, EXTERNAL_SENSOR_CONNECT_TIMEOUT);  
       
       Serial.println(F("OpenWeather parser"));
-
-      if (openWeatherLoader.loadCurrent()) {    
+      int resultCode = openWeatherLoader.loadCurrent();
+      if (resultCode == 200) {    
         Serial.println(F("OpenWeather parser - success"));
         // Serial.println(openWeatherLoader.temp);
         // Serial.println(openWeatherLoader.hum);
@@ -963,7 +963,8 @@ bool Env::updateExtSensorData(unsigned int attempt) {
         
       } else {
         
-        Serial.println(F("OpenWeather parser - error"));        
+        Serial.println(F("OpenWeather parser - error"));       
+        Serial.println(resultCode);   
 
         // lastState.extData.isDataValid = false;
 
@@ -971,7 +972,17 @@ bool Env::updateExtSensorData(unsigned int attempt) {
         Serial.println(lastError);
         
         openWeatherLoader.end();
-        return false;
+
+        if (resultCode == -1) {
+
+          Serial.println(F("Fail to connect OpenWeather server - no response or unavailable..."));
+          if (attempt < EXTERNAL_SENSOR_CONNECT_ATTEMPTS) {
+            delay(100);
+            Serial.println(F("Retry to connect OpenWeather..."));
+            return updateExtSensorData(attempt + 1);
+          }
+
+        } else return false;
       }
     
     }

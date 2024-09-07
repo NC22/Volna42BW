@@ -20,6 +20,7 @@ class KellyOpenWeather {
         bool collectJSONFieldDataRaw(int paramStart, int len, String & data, String & storage);
         bool collectJSONFieldData(String fieldName, String & payload, String & storage);
 
+        int connectionTimeout;
         // todo - load weather week plan
         
     public:
@@ -32,9 +33,9 @@ class KellyOpenWeather {
         KellyOWIconType weatherType;
         
         String url;
-        KellyOpenWeather(String url = "");
+        KellyOpenWeather(String url = "", int timeout = 5000);
         KellyOWIconType getMeteoIconState(String icon);
-        bool loadCurrent();
+        int loadCurrent();
         void end();
         
 };
