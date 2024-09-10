@@ -21,6 +21,7 @@ const char locShortSaturday[] PROGMEM = "сб";
 const char locShortSunday[] PROGMEM = "вс";
 
 const char locPressureMM[] PROGMEM = "мм.рт.ст.";
+const char locCO2[] PROGMEM = "ppm";
 const char locPressureHPA[] PROGMEM = "hPa";
 const char locVoltage[] PROGMEM = "V";
 

@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 enum uiWidgetType { 
+
 	uiClock, 
 	uiInfo, 
 	uiTemp, 
@@ -21,6 +22,11 @@ enum uiWidgetType {
 	uiPressure, 
 	uiDate,
 	uiPressureRemote,
+
+    uiSCD4XCO2,
+    uiSCD4XTemp,
+    uiSCD4XHum,
+
 	uiNone 
 };
 

@@ -413,6 +413,72 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
 
         drawBatWidget(baseX + 20, baseY, false, widget.type == uiBatRemote ? true : false, false); // baseX started from bat icon, not count prefix text
 
+    } else if  (widget.type == uiSCD4XHum || widget.type == uiSCD4XTemp || widget.type == uiSCD4XCO2) {
+
+      #if defined(CO2_SCD41)  
+      widgetWidth = 152;
+      widgetHeight = 54;
+      if (min) {
+        widgetHeight = 20;
+      }
+
+      if (fill) {
+          screen->drawRoundedSquare(baseX-2, baseY-2, widgetWidth+2, widgetHeight+2, 4, false, 0);
+      }
+
+      if (!env->updateSCD4X()) {
+
+        screen->drawString(baseX, baseY, "no data (SCD4X)", true);
+      } else {
+
+            char buffer[128];
+            if (widget.type == uiSCD4XTemp) {
+                    
+                if (!min) {
+               
+                  screen->setFont(&font44x44Config);
+                  sprintf(buffer, "%.1f", !env->celsius ? env->toFahrenheit(env->scd4XTemp) : env->scd4XTemp);
+                  baseX = screen->drawString(baseX, baseY + 20, buffer, true);  
+
+                  if (env->celsius) {
+                    screen->drawImage(10 + baseX, baseY + 20 + 4, &cels_39x43bw_settings, true); // Celsius glyph symbol    
+                  } else {
+                    screen->drawImage(6 + baseX, baseY + 20 + 4, &fahr_39x43bw_settings, true); // Fahrenheit glyph symbol    
+                  }
+
+                } else {
+
+                  if (env->celsius) sprintf(buffer, "%.1fC",  env->toFahrenheit(env->scd4XTemp));
+                  else sprintf(buffer, "%.1fF", env->scd4XTemp);
+                  
+                  screen->drawString(baseX, baseY, buffer, true);
+                }
+
+
+            } else if (widget.type == uiSCD4XHum)  {
+              
+                  if (!min) {
+                     screen->setFont(&font44x44Config);
+                  }
+                  
+                  sprintf(buffer, "%.1f%%", env->scd4XHumidity);  
+                  screen->drawString(baseX, baseY, buffer, true);
+
+            } else if (widget.type == uiSCD4XCO2)  {
+              
+                  if (!min) {
+                     screen->setFont(&font44x44Config);
+                  }
+                  
+                  String result = String(env->scd4XCO2);
+                  result += " ";
+                  result += FPSTR(locCO2);
+
+                  screen->drawString(baseX, baseY, result, true);
+            }
+      }
+      #endif
+      
     } else if  (widget.type == uiTemp || widget.type == uiTempRemote || widget.type == uiHumRemote || widget.type == uiHum) {
         
         widgetWidth = 152;

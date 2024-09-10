@@ -52,6 +52,7 @@ extern const char locShortSunday[] PROGMEM;
 
 extern const char locPressureMM[] PROGMEM;
 extern const char locPressureHPA[] PROGMEM;
+extern const char locCO2[] PROGMEM;
 extern const char locVoltage[] PROGMEM;
 
 extern const char locMonth1January[] PROGMEM;

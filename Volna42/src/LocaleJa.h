@@ -22,6 +22,7 @@ const char locShortSunday[] PROGMEM = "日";
 
 const char locPressureMM[] PROGMEM = "mmHg";
 const char locPressureHPA[] PROGMEM = "hPa";
+const char locCO2[] PROGMEM = "ppm";
 const char locVoltage[] PROGMEM = "V";
 
 const char locMonth1January[] PROGMEM = "1月";

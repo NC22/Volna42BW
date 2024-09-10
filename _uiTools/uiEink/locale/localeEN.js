@@ -126,7 +126,11 @@ var ENVLOCALE = {
     "widget_uiTempRemote": "[External] Temperature",
     "widget_uiPressureRemote": "[External] Pressure",
     "widget_uiHumRemote": "[External] Humidity",
-
+    
+    "widget_uiSCD4XCO2" : "[CO2 Sensor] CO2",
+    "widget_uiSCD4XTemp": "[CO2 Sensor] Temperature",
+    "widget_uiSCD4XHum" : "[CO2 Sensor] Humidity",
+    
     "widget_uiInfoIP": "IP address info (in constant mode)",
     "widget_uiInfoVoltage": "Battery voltage",
     "widget_uiLastSyncRemote": "[External] Last successfull sync date",

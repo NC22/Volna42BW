@@ -124,7 +124,11 @@ var ENVLOCALE = {
     "widget_uiTempRemote" : "[Внешний] Температура",
     "widget_uiPressureRemote": "[Внешний] Давление",
     "widget_uiHumRemote" : "[Внешний] Влажность",
-
+    
+    "widget_uiSCD4XCO2" : "[CO2 Sensor] CO2",
+    "widget_uiSCD4XTemp": "[CO2 Sensor] Температура",
+    "widget_uiSCD4XHum" : "[CO2 Sensor] Влажность",
+    
     "widget_uiInfoIP": "IP адрес (в режиме сервера)",
     "widget_uiInfoVoltage": "Напряжение аккумулятора",
     "widget_uiLastSyncRemote": "[Внешний] Дата последней синхронизации",

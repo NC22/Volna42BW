@@ -28,6 +28,10 @@
 #include <PubSubClient.h>
 
 
+#if defined(CO2_SCD41) 
+#include <SensirionI2CScd4x.h>
+#endif
+
 #include "GyverBME280.h" 
 
 #if defined(BAT_ADS1115)
@@ -213,6 +217,9 @@ class Env {
         
         void keepTelemetry(int key);
 
+        #if defined(CO2_SCD41) 
+        SensirionI2CScd4x scd4x;
+        #endif
         String sanitizeResponse(String var);
         void setDefaultLastStateData();
         bool restoreRTCmem();
@@ -227,6 +234,12 @@ class Env {
     public:
         String timezone = "MSK-3";
         time_t defaultTime = 1510592825;
+
+        #if defined(CO2_SCD41) 
+            uint16_t scd4XCO2;
+            float scd4XTemp;
+            float scd4XHumidity;
+        #endif
 
         bool batteryInit = false;
         bool mqttSuccess = false; // connected & succesfull data send
@@ -264,7 +277,7 @@ class Env {
         void mqttHAAutodetectionInit();
         bool mqttIsHAMode();
 
-        void initSensors();
+        bool initSensors();
 
         void updateTelemetry();
         void updateScreen();
@@ -280,6 +293,8 @@ class Env {
         void tick();
 
         float toFahrenheit(float celsius);
+        
+        bool updateSCD4X();
 
         float readTemperature();
         float readPressure();

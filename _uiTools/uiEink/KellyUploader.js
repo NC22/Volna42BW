@@ -30,6 +30,9 @@ function KellyImgUpl(env) {
         {uuid : 15, id : "uiPressure", width : 100, height : 20, x : 20, y : 160},
         {uuid : 16, id : "uiDate", width : 100, height : 20, x : 20, y : 160},  
         {uuid : 17, id : "uiPressureRemote", width : 100, height : 20, x : 20, y : 160},      
+        {uuid : 18, id : "uiSCD4XCO2", width : 100, height : 20, x : 20, y : 160},
+        {uuid : 19, id : "uiSCD4XTemp", width : 100, height : 20, x : 20, y : 160},  
+        {uuid : 20, id : "uiSCD4XHum", width : 100, height : 20, x : 20, y : 160},  
     ];
     
     var widgetsOrder  = [
@@ -51,6 +54,9 @@ function KellyImgUpl(env) {
         'uiPressure',
         'uiDate',
         'uiPressureRemote',
+        'uiSCD4XCO2',
+        'uiSCD4XTemp',
+        'uiSCD4XHum',
         // 'uiInfoMessage', // custom sign - text parametrs editing not implemented now
     ];
     

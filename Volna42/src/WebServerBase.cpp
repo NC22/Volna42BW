@@ -525,6 +525,8 @@ void WebServerBase::showDefaultPage() {
     String currentCfg = env->getConfig()->getOptionsJSON();
     server->setContentLength(currentCfg.length() + webdataSize_client_html + webdataSize_client_end_html + webdataSize_init_js);
 
+    // todo - not reconstruct string if possible - this use RAM, server->send can use PROGMEM pointers -> see getToolsSelectJS for ex.
+        
     if (ramFriendlyMode) {
 
         // server->send(200, "text/html; charset=utf-8", FPSTR(webdata_client_html) + scripts ); -- join strings - unsafe
@@ -544,7 +546,7 @@ void WebServerBase::showDefaultPage() {
             server->sendContent("");
 
     } else {
-        
+
         String response = "";
                response += FPSTR(webdata_client_html);
                response += currentCfg;

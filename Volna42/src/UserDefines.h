@@ -17,6 +17,9 @@
 #define EXTERNAL_SENSOR_CONNECT_ATTEMPTS 3 // Reconnect attempts on HTTP GET external data fail | Кол-во попыток подключения (HA & Domoticz & Openweather)
 #define EXTERNAL_SENSOR_CONNECT_TIMEOUT 5000 // Connection timeout in milliseconds | Максимальное время ожидания ответа сервера (HA & Domoticz & Openweather) 
 
+// Поддержка датчика CO2 - SCD41 или аналогов. (Вывод данных через виджеты в кастомном интерфейсе и веб-панели)
+// #define CO2_SCD41  // если используется, расскоментить библиотеку в platformio.ini
+
 // [Language] - заголовки "улица" \ "дом" вынесен в настройки веб-интерфейса в раздел "Общие настройки"
 
 #define LOCALE_RU  // Русский

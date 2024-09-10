@@ -1161,6 +1161,37 @@ void Env::updateTelemetry()  {
     Serial.println(lastState.lastTelemetry[key].bat);
 }
 
+bool Env::updateSCD4X() {
+  #if !defined(CO2_SCD41) 
+      return false;
+  #else
+
+    uint16_t error; 
+    char errorMessage[256];
+    error = scd4x.readMeasurement(scd4XCO2, scd4XTemp, scd4XHumidity);
+    if (error) {
+        Serial.print("Error trying to execute readMeasurement(): ");
+        errorToString(error, errorMessage, 256);
+        Serial.println(errorMessage);
+        return 0;
+    } else if (scd4XCO2 == 0) {
+        Serial.println("Invalid sample detected, skipping.");
+        return 0;
+    } else {
+        Serial.print("Co2:");
+        Serial.print(scd4XCO2);
+        Serial.print("\t");
+        Serial.print("Temperature:");
+        Serial.print(scd4XTemp);
+        Serial.print("\t");
+        Serial.print("Humidity:");
+        Serial.println(scd4XHumidity);
+
+        return true;
+    }
+  #endif
+}
+
 float Env::readTemperature()  {
     
     if (tsensor) {
@@ -1380,7 +1411,7 @@ float Env::getBatteryLvlfromV(float v) {
     return (float) ((v - min) / percent);
 }
 
-void Env::initSensors() {
+bool Env::initSensors() {
 
     Wire.begin(DEFAULT_I2C_SDA, DEFAULT_I2C_SCL); 
     bool error = false;
@@ -1405,9 +1436,61 @@ void Env::initSensors() {
 
     #endif
 
+    #if defined(CO2_SCD41) 
+
+      uint16_t terror;
+      char errorMessage[256];
+
+      scd4x.begin(Wire);
+
+      // stop potentially previously started measurement
+      terror = scd4x.stopPeriodicMeasurement();
+      if (terror) {
+          Serial.print("Error trying to execute stopPeriodicMeasurement(): ");
+          errorToString(terror, errorMessage, 256);
+          Serial.println(errorMessage);
+      }
+
+      uint16_t serial0;
+      uint16_t serial1;
+      uint16_t serial2;
+      terror = scd4x.getSerialNumber(serial0, serial1, serial2);
+      if (terror) {
+          Serial.print("Error trying to execute getSerialNumber(): ");
+          errorToString(terror, errorMessage, 256);
+          Serial.println(errorMessage);
+      } else {
+          Serial.print("Serial: 0x");
+          Serial.print(serial0 < 4096 ? "0" : "");
+          Serial.print(serial0 < 256 ? "0" : "");
+          Serial.print(serial0 < 16 ? "0" : "");
+          Serial.print(serial0, HEX);
+          Serial.print(serial1 < 4096 ? "0" : "");
+          Serial.print(serial1 < 256 ? "0" : "");
+          Serial.print(serial1 < 16 ? "0" : "");
+          Serial.print(serial1, HEX);
+          Serial.print(serial2 < 4096 ? "0" : "");
+          Serial.print(serial2 < 256 ? "0" : "");
+          Serial.print(serial2 < 16 ? "0" : "");
+          Serial.print(serial2, HEX);
+          Serial.println();
+      }
+
+      // Start Measurement
+      terror = scd4x.startPeriodicMeasurement();
+      if (terror) {
+          Serial.print("Error trying to execute startPeriodicMeasurement(): ");
+          errorToString(terror, errorMessage, 256);
+          Serial.println(errorMessage);
+      }
+
+    #endif
+
     if (!error) {
         Serial.println("Sensors [OK]");
     }
+
+    return error;
 }
 
 clockFormatted & Env::getFormattedTime() {

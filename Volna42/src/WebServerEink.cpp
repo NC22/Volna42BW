@@ -899,6 +899,15 @@ String WebServerEink::getInfo() {
                 }
             }
 
+            #if defined(CO2_SCD41)
+            if (env->updateSCD4X()) {
+
+                json += "\"temperature__scd4x\":" + String(env->scd4XTemp) + ",";
+                json += "\"humidity__scd4x\":" + String(env->scd4XHumidity) + ",";
+                json += "\"co2__scd4x\":" + String(env->scd4XCO2) + ",";
+            }
+            #endif
+
             json += "\"battery_sensor_v\":" + String(batTest) + ",";
             json += "\"battery_sensor_percent\":" + String((int) round(env->getBatteryLvlfromV(batTest))) + ",";
             json += "\"battery\":"; 
