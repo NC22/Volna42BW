@@ -63,7 +63,7 @@
 
   // ESP8266
 
-  	#define EPD_RST_PIN   -1 // D4 - GPIO - 2 ли -1 если у дисплея нет такого вывода
+  	#define EPD_RST_PIN   -1 // D4 - GPIO - 2 или -1 если у дисплея нет такого вывода
   	#define EPD_DC_PIN    0  // D3 - GPIO - 0
   	#define EPD_CS_PIN    15 // D8 - GPIO - 15 (CS) или опционально GND (-1)
   	#define EPD_BUSY_PIN  12 // D6 - GPIO - 12 (MISO)
