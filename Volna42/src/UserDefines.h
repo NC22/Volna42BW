@@ -54,7 +54,7 @@
 */
 	#define PARTIAL_UPDATE_INTERVAL 120        
 	#define PARTIAL_UPDATE_SUPPORT  
-	#define COLORMODE_2BIT_SUPPORT
+	#define COLORMODE_2BIT_SUPPORT  // Allow change image mode (1bit - 2-colors \ 2-bit 4-colors) from web panel if display supports 2-bit output 
 
   // [Deprecated, Dont use] Не используется - сейчас везде порядок вывода пикселей инициализируется командами на уровне контроллера
   // #define WEB_BUFFER_MOD_FLIPX  // для кастомных картинок экрана - приведение к единому начальному положению интерфейса и чистого буфера, для тестов ENVDATA.screen.bufferMod = "flipx";
@@ -63,7 +63,7 @@
 
   // ESP8266
 
-  	#define EPD_RST_PIN   -1 // unused (no RST pin in Heltec 1.5, display can stuck in sleep mode because of that, so we not use it in driver)
+  	#define EPD_RST_PIN   -1 // D4 - GPIO - 2 ли -1 если у дисплея нет такого вывода
   	#define EPD_DC_PIN    0  // D3 - GPIO - 0
   	#define EPD_CS_PIN    15 // D8 - GPIO - 15 (CS) или опционально GND (-1)
   	#define EPD_BUSY_PIN  12 // D6 - GPIO - 12 (MISO)
@@ -124,10 +124,9 @@
 		#define EPD_CS_PIN   -1  // GND (-1)    
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-	
+		
 		// [Optional, my old setup] | НЕ Основная
 		// моя старая алт. распиновка, через резистор
-	
 	/*	
 		#define EPD_BUSY_PIN 2   // D4 - GPIO - 2 (+20кОм резистор на VCC)
 		#define EPD_RST_PIN  12  // D6 - GPIO - 12 (MISO) 
@@ -135,7 +134,7 @@
 		#define EPD_CS_PIN   15  // D8 - GPIO - 15 (CS) или опционально GND (-1)
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-	*/	
+	*/
 		
 	#endif
 
