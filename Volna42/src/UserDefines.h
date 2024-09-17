@@ -2,20 +2,31 @@
 #define CfgDefines_h
 
 #if defined(ESP32)
+
 #define DEFAULT_I2C_SCL 41 // I2C SCL [ESP32] Can be assigned any unused pin
 #define DEFAULT_I2C_SDA 42 // I2C SDA [ESP32] Can be assigned any unused pin
+
 #else
+
 #define DEFAULT_I2C_SCL 5 // I2C SCL [ESP8266] dont edit, no variations
 #define DEFAULT_I2C_SDA 4 // I2C SDA [ESP8266] dont edit, no variations
+
+// Workaround wakeup from deepsleep issue - https://github.com/esp8266/Arduino/issues/6318
+// Решение для исправления проблемы дешевых клонов плат ESP8266 D1 Mini с зависанием при выходе из сна 
+#define FIX_DEEPSLEEP   0 // 0 - OFF, 1 - первый метод - непроверен \ first method - untested, 2 - второй, проверен в долгих тестах \ second, tested in long tests
+
 #endif
 
-#define CUI_MAX_WIDGETS 20				   // Максимально возможное кол-во выводимых виджетов для кастомного интерфейса
-#define CUI_LOOP_INTERVAL 14400            // Интервал смены оформления в режиме -loop - смена кастомных оформлений по порядку из того что загружено раз в 4 часа (тестовый функционал) 
+#define CUI_MAX_WIDGETS 20                   // Максимально возможное кол-во выводимых виджетов для кастомного интерфейса
+#define CUI_LOOP_INTERVAL 14400              // Интервал смены оформления в режиме -loop - смена кастомных оформлений по порядку из того что загружено раз в 4 часа (тестовый функционал) 
 
-#define PRESSURE_HPA false   // pressure in hPa (default - mmHg - мм.рт.ст)
-// #define SAFE_MODE // игнорировать настройки сохраненные в EEPROM при запуске - на случай если по каким-то причинам конфиг вызывает зависания при запуске или иные проблемы
-#define EXTERNAL_SENSOR_CONNECT_ATTEMPTS 3 // Reconnect attempts on HTTP GET external data fail | Кол-во попыток подключения (HA & Domoticz & Openweather)
+#define PRESSURE_HPA false                   // pressure in hPa (default - mmHg - мм.рт.ст)
+#define SAFE_MODE false                      // [DEBUG] игнорировать настройки сохраненные в EEPROM при запуске - на случай если по каким-то причинам конфиг вызывает зависания при запуске или иные проблемы
+
+#define EXTERNAL_SENSOR_CONNECT_ATTEMPTS 3   // Reconnect attempts on HTTP GET external data fail | Кол-во попыток подключения (HA & Domoticz & Openweather)
 #define EXTERNAL_SENSOR_CONNECT_TIMEOUT 5000 // Connection timeout in milliseconds | Максимальное время ожидания ответа сервера (HA & Domoticz & Openweather) 
+
+#define PARTIAL_UPDATE_INTERVAL 120          // Интервал частичного обновления экрана (если поддерживается) В секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
 
 // Поддержка датчика CO2 - SCD41 или аналогов. (Вывод данных через виджеты в кастомном интерфейсе и веб-панели)
 // #define CO2_SCD41  // если используется, расскоментить библиотеку в platformio.ini
@@ -29,9 +40,9 @@
 
 // [Display types] | [Типы дисплеев]
 
-// #define WAVESHARE_BW_42_UC8176          // Waveshare 4.2inch, REV 2.1 [B&W]
-#define WAVESHARE_BW_42_SSD1683            // Waveshare 4.2inch, REV 2.2 | WeAct 4.2inch [B&W, 4-colors grayscale displays]
-// #define WAVESHARE_RY_BW_42_UC8176       // Waveshare 4.2inch, REV 2.1 [B&W + Red or B&W + Yellow, 3-colors (separate buffers)]
+// #define WAVESHARE_BW_42_UC8176       // Waveshare 4.2inch, REV 2.1 [B&W]
+#define WAVESHARE_BW_42_SSD1683      // Waveshare 4.2inch, REV 2.2 | WeAct 4.2inch [B&W, 4-colors grayscale displays]
+// #define WAVESHARE_RY_BW_42_UC8176    // Waveshare 4.2inch, REV 2.1 [B&W + Red or B&W + Yellow, 3-colors (separate buffers)]
 // #define HELTEC_BW_15_S810F              // Heltec 1.54inch 200x200 [B&W]
 
 // [Battery sensor mode] | [Режим чтения показаний заряда батареи]
@@ -45,14 +56,14 @@
 // Если установлен SLEEP_SWITCH_PIN, переход в режим сна осуществляется только если SLEEP_SWITCH_PIN в состоянии digitalRead = LOW
 
 // #define SLEEP_SWITCH_PIN -1    // [ESP32] [ESP8266 - not enough pins, if 4.2' display used]
-// #define SLEEP_ALWAYS_ON        // Ignore sleep mode. Even if work from battery | Игнорировать режим сна. Не засыпать, даже если работаем от батареи. 
+// #define SLEEP_ALWAYS_IGNORE    // [DEBUG OPTION] Ignore sleep mode. Even if work from battery | Игнорировать режим сна. Не засыпать, даже если работаем от батареи. 
+// #define SLEEP_ALWAYS_SLEEP        // [DEBUG OPTION] Always go to sleep mode | Всегда уходить в режим сна 
 
 #if defined(HELTEC_BW_15_S810F)
 /*
-	[Дисплей 1.5'] Тестовый сетап
+	WeAct, Heltec 1.54' and compatible displays
     /api/clocktest - демо отображение полноэкранных часов с секундами
 */
-	#define PARTIAL_UPDATE_INTERVAL 120        
 	#define PARTIAL_UPDATE_SUPPORT  
 	#define COLORMODE_2BIT_SUPPORT  // Allow change image mode (1bit - 2-colors \ 2-bit 4-colors) from web panel if display supports 2-bit output 
 
@@ -67,9 +78,9 @@
   	#define EPD_DC_PIN    0  // D3 - GPIO - 0
   	#define EPD_CS_PIN    15 // D8 - GPIO - 15 (CS) или опционально GND (-1)
   	#define EPD_BUSY_PIN  12 // D6 - GPIO - 12 (MISO)
-	#define EPD_CLK_PIN   -1 // Всегда GPIO 13 (MOSI) - SPI
-	#define EPD_DIN_PIN   -1 // Всегда GPIO 14 (SCLK) - SPI  
-
+	#define EPD_CLK_PIN   -1 // Всегда GPIO 14 (SCLK) - SPI  
+	#define EPD_DIN_PIN   -1 // Всегда GPIO 13 (MOSI) - SPI
+	
 
 #elif defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683)
 
@@ -92,7 +103,6 @@
 
 	// USE /api/partialtest link to test if partial update works on your display without issues, and comment defines if its not, to prevent unexpected behavior
 
-	#define PARTIAL_UPDATE_INTERVAL 120          // Интервал частичного обновления экрана в секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
 	#define PARTIAL_UPDATE_SUPPORT               // Partial update is configurable in web UI and disabled by default. Used for update clock widget each minute
 	// #define RESET_MINUTE_TIMER_ON_WEB_REQUEST // Display updates could stuck web UI during screen refresh, so this can be usefull if you enter web interface frequently,
 	#define COLORMODE_2BIT_SUPPORT               // Allow change image mode (1bit - 2-colors \ 2-bit 4-colors) from web panel if display supports 2-bit output 
@@ -117,24 +127,24 @@
 	
 		// [https://42volna.com/scheme/] Основная распиновка, с освобождением ножки CS
 	
-	
+	/*
 		#define EPD_BUSY_PIN 12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_RST_PIN  15  // D8 - GPIO - 15 (CS)
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0
 		#define EPD_CS_PIN   -1  // GND (-1)    
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-		
+	*/	
 		// [Optional, my old setup] | НЕ Основная
 		// моя старая алт. распиновка, через резистор
-	/*	
+		
 		#define EPD_BUSY_PIN 2   // D4 - GPIO - 2 (+20кОм резистор на VCC)
 		#define EPD_RST_PIN  12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0
 		#define EPD_CS_PIN   15  // D8 - GPIO - 15 (CS) или опционально GND (-1)
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-	*/
+	
 		
 	#endif
 

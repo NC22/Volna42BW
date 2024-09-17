@@ -22,6 +22,9 @@
     #include <ESP8266HTTPClient.h>
     #include "sntp.h"
     // #include <TZ.h>
+    #if FIX_DEEPSLEEP > 0
+        #include "esp8266/deepsleepFix.h"
+    #endif
 #endif
 
 #include <WiFiClient.h>
@@ -164,7 +167,7 @@ typedef struct {
     bool cuiLoop;                  // todo - exclude from loop [default] cui ?
     bool cuiResetOnReboot;         // needed when we reboot from web ui, but not when move cui loop cursor and need to reboot for realloc memory by switch form 1-bit to 2-bit mode       
 
-    telemetry lastTelemetry[10];   
+    telemetry lastTelemetry[5];   
     externalSensorData extData; 
 
     bool updateMinutes;
@@ -190,7 +193,7 @@ class Env {
         
         unsigned long secondTimerStart;
 
-        int telemetryBufferMax = 10;
+        int telemetryBufferMax = 5;
         
         int minuteTimer;
 
@@ -205,6 +208,7 @@ class Env {
         bool asensor = false;
         bool ntp = false;
         bool partialUpdateRequired = false;
+        uint8_t RTCMemInit = 0;
         
         bool cuiEnabled;
         bool cuiFSinited = false;
@@ -236,9 +240,10 @@ class Env {
         time_t defaultTime = 1510592825;
 
         #if defined(CO2_SCD41) 
-            uint16_t scd4XCO2;
-            float scd4XTemp;
-            float scd4XHumidity;
+            uint16_t scd4XCO2 = 0;
+            float scd4XTemp = -1000;
+            float scd4XHumidity = -1000;
+            unsigned int scd4XerrorTick = 0;
         #endif
 
         bool batteryInit = false;

@@ -36,8 +36,10 @@ void Env::begin() {
   #endif
   cfg.excludeOptions.push_back(cScreenRotate); 
 
-  #if !defined(SAFE_MODE)
+  #if SAFE_MODE == false
     validateConfig(getConfig()->loadEEPROM());
+  #else     
+      Serial.println(F("[CONFIG] IGNORED -> Run in SAFE MODE"));   
   #endif
 
   initSensors();
@@ -46,13 +48,21 @@ void Env::begin() {
       esp_reset_reason_t reason = esp_reset_reason();
   #else
 
-      
      int reason = -1;
      ESP.getResetReason();
      reason = resetInfo.reason;
+    
+    // Фикшеный метод сна выводит модуль из сна с причиной REASON_EXT_SYS_RST что нарушает общую логику. Мы можем перед началом основной логики инициализации
+    // проверять сохранилась ли RTC память и если она корректна, то считать что мы вышли из сна, а не просто только что включили устройство
+
+     if (FIX_DEEPSLEEP > 0 && reason == REASON_EXT_SYS_RST && restoreRTCmem()) {
+        reason = REASON_DEEP_SLEEP_AWAKE;
+        Serial.println(F("[FIX_DEEPSLEEP] WakeUp STATE restored by RTC memory")); 
+     }
 
   #endif
-  
+
+
   // Проснулся после глубокого сна \ клик по кнопке "Reset" (считает как при выходе из сна в штатном режиме - таймер смещается и требуется полный сброс - вкл. выкл. или дождатся цикла синхронизации)
   // todo check wakeup states - при клике на ресет - причина остается та же, 
   // память не сбрасывается до полной потери питания - вполне возможно что так реализован сам микрочип esp8266
@@ -84,6 +94,10 @@ void Env::begin() {
                 lastState.sleepTimeCurrent = lastState.sleepTime;
               }
               
+              Serial.print(F("PARTIAL_UPDATE : ")); 
+              Serial.print(lastState.sleepTimeCurrent); 
+              Serial.print(F(" / ")); Serial.println(lastState.sleepTime);
+
           } else {
                 
             lastState.t += lastState.sleepTime;
@@ -118,6 +132,7 @@ void Env::begin() {
         }
 
         Serial.print(F("[Boot] : WakeUps : ")); Serial.print(lastState.wakeUps);
+        Serial.print(F(" FullScreenUpdate sec : ")); Serial.print(lastState.sleepTimeCurrent);
         Serial.print(F(" | time : ")); Serial.println(lastState.t);
       }
 
@@ -167,7 +182,10 @@ void Env::begin() {
 }
 
 bool Env::restoreRTCmem() {
-  
+
+    if (RTCMemInit > 0) return RTCMemInit == 1 ? true : false;
+    RTCMemInit = 1;
+
 #if defined(ESP32)
 
     if (!readRTCUserMemory(0, (uint32_t*) &lastState, sizeof(lastState))) {
@@ -176,7 +194,12 @@ bool Env::restoreRTCmem() {
     }
     
 #else
-    ESP.rtcUserMemoryRead(0, (uint32_t*) &lastState, sizeof(lastState));
+
+    if (!ESP.rtcUserMemoryRead(0, (uint32_t*) &lastState, sizeof(lastState))) {
+        lastState.cfgVersion = 0;
+        lastState.t = 0;
+    }
+
 #endif
 
     if (lastState.t < 100000 || lastState.cfgVersion != cdConfigVersion) {
@@ -185,6 +208,7 @@ bool Env::restoreRTCmem() {
 
       setDefaultLastStateData();
       applyConfigToRTC();
+      RTCMemInit = 2;
 
       return false;
     } else return true;
@@ -437,22 +461,36 @@ void Env::saveCurrentState()  {
 
 void Env::sleep()  {
     
-    Serial.println("[Deep sleep]");  
     lastState.t = time(nullptr);
     saveCurrentState();
 
-    if (lastState.updateMinutes) {
+    #if defined(ESP8266) && FIX_DEEPSLEEP > 0
 
-      #if defined(PARTIAL_UPDATE_INTERVAL)
+        Serial.print(F("[Deep sleep] FIX_DEEPSLEEP "));  
+
+        if (lastState.updateMinutes) {
+          Serial.println(PARTIAL_UPDATE_INTERVAL); 
+          delay(300); // may be can be removed, just serial output will be broken
+          nkDeepsleep(PARTIAL_UPDATE_INTERVAL * 1000000, FIX_DEEPSLEEP);
+        } else {
+          Serial.println(lastState.sleepTime); 
+          delay(300);
+          nkDeepsleep(lastState.sleepTime * 1000000, FIX_DEEPSLEEP);
+        }
+
+    #else
+
+      Serial.print(F("[Deep sleep] "));  
+
+      if (lastState.updateMinutes) {
+        Serial.println(PARTIAL_UPDATE_INTERVAL); 
         ESP.deepSleep(PARTIAL_UPDATE_INTERVAL * 1000000);
-      #else
-         ESP.deepSleep(60 * 1000000);
-      #endif
-
-    } else {
-      ESP.deepSleep(lastState.sleepTime * 1000000);
-    }
-}
+      } else {
+        Serial.println(lastState.sleepTime); 
+        ESP.deepSleep(lastState.sleepTime * 1000000);
+      }
+    #endif
+  }
 
 void Env::keepTelemetry(int key)  {
         
@@ -462,8 +500,10 @@ void Env::keepTelemetry(int key)  {
 }
 
 bool Env::isSleepRequired() {
-    
-    #if defined(BAT_NO) || defined(SLEEP_ALWAYS_ON)
+        
+    #if defined(SLEEP_ALWAYS_SLEEP)
+      return true;
+    #elif defined(BAT_NO) || defined(SLEEP_ALWAYS_IGNORE)
       return false;
     #endif
 
@@ -1162,8 +1202,11 @@ void Env::updateTelemetry()  {
 }
 
 bool Env::updateSCD4X() {
+
   #if !defined(CO2_SCD41) 
+
       return false;
+
   #else
 
     uint16_t error; 
@@ -1173,10 +1216,12 @@ bool Env::updateSCD4X() {
         Serial.print("Error trying to execute readMeasurement(): ");
         errorToString(error, errorMessage, 256);
         Serial.println(errorMessage);
-        return 0;
+        scd4XerrorTick++;
+        return (scd4XerrorTick <= 3 && scd4XTemp > -1000) ? true : false;
     } else if (scd4XCO2 == 0) {
         Serial.println("Invalid sample detected, skipping.");
-        return 0;
+        scd4XerrorTick++;
+        return (scd4XerrorTick <= 3 && scd4XTemp > -1000) ? true : false;
     } else {
         Serial.print("Co2:");
         Serial.print(scd4XCO2);
@@ -1186,7 +1231,7 @@ bool Env::updateSCD4X() {
         Serial.print("\t");
         Serial.print("Humidity:");
         Serial.println(scd4XHumidity);
-
+        scd4XerrorTick = 0;
         return true;
     }
   #endif
