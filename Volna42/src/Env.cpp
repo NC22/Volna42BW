@@ -36,7 +36,7 @@ void Env::begin() {
   #endif
   cfg.excludeOptions.push_back(cScreenRotate); 
 
-  #if SAFE_MODE == false
+  #if !defined(SAFE_MODE) || SAFE_MODE == false
     validateConfig(getConfig()->loadEEPROM());
   #else     
       Serial.println(F("[CONFIG] IGNORED -> Run in SAFE MODE"));   
@@ -54,11 +54,12 @@ void Env::begin() {
     
     // Фикшеный метод сна выводит модуль из сна с причиной REASON_EXT_SYS_RST что нарушает общую логику. Мы можем перед началом основной логики инициализации
     // проверять сохранилась ли RTC память и если она корректна, то считать что мы вышли из сна, а не просто только что включили устройство
-
+    #if defined(FIX_DEEPSLEEP)
      if (FIX_DEEPSLEEP > 0 && reason == REASON_EXT_SYS_RST && restoreRTCmem()) {
         reason = REASON_DEEP_SLEEP_AWAKE;
         Serial.println(F("[FIX_DEEPSLEEP] WakeUp STATE restored by RTC memory")); 
      }
+    #endif
 
   #endif
 
@@ -464,7 +465,7 @@ void Env::sleep()  {
     lastState.t = time(nullptr);
     saveCurrentState();
 
-    #if defined(ESP8266) && FIX_DEEPSLEEP > 0
+    #if defined(ESP8266) && defined(FIX_DEEPSLEEP) && FIX_DEEPSLEEP > 0
 
         Serial.print(F("[Deep sleep] FIX_DEEPSLEEP "));  
 

@@ -22,7 +22,7 @@
     #include <ESP8266HTTPClient.h>
     #include "sntp.h"
     // #include <TZ.h>
-    #if FIX_DEEPSLEEP > 0
+    #if defined(FIX_DEEPSLEEP) && FIX_DEEPSLEEP > 0
         #include "esp8266/deepsleepFix.h"
     #endif
 #endif
