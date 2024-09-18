@@ -61,22 +61,23 @@ const char longDateFormat[] PROGMEM = "%d.%m.%y";   // Date string format (2-str
     const uint8_t textDateFormat PROGMEM = 1; 
 #endif
 
-const uint8_t cfgCelsius PROGMEM = 1;               // 0-1 | Use Celsius instead of Fahrenheit by default
-const uint8_t cfg12HourFormat PROGMEM = 0;          // 0-1 | Use 12 hour PM / AM clock format by default 
+// [Config defaults] | [Настройки по умолчанию]
 
-// [Настройки по умолчанию]
+const uint8_t cfgCelsius PROGMEM = 1;                  // 0-1 | Use Celsius instead of Fahrenheit by default
+const uint8_t cfg12HourFormat PROGMEM = 0;             // 0-1 | Use 12 hour PM / AM clock format by default 
+const uint8_t cfgUpdateMinutes PROGMEM = 0;            // 0-1 | Update clock widget every minute (actual period is defined in PARTIAL_UPDATE_INTERVAL)
 
 const char cdTimezone[] PROGMEM = "MSK-3";             // timezone - list https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h
 const char cdNtpHosts[] PROGMEM = "pool.ntp.org";      // ntp server - если не используется, задать - off и очистить поле timezone, в таком случае время можно определить вручную через панель управления
 const char cfgWifiSSID[] PROGMEM = "";                 // Default WiFi network name to connect to (you can setup it from web interface by connecting to default AP)
 const char cfgWifiP[] PROGMEM = "";                    // Default Wifi password
 
-const char cfgOTALogin[] PROGMEM = "admin";     // Логин и пароль для входа на страницу загрузки прошивки через веб интерфейс (/update)
+const char cfgOTALogin[] PROGMEM = "admin";            // Логин и пароль для входа на страницу загрузки прошивки через веб интерфейс (/update)
 const char cfgOTAPassword[] PROGMEM = "admin";
 
-const char cfgExtSensor[] PROGMEM = "";         // API ссылка на внешний датчик (Home Assistant или Domoticz) - например типовой формат для Domoticz - http://127.0.0.1:8080/json.htm?type=devices&rid=[ID устройства] и для HA - http://127.0.0.1:8123/api/states/[ID устройства]
-const char cfgExtSensorL[] PROGMEM = "";        // Логин (Domoticz) - требуется в зависимости от настроек Domoticz
-const char cfgExtSensorP[] PROGMEM = "";         // Пароль (Domoticz) или Токен авторизации (Home Assistant)
+const char cfgExtSensor[] PROGMEM = "";                // API ссылка на внешний датчик (Home Assistant или Domoticz) - например типовой формат для Domoticz - http://127.0.0.1:8080/json.htm?type=devices&rid=[ID устройства] и для HA - http://127.0.0.1:8123/api/states/[ID устройства]
+const char cfgExtSensorL[] PROGMEM = "";               // Логин (Domoticz) - требуется в зависимости от настроек Domoticz
+const char cfgExtSensorP[] PROGMEM = "";               // Пароль (Domoticz) или Токен авторизации (Home Assistant)
 
 // [MQTT server]
 const char cfgMqttHost[] PROGMEM = "";

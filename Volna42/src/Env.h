@@ -63,8 +63,9 @@ extern const unsigned int cdConfigVersion PROGMEM;
 extern const uiWidgetDefaults widgetsDefaults[] PROGMEM;
 extern const size_t widgetsDefaultsSize PROGMEM;
 
-extern const uint8_t cfgCelsius PROGMEM;	
-extern const uint8_t cfg12HourFormat PROGMEM;	
+extern const uint8_t cfgCelsius PROGMEM;
+extern const uint8_t cfg12HourFormat PROGMEM;
+extern const uint8_t cfgUpdateMinutes PROGMEM;
 
 extern const uint8_t textDateFormat PROGMEM;	
 extern const char longDateFormat[] PROGMEM;

@@ -2485,16 +2485,15 @@ void Env::applyConfigToRTC() {
     #if defined(PARTIAL_UPDATE_SUPPORT)
 
       if (cfg.cfgValues[cUpdateMinutes].length() > 0) {
-
+        
         lastState.updateMinutes = cfg.getBool(cUpdateMinutes);
 
         if (cfg.sanitizeError) {
-          lastState.updateMinutes = false;
+          lastState.updateMinutes = pgm_read_byte(&cfgUpdateMinutes) > 0;
         }
 
       } else {
-        
-        cfg.cfgValues[cUpdateMinutes] = "0";
+        lastState.updateMinutes = pgm_read_byte(&cfgUpdateMinutes) > 0;
       }
 
     #endif

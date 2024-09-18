@@ -103,7 +103,7 @@
 
 	// USE /api/partialtest link to test if partial update works on your display without issues, and comment defines if its not, to prevent unexpected behavior
 
-	#define PARTIAL_UPDATE_SUPPORT               // Partial update is configurable in web UI and disabled by default. Used for update clock widget each minute
+	#define PARTIAL_UPDATE_SUPPORT               // Partial update is configurable in web UI. Default value - cfgUpdateMinutes in UserSettings.h. Used for update clock widget each minute
 	// #define RESET_MINUTE_TIMER_ON_WEB_REQUEST // Display updates could stuck web UI during screen refresh, so this can be usefull if you enter web interface frequently,
 	#define COLORMODE_2BIT_SUPPORT               // Allow change image mode (1bit - 2-colors \ 2-bit 4-colors) from web panel if display supports 2-bit output 
 
