@@ -162,8 +162,10 @@ typedef struct {
     int connectTimes;              // number of succesfull connections with external sensor
     bool onBattery;                // on battery check - setted once on first setup
 
+    u_int8_t cuiBitsPerPixel;      // last CUI bits per pixel mode
+
     u_int8_t lowBatTick;           // times battery sensor detected low battery state, will show sad hangry cat if count enough
-    int16_t cuiFileIndex;          // temporary file index - if we need to load once on reboot some specified custom user interface without save to permanent memory
+    int16_t cuiFileIndex;          // temporary file index - if we need to load once on reboot some specified custom user interface without save to permanent memory    
     int cuiTimeCurrent;            // cui timer for loop mode (change custom ui every N seconds, use cuiFileIndex as cursor)
     bool cuiLoop;                  // todo - exclude from loop [default] cui ?
     bool cuiResetOnReboot;         // needed when we reboot from web ui, but not when move cui loop cursor and need to reboot for realloc memory by switch form 1-bit to 2-bit mode       

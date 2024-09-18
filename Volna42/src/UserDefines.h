@@ -29,7 +29,7 @@
 #define PARTIAL_UPDATE_INTERVAL 120          // Интервал частичного обновления экрана (если поддерживается) В секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
 
 // Поддержка датчика CO2 - SCD41 или аналогов. (Вывод данных через виджеты в кастомном интерфейсе и веб-панели)
-// #define CO2_SCD41  // если используется, расскоментить библиотеку в platformio.ini
+// #define CO2_SCD41  // если используется, раскомментить библиотеку в platformio.ini ~требует +3-4кб оперативки (может не хватать памяти для некоторых действий в web-ui если используется 2-bit графика на ESP8266)
 
 // [Language] - заголовки "улица" \ "дом" вынесен в настройки веб-интерфейса в раздел "Общие настройки"
 
@@ -57,7 +57,7 @@
 
 // #define SLEEP_SWITCH_PIN -1    // [ESP32] [ESP8266 - not enough pins, if 4.2' display used]
 // #define SLEEP_ALWAYS_IGNORE    // [DEBUG OPTION] Ignore sleep mode. Even if work from battery | Игнорировать режим сна. Не засыпать, даже если работаем от батареи. 
-// #define SLEEP_ALWAYS_SLEEP        // [DEBUG OPTION] Always go to sleep mode | Всегда уходить в режим сна 
+// #define SLEEP_ALWAYS_SLEEP     // [DEBUG OPTION] Always go to sleep mode | Всегда уходить в режим сна 
 
 #if defined(HELTEC_BW_15_S810F)
 /*
@@ -133,7 +133,7 @@
 		#define EPD_CS_PIN   -1  // GND (-1)    
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-	
+
 		// [Optional, my old setup] | НЕ Основная
 		// моя старая алт. распиновка, через резистор
 	
@@ -145,7 +145,7 @@
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
 	*/	
-		
+	
 	#endif
 
 #endif

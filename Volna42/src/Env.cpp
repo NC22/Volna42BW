@@ -2357,6 +2357,8 @@ bool Env::cuiReadStorageFile(bool widgetsOnly) {
 
                   if (bitsPerPixel <= 0 || bitsPerPixel > 2) bitsPerPixel = 1;
 
+                  lastState.cuiBitsPerPixel = bitsPerPixel;
+
                   getCanvas()->setBitsPerPixel(bitsPerPixel);
                   getCanvas()->setRotate(0);
                   getCanvas()->clear();
@@ -2526,7 +2528,10 @@ void Env::applyConfigToRTC(bool configUpdate) {
     const char* loopMarker = PSTR("-loop"); 
     lastState.cuiLoop = false;
     lastState.cuiTimeCurrent = 0;
-    if (!configUpdate) lastState.cuiFileIndex = -1;
+    if (!configUpdate) {
+      lastState.cuiFileIndex = -1;
+      lastState.cuiBitsPerPixel = -1;
+    }
 
     if (cuiIsEnabled() && strcmp_P(cuiName.c_str(), loopMarker) == 0) {
         lastState.cuiLoop = true;

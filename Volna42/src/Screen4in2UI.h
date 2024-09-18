@@ -48,7 +48,7 @@ class Screen4in2UI {
 
         // For partial mode skip draw some of UI parts (temp & hum widget & cat image) during drawUIToBuffer to update only clock widget and possible bottom layer
         bool partial = false; 
-        int returnBitPerPixel = -1;
+        bool renderWidgetsOnly = false; // force render widgets only (used for in case we cant render full image in 2-bit since display not support partial refresh in 2bit mode - we draw clean canvas with only widgets in 1-bit mode)
         
         WidgetController * widgetController;
 

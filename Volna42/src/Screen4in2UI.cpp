@@ -247,9 +247,9 @@ bool Screen4in2UI::drawUIToBufferCustom() {
     */
 
     // We cant partial update 2-bit data, so we skip redraw \ reinit bit mode to redraw background, update and load only widgets
-    if (partial && returnBitPerPixel > 1) {
+    if (renderWidgetsOnly) {
 
-        Serial.println(F("Redraw in partial mode with only widgets"));  
+        Serial.println(F("Redraw with only widgets"));  
         env->canvas->setRotate(0);
         env->canvas->clear();
 
@@ -411,27 +411,27 @@ void Screen4in2UI::drawUIToBuffer() {
 
 void Screen4in2UI::updatePartialClock() {
 	
-    returnBitPerPixel = -1;
-    if (env->canvas->bitPerPixel > 1) {
+    int returnBitPerPixel = -1;
+    renderWidgetsOnly = false;
+
+    // we only wakedUp & CUI was in 2-bit mode
+    if (!env->canvas->bufferBW && env->lastState.cuiBitsPerPixel > 1) {
+
+        renderWidgetsOnly = true;
+        env->canvas->setBitsPerPixel(1); // init buffer, since in widgets only mode buffer initialization is ignored
+
+    // temporary set 1-bit mode & remember original state, since we cant output in 2-bit mode partial data
+    } else if (env->canvas->bitPerPixel > 1) { 
+
         returnBitPerPixel = env->canvas->bitPerPixel;
-        env->canvas->setBitsPerPixel(1, true);
+        env->canvas->setBitsPerPixel(1, true); // seb bits per pixel without init memory, since we already alloccated enough
+        renderWidgetsOnly = true;
     }
     
-    /*
-      // bit hacky 
-      // partial update not support 2-bit images & canvas
-      unsigned int origBits = env->canvas->bitPerPixel;
-      if (env->canvas->bitPerPixel > 1) {
-          origBits = env->canvas->bitPerPixel;
-          env->canvas->bitPerPixel = 1;
-      }
-      // cuiWidgetsOnly = false;
-      // env->canvas->bitPerPixel = origBits;
-    */
-
     partial = true;
     drawUIToBuffer();
     partial = false;
+    renderWidgetsOnly = false;
 
     if (widgetController->clockPartial.xStart == -1 && widgetController->clockPartial.xEnd == -1) {
         Serial.println(F("[drawTestPartial] no clock data"));  
