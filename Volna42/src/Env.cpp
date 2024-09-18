@@ -126,8 +126,8 @@ void Env::begin() {
           lastState.cuiTimeCurrent -= lastState.sleepTime;
 
           if (lastState.cuiTimeCurrent <= 0) {
-              if (lastState.cuiFileIndex) lastState.cuiFileIndex++;
               lastState.cuiTimeCurrent = CUI_LOOP_INTERVAL;
+              cuiLoopNext();
           } 
         }
 
@@ -302,8 +302,8 @@ void Env::tick() {
     }
 
     if (lastState.cuiLoop && lastState.cuiTimeCurrent <= 0) {
-        if (lastState.cuiFileIndex) lastState.cuiFileIndex++;
         lastState.cuiTimeCurrent = CUI_LOOP_INTERVAL;
+        cuiLoopNext();
     }
 
     if (lastState.updateMinutes && minuteTimer <= 0 && lastState.sleepTimeCurrent > 0) { // sleepTimeCurrent (full screen update ticker) in priority
@@ -2020,9 +2020,12 @@ void Env::cuiApplyLoop() {
     
     Serial.print(F("[LOOP] ")); Serial.println(String(lastState.cuiFileIndex)); 
 
+    // applys cuiName by cursor index, originaly cui mode inited in cuiResetStateByConfig()
     lastState.cuiFileIndex = cuiGetNameByIndex(lastState.cuiFileIndex, cuiName);
-    if (lastState.cuiFileIndex == -1) {
+
+    if (lastState.cuiFileIndex == -1) { // probably was removed by web-ui
       lastState.cuiFileIndex = cuiGetNameByIndex(-1, cuiName);
+      resetPartialData();
       Serial.print(F("[Custom UI][LOOP Mode] reached end. Reset to index : ")); Serial.println(String(lastState.cuiFileIndex)); 
     }
 
@@ -2032,17 +2035,15 @@ void Env::cuiApplyLoop() {
       
       Serial.println(F("[Custom UI][LOOP Mode] no data to display, disable mode")); 
     }
-
-    resetPartialData();
     
     // Serial.println("[LOOP end]" + String(lastState.cuiFileIndex) + " file : " + cuiName); 
   }
 } 
 
-void Env::cuiLoopTestNext() {
+void Env::cuiLoopNext() {
   if (lastState.cuiLoop) {
     lastState.cuiFileIndex++;
-    updateScreen();
+    resetPartialData();
   }
 }
 
@@ -2146,37 +2147,60 @@ bool Env::cuiDeleteStorageFile(String name) {
   return true;
 }
 
-/*
-int16_t Env::cuiGetIndexByName(String &name) {
-  
-#if defined(ESP32)
+int16_t Env::cuiGetIndexByName(String searchName) {
 
-    return -1;
+  cuiInitFS();
 
-#else
+  searchName += ".bit";
+  int index = -1;
+  String tmpName;
+  #if defined(ESP32)
+      
+    File root = SPIFFS.open("/cui/");
+    if (!root) {
+        Serial.println(F("Failed to open directory"));
+        return index;
+    }
 
-    cuiInitFS();
-    String filename = name + ".bit";
-    int index = -1;
-    String tmpName;
+    while (true) {
+        File file = root.openNextFile();
+        if (!file) {
+            break;
+        }
+        if (file.isDirectory()) continue;
+
+        tmpName = file.name();
+        if (tmpName.indexOf(".bit") == -1) continue;
+
+        index++;
+        if (tmpName == searchName) {
+            return index;
+            break;
+        } 
+        file.close();
+    }
+    
+  #else
+    
     Dir dir = LittleFS.openDir("/cui/");
-
     while (dir.next()) {
-        if (dir.isDirectory()) continue;
 
+        if (dir.isDirectory()) continue;
         tmpName = dir.fileName();
         if (tmpName.indexOf(".bit") == -1) continue;
 
         index++;
-        if (dir.fileName() == filename) return index;
+        if (searchName == tmpName) { 
+          return index;           
+          break;
+        } 
     }
 
-    return -1;
+  #endif
 
-#endif
-
+  return -1;
 }
-*/
+
 
 /* -1 get first one. return -1 if file with index not found  */
 int16_t Env::cuiGetNameByIndex(int16_t searchIndex, String &name) {
@@ -2465,7 +2489,7 @@ bool Env::cuiReadStorageFile(bool widgetsOnly) {
 
 // sync config sensetive variables stored in RTC
 
-void Env::applyConfigToRTC() {
+void Env::applyConfigToRTC(bool configUpdate) {
 
     Serial.println(F("[applyConfigToRTC] apply config values to RTC memory")); 
 
@@ -2501,7 +2525,7 @@ void Env::applyConfigToRTC() {
     const char* loopMarker = PSTR("-loop"); 
     lastState.cuiLoop = false;
     lastState.cuiTimeCurrent = 0;
-    lastState.cuiFileIndex = -1;
+    if (!configUpdate) lastState.cuiFileIndex = -1;
 
     if (cuiIsEnabled() && strcmp_P(cuiName.c_str(), loopMarker) == 0) {
         lastState.cuiLoop = true;
@@ -2684,7 +2708,7 @@ void Env::validateConfig(unsigned int version, std::vector<cfgOptionKeys> * upda
         }
     }
 
-    applyConfigToRTC();
+    applyConfigToRTC(updatedKeys != NULL);
 }
 
 bool Env::commitConfig() {

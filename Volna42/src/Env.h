@@ -228,7 +228,7 @@ class Env {
         String sanitizeResponse(String var);
         void setDefaultLastStateData();
         bool restoreRTCmem();
-        void applyConfigToRTC();
+        void applyConfigToRTC(bool configUpdate = false);
         
         void mqttMessageReceivedCallback(char* topic, uint8_t* payload, unsigned int length);
 
@@ -342,7 +342,7 @@ class Env {
         void cuiApplyLoop();
         bool cuiPrepareRebootIfNeeded();
         int16_t cuiGetNameByIndex(int16_t index, String &name);
-        // int16_t cuiGetIndexByName(String &name);
+        int16_t cuiGetIndexByName(String name);
         bool cuiIsEnabled();
         void cuiSetState(bool state, String sname = "");
         
@@ -361,7 +361,7 @@ class Env {
         void cuiResetWidgets();
         void cuiResetStateByConfig();
 
-        void cuiLoopTestNext();
+        void cuiLoopNext();
 
         Config * getConfig();
 };

@@ -114,7 +114,8 @@ void WebServerEink::router() {
     } else if (server->uri().indexOf("/api/buffer") != -1) {
         apiGetBuffer();
     } else if (server->uri().indexOf("/api/testloop") != -1) {
-        env->cuiLoopTestNext();
+        env->cuiLoopNext();
+        env->updateScreen();
         server->send(200, "application/json", "{\"status\":\"ok\"}"); 
         return; 
     } else if (server->uri().indexOf("/api/testdata") != -1) {
@@ -209,6 +210,17 @@ void WebServerEink::apiCuiDelete() {
 
     for (int i = 0; i < server->args(); i++)  {
         if (server->argName(i) == "filename") {
+        
+            int newIndex = env->cuiGetIndexByName(server->arg(i));
+            if (newIndex == -1) {
+
+                Serial.print(F("[apiCuiSelect] CUI File not found : ")); 
+                Serial.print(server->arg(i));
+                
+                server->send(200, "application/json", "{\"status\":\"fail\",\"error\":\"CUI File not found\"}"); 
+                return; 
+            }
+
             env->cuiDeleteStorageFile(server->arg(i));
             server->send(200, "application/json", "{\"status\":\"ok\",\"list\":" + env->cuiGetListFilesJSON() + "}"); 
             return; 
@@ -548,10 +560,25 @@ void WebServerEink::apiCuiSelect() {
 
     for (int i = 0; i < server->args(); i++)  {
         if (server->argName(i) == "filename") {
-            
+
+            int newIndex = env->cuiGetIndexByName(server->arg(i));
+            if (newIndex == -1) {
+
+                Serial.print(F("[apiCuiSelect] CUI File not found : ")); 
+                Serial.print(server->arg(i));
+                
+                server->send(200, "application/json", "{\"status\":\"fail\",\"error\":\"CUI File not found\"}"); 
+                return; 
+            }
+
             String comm = "";
 
-            env->cuiSetState(true, server->arg(i));
+            if (env->lastState.cuiLoop) {
+                env->lastState.cuiFileIndex = newIndex;
+            } else {
+                env->cuiSetState(true, server->arg(i));
+            }
+
             env->resetPartialData();
 
             if (env->cuiPrepareRebootIfNeeded()) {
@@ -864,7 +891,8 @@ String WebServerEink::getInfo() {
     String json = WebServerBase::getInfo(); // "{";
 
     rtcData & lastState = env->getCurrentState();
- 
+    env->updateTelemetry();
+    
     int lkey = lastState.lastTelemetrySize - 1;
     Serial.print(F("Currently collected telemetry size : ")); Serial.println(lkey); 
    
