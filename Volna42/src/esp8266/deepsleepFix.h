@@ -1,3 +1,8 @@
+#ifndef deepSleepFix_h
+#define deepSleepFix_h
+
+#if defined(ESP8266)
+
 #include <Arduino.h>
 extern "C" {
   #include "user_interface.h"
@@ -9,3 +14,7 @@ extern "C" {
 #define ets_delay_us ((void (*)(int))0x40002ecc)
 
 void nkDeepsleep(uint32 t_us, unsigned int method);
+
+#endif
+
+#endif

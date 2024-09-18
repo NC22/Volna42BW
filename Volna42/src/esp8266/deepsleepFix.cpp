@@ -1,5 +1,7 @@
 #include "deepsleepFix.h"
 
+#if defined(ESP8266)
+
 uint32_t*RT= (uint32_t *)0x60000700;
 
 // method = 2 - slightly different codes, tested without issues on LOLIN D1 Mini V4, original D1 Mini Clone boards
@@ -60,3 +62,5 @@ void nkDeepsleep(uint32_t t_us, unsigned int method)
   }
 
 }
+
+#endif
