@@ -2,50 +2,87 @@
 #include <UserDefines.h>
 #include <Arduino.h>
 
-const cfgOption cfgOptions[] = { 
+const char pgmCfgWifiNetwork[] PROGMEM = "wifiNetwork";
+const char pgmCfgWifiPassword[] PROGMEM = "wifiPassword";
+const char pgmCfgTimezone[] PROGMEM = "timezone";
+const char pgmCfgTempOffset[] PROGMEM = "tempOffset";
+const char pgmCfgModeDuration[] PROGMEM = "modeDuration";
+const char pgmCfgModeList[] PROGMEM = "modeList";
+const char pgmCfgModeListEnabled[] PROGMEM = "modeListEnabled";
+const char pgmCfgNtpHosts[] PROGMEM = "ntpHosts";
+const char pgmCfgMqttHost[] PROGMEM = "mqttHost";
+const char pgmCfgMqttPort[] PROGMEM = "mqttPort";
+const char pgmCfgMqttLogin[] PROGMEM = "mqttLogin";
+const char pgmCfgMqttPassword[] PROGMEM = "mqttPassword";
+const char pgmCfgToFahrenheit[] PROGMEM = "toFahrenheit";
+const char pgmCfgMqttPrefixIn[] PROGMEM = "mqttPrefixIn";     
+const char pgmCfgMqttDevicesIds[] PROGMEM = "mqttDevicesIds"; 
+
+const char pgmCfgScreenRotate[] PROGMEM = "screenRotate";
+const char pgmCfgScreenLandscape[] PROGMEM = "screenLandscape";
+const char pgmCfgSleepTime[] PROGMEM = "sleepTime";
+const char pgmCfgTimestamp[] PROGMEM = "timestamp";
+
+const char pgmCfgWifiNetworkFallback[] PROGMEM = "wifiNetworkFallback";
+const char pgmCfgWifiPasswordFallback[] PROGMEM = "wifiPasswordFallback";
+
+const char pgmCfgImagePreset[] PROGMEM = "imagePreset";
+
+const char pgmCfgExtSensorLink[] PROGMEM = "extSensorLink";
+const char pgmCfgExtSensorLogin[] PROGMEM = "extSensorLogin";
+const char pgmCfgExtSensorPassword[] PROGMEM = "extSensorPassword";
+
+const char pgmCfgMqttHAPrefix[] PROGMEM = "mqttHAPrefix"; 
+const char pgmCfgMqttHADevice[] PROGMEM = "mqttHADevice"; 
+const char pgmCfgSyncEvery[] PROGMEM = "syncEvery";
+const char pgmCfgTimeFormat12[] PROGMEM = "timeFormat12";
+
+const char pgmCfgUpdateMinutes[] PROGMEM = "updateMinutes";
+const char pgmCfgTitleIndoor[] PROGMEM = "titleIndoor";
+const char pgmCfgTitleExternal[] PROGMEM = "titleExternal";
+
+const cfgOption cfgOptions[] = {
+    {cWifiNetwork, ctypeString, false, pgmCfgWifiNetwork, true},
+    {cWifiPassword, ctypeString, true, pgmCfgWifiPassword, true},
+    {cTimezone, ctypeString, false, pgmCfgTimezone, true},
+    {cTempOffset, ctypeFloat, false, pgmCfgTempOffset, false},
+
+    {cModeDuration, ctypeInt, false, pgmCfgModeDuration, false},
+    {cModeList, ctypeString, false, pgmCfgModeList, false},
+    {cModeListEnabled, ctypeString, false, pgmCfgModeListEnabled, false},
+
+    {cNtpHosts, ctypeString, false, pgmCfgNtpHosts, true},
     
-    {cWifiNetwork, ctypeString, false, "wifiNetwork", true},
-    {cWifiPassword, ctypeString, true, "wifiPassword", true},
-    
-    {cTimezone, ctypeString, false, "timezone", true},    
-    {cTempOffset, ctypeFloat, false, "tempOffset", false},
+    {cMqttHost, ctypeString, false, pgmCfgMqttHost, true},
+    {cMqttPort, ctypeInt, false, pgmCfgMqttPort, true},
+    {cMqttLogin, ctypeString, false, pgmCfgMqttLogin, true},
+    {cMqttPassword, ctypeString, true, pgmCfgMqttPassword, true},
+    {cToFahrenheit, ctypeBool, false, pgmCfgToFahrenheit, false},
+    {cMqttPrefixIn, ctypeString, false, pgmCfgMqttPrefixIn, false},  // Domoticz Prefix
+    {cMqttDevicesIds, ctypeString, false, pgmCfgMqttDevicesIds, false},  // Domoticz device ids ( T&H&B, T&H, T )
 
-    {cModeDuration, ctypeInt, false, "modeDuration", false},
-    {cModeList, ctypeString, false, "modeList", false},
-    {cModeListEnabled, ctypeString, false, "modeListEnabled", false},
-    
-    {cNtpHosts, ctypeString, false, "ntpHosts", true},
-    
-    {cMqttHost, ctypeString, false, "mqttHost", true},
-    {cMqttPort, ctypeInt, false, "mqttPort", true},
-    {cMqttLogin, ctypeString, false, "mqttLogin", true},
-    {cMqttPassword, ctypeString, true, "mqttPassword", true},
-    {cToFahrenheit, ctypeBool, false, "toFahrenheit", false},
-    {cMqttPrefixIn, ctypeString, false, "mqttPrefixIn", false},     // Domoticz Prefix
-    {cMqttDevicesIds, ctypeString, false, "mqttDevicesIds", false}, // Domoticz device ids ( T&H&B, T&H, T )
+    {cScreenRotate, ctypeBool, false, pgmCfgScreenRotate, false},
+    {cScreenLandscape, ctypeBool, false, pgmCfgScreenLandscape, false},
+    {cSleepTime, ctypeInt, false, pgmCfgSleepTime, false},
+    {cTimestamp, ctypeString, false, pgmCfgTimestamp, false},
 
-    {cScreenRotate, ctypeBool, false, "screenRotate", false},
-    {cScreenLandscape, ctypeBool, false, "screenLandscape", false},
-    {cSleepTime, ctypeInt, false, "sleepTime", false},
-    {cTimestamp, ctypeString, false, "timestamp", false},
+    {cWifiNetworkFallback, ctypeString, false, pgmCfgWifiNetworkFallback, false},
+    {cWifiPasswordFallback, ctypeString, true, pgmCfgWifiPasswordFallback, false},
 
-    {cWifiNetworkFallback, ctypeString, false, "wifiNetworkFallback", false},
-    {cWifiPasswordFallback, ctypeString, true, "wifiPasswordFallback", false},
+    {cImagePreset, ctypeString, false, pgmCfgImagePreset, false},
 
-    {cImagePreset, ctypeString, false, "imagePreset", false},
+    {cExtSensorLink, ctypeString, false, pgmCfgExtSensorLink, false},
+    {cExtSensorLogin, ctypeString, false, pgmCfgExtSensorLogin, false},
+    {cExtSensorPassword, ctypeString, true, pgmCfgExtSensorPassword, false},
 
-    {cExtSensorLink, ctypeString, false, "extSensorLink", false},
-    {cExtSensorLogin, ctypeString, false, "extSensorLogin", false},
-    {cExtSensorPassword, ctypeString, true, "extSensorPassword"},
+    {cMqttHAPrefix, ctypeString, false, pgmCfgMqttHAPrefix, false},   // Home Assistant prefix
+    {cMqttHADevice, ctypeString, false, pgmCfgMqttHADevice, false},   // Home Assistant device description (Id, Name)
+    {cSyncEvery, ctypeString, false, pgmCfgSyncEvery, false},
+    {cTimeFormat12, ctypeBool, false, pgmCfgTimeFormat12, false},
 
-    {cMqttHAPrefix, ctypeString, false, "mqttHAPrefix", false}, // Home Assistant prefix
-    {cMqttHADevice, ctypeString, false, "mqttHADevice", false}, // Home Assistant device description (Id, Name)
-    {cSyncEvery, ctypeString, false, "syncEvery", false},
-    {cTimeFormat12, ctypeBool, false, "timeFormat12", false},
-
-    {cUpdateMinutes, ctypeBool, false, "updateMinutes", false},
-    {cTitleIndoor, ctypeString, false, "titleIndoor", false},
-    {cTitleExternal, ctypeString, false, "titleExternal", false},
+    {cUpdateMinutes, ctypeBool, false, pgmCfgUpdateMinutes, false},
+    {cTitleIndoor, ctypeString, false, pgmCfgTitleIndoor, false},
+    {cTitleExternal, ctypeString, false, pgmCfgTitleExternal, false},
 };
 
 const size_t cfgOptionsSize PROGMEM = sizeof(cfgOptions) / sizeof(cfgOptions[0]);

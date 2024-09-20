@@ -10,6 +10,7 @@
 
 #include <EnvConfigTypes.h>
 
+// extern const char* const pgmCfgOptionsKeys[] PROGMEM;
 extern const cfgOption cfgOptions[];
 extern const size_t cfgOptionsSize PROGMEM;
 extern const char defaultLocale[] PROGMEM;

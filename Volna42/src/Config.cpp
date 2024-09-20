@@ -29,9 +29,8 @@ void Config::test() {
 cfgOptionKeys Config::getOptionKey(const char * name) {
 
     for(size_t i = 0; i < cfgSize; i++) {
-
-        if (strcmp(cfgOptions[i].keyStr, name) == 0) {
-            Serial.println(cfgOptions[i].keyStr);
+        if (strcmp_P(name, (PGM_P)cfgOptions[i].keyStr) == 0) {
+            Serial.println(name);
             return cfgOptions[i].key;
         }
     }
@@ -44,7 +43,7 @@ String Config::getKeyName(cfgOptionKeys key) {
     for(size_t i = 0; i < cfgSize; i++) {
 
         if (cfgOptions[i].key == key) {
-            return cfgOptions[i].keyStr;
+            return FPSTR(cfgOptions[i].keyStr);
         }
     }
 

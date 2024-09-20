@@ -142,10 +142,10 @@ bool KellyEInk::initPins() {
 
 
     Serial.println(F("Pins : "));
-    Serial.print("BUSY : "); Serial.println(ENK_PIN_BUSY);
-    Serial.print("RST : "); Serial.println(ENK_PIN_RST);
-    Serial.print("DC : "); Serial.println(ENK_PIN_DC);
-    Serial.print("CS : "); Serial.println(ENK_PIN_CS);
+    Serial.print(F("BUSY : ")); Serial.println(ENK_PIN_BUSY);
+    Serial.print(F("RST : ")); Serial.println(ENK_PIN_RST);
+    Serial.print(F("DC : ")); Serial.println(ENK_PIN_DC);
+    Serial.print(F("CS : ")); Serial.println(ENK_PIN_CS);
     Serial.println(F("-----------"));
 
 	pinsInit = true;
