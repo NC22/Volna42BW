@@ -16,15 +16,16 @@
             <div class="page-header" >
                 <div id="header"></div>
              </div>
-             
-            <div id="device-info-container">
             
+            <div id="device-info-container">
+                
                 <div id="notification-info"></div> 
                 <div id="device-info"></div>                
                 <div class="device-info-actions"><a href="#" id="device-info-refresh">Обновить</a> <!--a href="#">View log</a--> </div>
             </div>
             
             <div class="page-options" id="page"></div>
+            
             <div id="result" class="notice"><div id="result-close">X</div><div></div></div>
             
         </div>
@@ -49,6 +50,11 @@
              
              var load = function() {
                 ENVINIT(true);
+                
+                // только для тестов - в версии заливаемой на устройство все параметры окружения вшиты
+                var debugTools = new KellyImgUplDebug();
+                    debugTools.init();
+                    
              }
             
         </script>
@@ -240,9 +246,12 @@
 <!-- INCLUDE PART -->
 
         <script type="text/javascript" src="ui/KellyTools.js"></script>
+        <script type="text/javascript" src="ui/KellyTools.select.widget.js"></script>
         <script type="text/javascript" src="uiEink/locale/localeRU.js"></script>
         <script type="text/javascript" src="uiEink/KellyUploader.js"></script>
+        <script type="text/javascript" src="uiEink/KellyUploader.tools.js"></script>
         <script type="text/javascript" src="uiEink/KellyUIFileManager.js"></script>
+        <script type="text/javascript" src="uiEink/KellyUploader.tools.debug.js"></script>
         
         <script type="text/javascript" src="uiEink/initUpload.js"></script>
         

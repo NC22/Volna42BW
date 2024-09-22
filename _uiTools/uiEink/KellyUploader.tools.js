@@ -10,8 +10,6 @@ function getFBController(screen) {
             sbController.screenHeight = h;
             sbController.bufferLen = (sbController.screenWidth * sbController.screenHeight / 8) * screen.bitPerPixel;
             sbController.buffer = new Uint8Array( sbController.bufferLen );
-            if (screen.bufferMod) sbController.bufferMod = new Uint8Array( sbController.bufferLen ); 
-            else sbController.bufferMod = false;
             sbController.bufferBitPerPixel = screen.bitPerPixel;
             console.log('Init screen buffer [' + sbController.screenWidth + 'x' + sbController.screenHeight + '] - Bytes : ' + sbController.bufferLen);
         }

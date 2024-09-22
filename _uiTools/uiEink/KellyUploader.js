@@ -69,12 +69,10 @@ function KellyImgUpl(env) {
         return false;
     };
     
-    var colors = {WHITE : [231, 237, 239], BLACK : [13, 15, 16], GRAY1: [ 128, 128, 128 ], GRAY2: [ 192, 192, 192 ] };
+    var colors = {WHITE : [231, 237, 239], BLACK : [13, 15, 16], GRAY1: [ 128, 128, 128 ], GRAY2: [ 192, 192, 192 ] }; // used for find nearest colors, used as default render colors for preview
     var colorsBits = {WHITE : [1, 1], BLACK : [0, 0], GRAY1: [1, 0], GRAY2: [0, 1] };
-
-    var selectScrollControllerEvent = function(e) {
-        handler.scrollTarget = this;
-    };
+    
+    handler.rPalete = colors;
     
     var delayUpdateCurrent = function() {
        if (handler.lastSettings) {
@@ -236,7 +234,7 @@ function KellyImgUpl(env) {
         var screenCtx = screenEl.getContext('2d');
         
             screenCtx.rect(0, 0, screen.width, screen.height);
-            screenCtx.fillStyle = 'rgb(' + colors.WHITE[0] + ',' + colors.WHITE[1] + ',' + colors.WHITE[2] + ')';
+            screenCtx.fillStyle = 'rgb(' + handler.rPalete.WHITE[0] + ',' + handler.rPalete.WHITE[1] + ',' + handler.rPalete.WHITE[2] + ')';
             screenCtx.fill();
             
         var bitCursor = 0, byteN = 0;   
@@ -250,11 +248,11 @@ function KellyImgUpl(env) {
                     if (screen.bitPerPixel == 2) {
                         
                         var bitData = [sbController.getBit(sbController.buffer[byteN], bitCursor), sbController.getBit(sbController.buffer[byteN], bitCursor+1)];
-                        var color = colors.BLACK;
+                        var color = handler.rPalete.BLACK;
                         
-                             if (colorsBits.WHITE[0] == bitData[0] && colorsBits.WHITE[1] == bitData[1]) color = colors.WHITE;
-                        else if (colorsBits.GRAY1[0] == bitData[0] && colorsBits.GRAY1[1] == bitData[1]) color = colors.GRAY1;
-                        else if (colorsBits.GRAY2[0] == bitData[0] && colorsBits.GRAY2[1] == bitData[1]) color = colors.GRAY2;
+                             if (colorsBits.WHITE[0] == bitData[0] && colorsBits.WHITE[1] == bitData[1]) color = handler.rPalete.WHITE;
+                        else if (colorsBits.GRAY1[0] == bitData[0] && colorsBits.GRAY1[1] == bitData[1]) color = handler.rPalete.GRAY1;
+                        else if (colorsBits.GRAY2[0] == bitData[0] && colorsBits.GRAY2[1] == bitData[1]) color = handler.rPalete.GRAY2;
                         
                         pixelData.data[g + 0] = color[0];
                         pixelData.data[g + 1] = color[1];
@@ -578,7 +576,7 @@ function KellyImgUpl(env) {
             if (!offset) offset = 0;
             var oldOffset = offset;
             
-            var target = screen.bufferMod ? "bufferMod" : "buffer";
+            var target = "buffer";
             var data = sbController[target];
             if (screen.bitPerPixel > 1) {
                
@@ -769,7 +767,6 @@ function KellyImgUpl(env) {
                         }
                         
                         sbController.init(screen.width, screen.height);
-                        screen.bufferMod = false;
                         
                         for (var i = 0; i < sbController.buffer.length; i++) sbController.buffer[i] = result.simpleBuffer[i];
                         for (var i = 0; i < widgets.length; i++) {
@@ -858,6 +855,15 @@ function KellyImgUpl(env) {
             }
         });
     };
+    
+    this.initScreen = function() {
+        
+        var screenEl = gid('img-up-screen');
+            screenEl.width = screen.width;
+            screenEl.height = screen.height;
+                 
+        updateDispInfo();
+    };
         
     this.init = function() {
         
@@ -875,12 +881,7 @@ function KellyImgUpl(env) {
     
         gid('device-info-container').classList.add('shown');
         gid('img-up-preview').style.display = '';
-                
-        var screenEl = gid('img-up-screen');
-            screenEl.width = screen.width;
-            screenEl.height = screen.height;
-                 
-        updateDispInfo();
+        handler.initScreen();        
         
         var imgForm = gid('img-up');        
         gid('page').appendChild(imgForm);
@@ -896,10 +897,7 @@ function KellyImgUpl(env) {
             gid('img-up-offset-y').value = 0;
             handler.widgetsUpdatedByCfg = false;
         };
-        
-        gid('img-up-offset-x').onclick = selectScrollControllerEvent;
-        gid('img-up-offset-y').onclick = selectScrollControllerEvent;
-        gid('img-up-threshhold-value').onclick = selectScrollControllerEvent;    
+          
         gid('img-up-matkinson-coefficient').onclick = delayUpdateCurrent;
         gid('img-up-gs').onclick = delayUpdateCurrent;
         gid('img-up-matkinson-auto').onclick = delayUpdateCurrent;
@@ -914,27 +912,28 @@ function KellyImgUpl(env) {
         gid('img-up-mthreshhold').onclick = delayUpdateCurrent;
             
         handler.lastScrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
+        
+        document.addEventListener("click", function(e){
+            handler.scrollTarget = e.target.id && ['img-up-offset-x', 'img-up-offset-y', 'img-up-threshhold-value'].indexOf(e.target.id) != -1 ? e.target : false;
+        }, false);
+        
         document.addEventListener("wheel", function(e){
             
            if (KellyTools.locked(true) || !handler.scrollTarget) return;
            
            var st = window.pageYOffset || document.documentElement.scrollTop; 
-           var isFloat = handler.scrollTarget.getAttribute('data-step').indexOf('.') !== -1;
-           var step = isFloat ?  KellyTools.validateFloat(handler.scrollTarget.getAttribute('data-step')) : KellyTools.validateInt(handler.scrollTarget.getAttribute('data-step'));
+           var stVal = handler.scrollTarget.getAttribute('data-step');
+           var isFloat = stVal.indexOf('.') !== -1;
+           var step = isFloat ?  KellyTools.validateFloat(stVal) : KellyTools.validateInt(stVal);
            var value = isFloat ? KellyTools.validateFloat(handler.scrollTarget.value) : KellyTools.validateInt(handler.scrollTarget.value);
            
-           if (event.deltaY < 0) {
-               value+=step;
-           } else {
-              value-=step;
-           } 
+           value += step * (event.deltaY < 0 ? 1 : -1);
            
            handler.scrollTarget.value = value;
            lastScrollTop = st <= 0 ? 0 : st; 
            delayUpdateCurrent();
-           
-        }, false);
+           e.preventDefault();
+        },  { passive: false });
         
         gid('img-up-save').onclick = function() {
             KellyTools.locked();
