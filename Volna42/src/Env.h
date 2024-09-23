@@ -16,7 +16,6 @@
 
 #if defined(ESP32)
     #include <HTTPClient.h>
-    #include <HttpClient.h> 
     #include "esp_sntp.h"
     // #include <thirdparty/TZ.h>
 #else 
