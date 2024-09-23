@@ -190,6 +190,7 @@ bool Env::restoreRTCmem() {
 #if defined(ESP32)
 
     if (!readRTCUserMemory(0, (uint32_t*) &lastState, sizeof(lastState))) {
+    // if (!readRTCUserMemoryActualRTC(lastState)) {
         lastState.cfgVersion = 0;
         lastState.t = 0;
     }
@@ -356,7 +357,7 @@ bool Env::isSyncRequired() {
     } 
 }
 
-void Env::restartNTP() {
+void Env::restartNTP(bool resetOnly) {
     
     ntp = false;
     lastError = "";
@@ -368,10 +369,10 @@ void Env::restartNTP() {
     settimeofday(&tv, nullptr);
 
     yield();
-    setupNTP();
+    if (!resetOnly) setupNTP();
 }
 
-bool Env::setupNTP() {
+bool Env::setupNTP(unsigned int attempt) {
     if (ntp) return true;
 
     String ntpServer = getConfig()->cfgValues[cNtpHosts];
@@ -406,6 +407,17 @@ bool Env::setupNTP() {
       if (i > 60) {
 
         Serial.println(F("Time sync failed!"));
+
+        #if defined(NTP_CONNECT_ATTEMPTS)
+
+          if (attempt < NTP_CONNECT_ATTEMPTS) {
+              restartNTP(true);
+              Serial.println(F("Time sync - reattempt!"));
+              return setupNTP(attempt + 1);
+          }
+
+        #endif
+
         lastError = "NTP server is not accessable. Default time setted (by config or firmware variable)";
         initDefaultTime();
 
@@ -455,6 +467,8 @@ void Env::saveCurrentState()  {
 #if defined(ESP32)
 
   writeRTCUserMemory(0, (uint32_t*)&lastState, sizeof(lastState));
+  // writeRTCUserMemoryActualRTC(lastState);
+
 #else
     ESP.rtcUserMemoryWrite (0, (uint32_t*) &lastState, sizeof(lastState));
 #endif
@@ -1030,7 +1044,7 @@ bool Env::updateExtSensorData(unsigned int attempt) {
 
     WiFiClient client;
     HTTPClient http;
-
+     
     externalSensorData newData;
     newData.isDataValid = false;
     newData.temperature = -1000;
@@ -1069,10 +1083,9 @@ bool Env::updateExtSensorData(unsigned int attempt) {
     Serial.println(F("updateExtSensorData"));
 
     int httpResponseCode = http.GET();
-    String payload = http.getString(); 
-
     if (httpResponseCode < 0) {
-      Serial.println(F("Fail to connect ext sensor..."));
+      Serial.print(F("Fail to connect ext sensor... Code "));
+      Serial.println(httpResponseCode);
       if (attempt < EXTERNAL_SENSOR_CONNECT_ATTEMPTS) {
         delay(100);
         Serial.println(F("Retry to connect ext sensor..."));
@@ -1081,6 +1094,9 @@ bool Env::updateExtSensorData(unsigned int attempt) {
     }
 
     if (httpResponseCode > 0) {
+      
+        String payload = http.getString();
+
         String collectedData;
         String resultData = "";
         bool homeAssistant = false;
@@ -1140,7 +1156,7 @@ bool Env::updateExtSensorData(unsigned int attempt) {
       if (httpResponseCode == -1) {
          lastError = "External sensor error : Server not accessable";
       } else {
-         lastError = "External sensor error : Error code: " + String(httpResponseCode) + ", Response : " + sanitizeResponse(payload);
+         lastError = "External sensor error : Unknown error code: " + String(httpResponseCode);
       }
 
       Serial.print(F("Error code: ")); Serial.println(httpResponseCode);
