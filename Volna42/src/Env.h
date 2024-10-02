@@ -105,6 +105,10 @@ class Screen1in54UI;
 
 #endif
 
+#if defined(INTERNAL_SENSOR_DS18B20)
+    #include <OneWire.h>
+    #include <DallasTemperature.h>
+#endif
 
 class Env {
     private :
@@ -169,6 +173,12 @@ class Env {
             float scd4XTemp = -1000;
             float scd4XHumidity = -1000;
             unsigned int scd4XerrorTick = 0;
+        #endif
+
+        #if defined(INTERNAL_SENSOR_DS18B20)
+            OneWire * oneWire;
+            DallasTemperature * sensors;
+            DeviceAddress dsTermometr;
         #endif
 
         bool batteryInit = false;

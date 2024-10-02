@@ -7,6 +7,8 @@ function KellyImgUplDebug() {
         [[224, 248, 207], [7, 24, 33],  [48, 104, 80], [134, 192, 108]],
     ];
     
+    // WHITE, BLACK, GRAY1 (Darker), GRAY2 (Lighter)
+    
     var defaultPal = false;
     var uploader = false;
     var handler = this;

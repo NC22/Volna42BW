@@ -1255,10 +1255,23 @@ bool Env::updateSCD4X() {
 }
 
 float Env::readTemperature()  {
-    
-    if (tsensor) {
-      return tempSensor.readTemperature() + tempOffset;
-    } else return -1000;
+
+    #if defined(INTERNAL_SENSOR_DS18B20)
+
+      float tempC = sensors->getTempC(dsTermometr);
+      if(tempC == DEVICE_DISCONNECTED_C) {
+        Serial.println(F("[DS18B20] Error: Could not read temperature data"));
+        return -1000;
+      } else return tempC + tempOffset;
+
+    #else  
+
+      if (tsensor) {
+        return tempSensor.readTemperature() + tempOffset;
+      } else return -1000;
+
+
+    #endif
 }
 
 // (1 °C × 9/5) + 32 = 33,8 °F
@@ -1478,12 +1491,40 @@ bool Env::initSensors() {
     Wire.begin(DEFAULT_I2C_SDA, DEFAULT_I2C_SCL); 
     bool error = false;
 
-    if (!tempSensor.begin(0x76)) {
+    // One wire датчики
+
+    #if defined(INTERNAL_SENSOR_DS18B20)
+
+      oneWire = new OneWire(INTERNAL_SENSOR_DS18B20);
+      sensors = new DallasTemperature(oneWire);
+      Serial.print(F("[DS18B20] Locating devices..."));
+
+      sensors->begin();
+      Serial.print(F("Found "));
+      Serial.print(sensors->getDeviceCount(), DEC);
+      Serial.println(F(" devices."));  
+      
+      if (!sensors->getAddress(dsTermometr, 0)) {
+        Serial.println(F("Unable to find address for Device 0")); 
         error = true;
-        Serial.println("Could not find a valid BME280 sensor, check wiring!");
-    } else {
-        tsensor = true;
-    }
+      }
+
+    #endif
+
+    // I2C
+    
+    #if defined(INTERNAL_SENSOR_BME280) && INTERNAL_SENSOR_BME280 == false
+
+    #else
+
+      if (!tempSensor.begin(0x76)) {
+          error = true;
+          Serial.println("Could not find a valid BME280 sensor, check wiring!");
+      } else {
+          tsensor = true;
+      }
+
+    #endif
 
     #if defined(BAT_ADS1115)
 
