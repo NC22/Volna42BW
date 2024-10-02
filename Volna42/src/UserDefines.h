@@ -27,14 +27,16 @@
 #define EXTERNAL_SENSOR_CONNECT_TIMEOUT 15000 // Connection timeout in milliseconds | Максимальное время ожидания ответа сервера (HA & Domoticz & Openweather) 
 #define NTP_CONNECT_ATTEMPTS 3
 
-#define PARTIAL_UPDATE_INTERVAL 120          // Интервал частичного обновления экрана (если поддерживается) В секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
+#define PARTIAL_UPDATE_INTERVAL 120           // Интервал частичного обновления экрана (если поддерживается) В секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
 
 // [Внутренний сенсор температуры]
 
-/// #define INTERNAL_SENSOR_BME280   true    // BME280, подхватывается по I2C 
-#define INTERNAL_SENSOR_DS18B20  2			 // DS18B20 - указать пин подключения (2 - GPIO2 - D4), если BME280 так же присутствует на I2C шине то c него будут взяты Hum & Pressure
+#define INTERNAL_SENSOR_BME280   true         // BME280, подхватывается по I2C 
+// #define INTERNAL_SENSOR_DS18B20  2         // DS18B20 - сенсор температуры - указать пин подключения (2 - GPIO2 - D4), если BME280 так же присутствует на I2C шине то c него будут взяты Hum & Pressure
 
-// Поддержка датчика CO2 - SCD41 или аналогов. (Вывод данных через виджеты в кастомном интерфейсе и веб-панели)
+// [Дополнительные внутренние датчики]
+
+// Поддержка датчика CO2 - SCD41 (Вывод данных через виджеты в кастомном интерфейсе и веб-панели)
 // #define CO2_SCD41  // если используется, раскомментить библиотеку в platformio.ini ~требует +3-4кб оперативки (может не хватать памяти для некоторых действий в web-ui если используется 2-bit графика на ESP8266)
 
 // [Language] - заголовки "улица" \ "дом" вынесен в настройки веб-интерфейса в раздел "Общие настройки"
@@ -47,9 +49,9 @@
 // [Display types] | [Типы дисплеев]
 
 // #define WAVESHARE_BW_42_UC8176       // Waveshare 4.2inch, REV 2.1 [B&W]
-// #define WAVESHARE_BW_42_SSD1683      // Waveshare 4.2inch, REV 2.2 | WeAct 4.2inch [B&W, 4-colors grayscale displays]
+#define WAVESHARE_BW_42_SSD1683         // Waveshare 4.2inch, REV 2.2 | WeAct 4.2inch [B&W, 4-colors grayscale displays]
 // #define WAVESHARE_RY_BW_42_UC8176    // Waveshare 4.2inch, REV 2.1 [B&W + Red or B&W + Yellow, 3-colors (separate buffers)]
-#define WAVESHARE_RY_BW_42_UC8176_B     // Waveshare 4.2inch, REV ??? - если при выводе WAVESHARE_RY_BW_42_UC8176 инвертирует цвета (фон красным \ отдельные элементы белым \ черным)
+// #define WAVESHARE_RY_BW_42_UC8176_B  // Waveshare 4.2inch, REV ??? - если при выводе WAVESHARE_RY_BW_42_UC8176 инвертирует цвета (фон красным \ отдельные элементы белым \ черным)
 // #define HELTEC_BW_15_S810F           // Heltec 1.54inch 200x200 [B&W]
 
 // [Battery sensor mode] | [Режим чтения показаний заряда батареи]

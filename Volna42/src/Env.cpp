@@ -600,10 +600,17 @@ void Env::mqttHAAutodetectionInit() {
         lastError = F("Error in HA MQTT initialization. Possible small buffer size, check - setBufferSize");
       }
 
-      tmp.replace(F("temperature"), F("humidity"));
-      tmp.replace(F("°C"), F("%"));
+      tmp.replace(F("temperature"), F("pressure"));
+      tmp.replace(F("°C"), F("hPa"));
 
-      //tmp = "{\"device_class\":\"humidity\",\"name\":\"" + rawMqttIds[1]  + " Humidity\",\"state_topic\":\"" + tstate + "/info\",\"unit_of_measurement\":\"%\",\"value_template\":\"{{value_json.humidity}}\"}"; // , " + device + "
+      comm = cfg.cfgValues[cMqttHAPrefix] + String("/sensor/" + rawMqttIds[0] + "/pressure/config");
+      if (!_mqttClient.publish(comm.c_str(), tmp.c_str(), true)) {
+        Serial.println(F("[mqttHAAutodetectionInit] Fail send - pressure info")); 
+      }
+
+      tmp.replace(F("pressure"), F("humidity"));
+      tmp.replace(F("hPa"), F("%"));
+
       comm = cfg.cfgValues[cMqttHAPrefix] + String("/sensor/" + rawMqttIds[0] + "/humidity/config");      
       Serial.println(comm); 
       Serial.println(tmp); 
@@ -613,8 +620,6 @@ void Env::mqttHAAutodetectionInit() {
       }
 
       tmp.replace(F("humidity"), F("battery"));
-
-      //tmp = "{\"device_class\":\"humidity\",\"name\":\"" + rawMqttIds[1]  + " Humidity\",\"state_topic\":\"" + tstate + "/info\",\"unit_of_measurement\":\"%\",\"value_template\":\"{{value_json.humidity}}\"}"; // , " + device + "
       comm = cfg.cfgValues[cMqttHAPrefix] + String("/sensor/" + rawMqttIds[0] + "/battery/config");      
 
       if (!_mqttClient.publish(comm.c_str(), tmp.c_str(), true)) {
@@ -773,7 +778,7 @@ bool Env::mqttSendCurrentData() {
         
         tstate = "home/" + rawMqttIds[0] + "/info";
 
-        payload = "{\"temperature\":" + String(readTemperature()) + ",\"humidity\":" + String(readHumidity());
+        payload = "{\"temperature\":" + String(readTemperature()) + ",\"humidity\":" + String(readHumidity()) + ",\"pressure\":" + String((float) (readPressure() / 100.0));
 
         if (isOnBattery()) {
           if (lastState.lastTelemetrySize > 0) {
@@ -1256,21 +1261,28 @@ bool Env::updateSCD4X() {
 
 float Env::readTemperature()  {
 
+    // Optional one wire temperature sensor
+
     #if defined(INTERNAL_SENSOR_DS18B20)
 
       float tempC = sensors->getTempC(dsTermometr);
       if(tempC == DEVICE_DISCONNECTED_C) {
-        Serial.println(F("[DS18B20] Error: Could not read temperature data"));
-        return -1000;
+        Serial.println(F("[DS18B20] Error: Could not read temperature data"));        
       } else return tempC + tempOffset;
 
-    #else  
+    #endif
+
+    // Default BME280 or replacements
+
+    #if defined(INTERNAL_SENSOR_BME280) && INTERNAL_SENSOR_BME280 == false
+
+        return -1000;
+    #else
 
       if (tsensor) {
         return tempSensor.readTemperature() + tempOffset;
       } else return -1000;
-
-
+    
     #endif
 }
 
@@ -1512,8 +1524,10 @@ bool Env::initSensors() {
     #endif
 
     // I2C
-    
+
     #if defined(INTERNAL_SENSOR_BME280) && INTERNAL_SENSOR_BME280 == false
+
+        // replacement sensors can be placed here
 
     #else
 
