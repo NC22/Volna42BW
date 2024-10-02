@@ -42,8 +42,9 @@
 // [Display types] | [Типы дисплеев]
 
 // #define WAVESHARE_BW_42_UC8176       // Waveshare 4.2inch, REV 2.1 [B&W]
-#define WAVESHARE_BW_42_SSD1683         // Waveshare 4.2inch, REV 2.2 | WeAct 4.2inch [B&W, 4-colors grayscale displays]
+// #define WAVESHARE_BW_42_SSD1683      // Waveshare 4.2inch, REV 2.2 | WeAct 4.2inch [B&W, 4-colors grayscale displays]
 // #define WAVESHARE_RY_BW_42_UC8176    // Waveshare 4.2inch, REV 2.1 [B&W + Red or B&W + Yellow, 3-colors (separate buffers)]
+#define WAVESHARE_RY_BW_42_UC8176_B     // Waveshare 4.2inch, REV ??? - если при выводе WAVESHARE_RY_BW_42_UC8176 инвертирует цвета (фон красным \ отдельные элементы белым \ черным)
 // #define HELTEC_BW_15_S810F           // Heltec 1.54inch 200x200 [B&W]
 
 // [Battery sensor mode] | [Режим чтения показаний заряда батареи]
@@ -83,7 +84,7 @@
 	#define EPD_DIN_PIN   -1 // Всегда GPIO 13 (MOSI) - SPI
 	
 
-#elif defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683)
+#elif defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
 
 /*
 	[Дисплеи 4.2']  

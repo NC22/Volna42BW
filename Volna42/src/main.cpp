@@ -26,7 +26,7 @@
 
 Env env = Env();
 
-#if defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176)
+#if defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_RY_BW_42_UC8176_B)
 KellyCanvas canvas = KellyCanvas(400, 300);
 Screen4in2UI screenController = Screen4in2UI(&env);
 

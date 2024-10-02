@@ -11,6 +11,8 @@
 #include "KellyEInk_42_SSD1683_BW_2BIT.h"
 #elif defined(WAVESHARE_RY_BW_42_UC8176)
 #include "KellyEInk_42_UC8176_RBW.h"
+#elif defined(WAVESHARE_RY_BW_42_UC8176_B)
+#include "KellyEInk_42_UC8176_RBW_B.h"
 #endif
 
 class Env;
@@ -28,6 +30,8 @@ class Screen4in2UI {
         KellyEInk_42_SSD1683_BW_2BIT * displayDriver  = NULL;
         #elif defined(WAVESHARE_RY_BW_42_UC8176)
         KellyEInk_42_UC8176_RBW * displayDriver  = NULL;
+        #elif defined(WAVESHARE_RY_BW_42_UC8176_B)
+        KellyEInk_42_UC8176_RBW_B * displayDriver  = NULL;
         #endif
         
         int drawTemp(int theight, bool indoor, float temperature, float humidity, float pressure, imageDrawModificators & mods, bool land = false);        

@@ -74,7 +74,7 @@ extern const char shortDateFormat[] PROGMEM;
 #include <EnvStructs.h>
 // todo - поддержка переворота экрана на 180 - нужно поменять порядок вывода полного буфера и делать правки для частичного обновления
 
-#if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683)
+#if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
 #include <Screen4in2UI.h>
 class Screen4in2UI;
 #elif defined(HELTEC_BW_15_S810F)
@@ -191,7 +191,7 @@ class Env {
 
         std::vector<uiWidgetStyle> cuiWidgets;
         KellyCanvas * canvas;
-        #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683)
+        #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
         Screen4in2UI * screen;
         #elif defined(HELTEC_BW_15_S810F)
         Screen1in54UI * screen;

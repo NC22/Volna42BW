@@ -984,7 +984,7 @@ void WebServerEink::apiTestData() {
 
         } else if (server->arg(i) == "partial_update" ) {               
             
-            #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) 
+            #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
             
                 // Serial.println("[Deep sleep INIT 4 sec]");  
                 // env->lastState.t = time(nullptr);
@@ -1001,7 +1001,7 @@ void WebServerEink::apiTestData() {
 
         } else if (server->arg(i) == "partial_update2") {   
             
-            #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683)
+            #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
             
                 if (server->method() == HTTP_POST) env->screen->updateTestPartial2();
                 

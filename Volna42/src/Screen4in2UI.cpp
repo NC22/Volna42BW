@@ -1,6 +1,6 @@
 #include <Screen4in2UI.h>
 
-#if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683)
+#if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
 
 /*
   Todo  
@@ -18,6 +18,9 @@ Screen4in2UI::Screen4in2UI(Env * nenv) {
     #elif defined(WAVESHARE_RY_BW_42_UC8176)
     #include "KellyEInk_42_UC8176_RBW.h"
     displayDriver = new KellyEInk_42_UC8176_RBW(EPD_BUSY_PIN, EPD_RST_PIN, EPD_DC_PIN, EPD_CS_PIN, EPD_CLK_PIN, EPD_DIN_PIN);
+    #elif defined(WAVESHARE_RY_BW_42_UC8176_B)
+    #include "KellyEInk_42_UC8176_RBW_B.h"
+    displayDriver = new KellyEInk_42_UC8176_RBW_B(EPD_BUSY_PIN, EPD_RST_PIN, EPD_DC_PIN, EPD_CS_PIN, EPD_CLK_PIN, EPD_DIN_PIN);
     #endif
 
     env = nenv;
