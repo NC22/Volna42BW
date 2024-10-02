@@ -153,6 +153,13 @@ class Env {
         #if defined(CO2_SCD41) 
         SensirionI2CScd4x scd4x;
         #endif
+
+        #if defined(INTERNAL_SENSOR_DS18B20)
+            OneWire * oneWire;
+            DallasTemperature * dsSensors;
+            DeviceAddress dsTermometr;
+        #endif
+
         String sanitizeResponse(String var);
         void setDefaultLastStateData();
         bool restoreRTCmem();
@@ -173,12 +180,6 @@ class Env {
             float scd4XTemp = -1000;
             float scd4XHumidity = -1000;
             unsigned int scd4XerrorTick = 0;
-        #endif
-
-        #if defined(INTERNAL_SENSOR_DS18B20)
-            OneWire * oneWire;
-            DallasTemperature * sensors;
-            DeviceAddress dsTermometr;
         #endif
 
         bool batteryInit = false;

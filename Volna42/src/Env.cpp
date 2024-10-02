@@ -1265,7 +1265,7 @@ float Env::readTemperature()  {
 
     #if defined(INTERNAL_SENSOR_DS18B20)
 
-      float tempC = sensors->getTempC(dsTermometr);
+      float tempC = dsSensors->getTempC(dsTermometr);
       if(tempC == DEVICE_DISCONNECTED_C) {
         Serial.println(F("[DS18B20] Error: Could not read temperature data"));        
       } else return tempC + tempOffset;
@@ -1508,15 +1508,15 @@ bool Env::initSensors() {
     #if defined(INTERNAL_SENSOR_DS18B20)
 
       oneWire = new OneWire(INTERNAL_SENSOR_DS18B20);
-      sensors = new DallasTemperature(oneWire);
+      dsSensors = new DallasTemperature(oneWire);
       Serial.print(F("[DS18B20] Locating devices..."));
 
-      sensors->begin();
+      dsSensors->begin();
       Serial.print(F("Found "));
-      Serial.print(sensors->getDeviceCount(), DEC);
+      Serial.print(dsSensors->getDeviceCount(), DEC);
       Serial.println(F(" devices."));  
       
-      if (!sensors->getAddress(dsTermometr, 0)) {
+      if (!dsSensors->getAddress(dsTermometr, 0)) {
         Serial.println(F("Unable to find address for Device 0")); 
         error = true;
       }
