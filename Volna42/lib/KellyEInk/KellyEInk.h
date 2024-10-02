@@ -44,7 +44,6 @@ class KellyEInk {
     public:
 
 		bool pinsInit = false;
-		bool deepSleep = true;
 		unsigned int bitMode = 1;
 
 		unsigned int displayWidth;

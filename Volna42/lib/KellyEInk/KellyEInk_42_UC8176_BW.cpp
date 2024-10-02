@@ -113,7 +113,7 @@ void KellyEInk_42_UC8176_BW::displayInit(unsigned int bitMode, bool partialMode)
 		Serial.println(F("e-Paper : used with [UNSUPPORTED COLOR MODE] 2bit, possible artifacts and wrong output"));
 	}
 
-	if (deepSleep) displayReset();		
+	displayReset();		
 	sendCommand(0x04);  // Power ON (PON)
 	readBusy();		
 

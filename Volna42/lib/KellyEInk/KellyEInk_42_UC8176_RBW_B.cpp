@@ -17,14 +17,15 @@ void KellyEInk_42_UC8176_RBW_B::display(const unsigned char *blackimage, const u
 	sendCommand(0x10);
 	for (uint16_t j = 0; j < Height; j++) {
 		for (uint16_t i = 0; i < Width; i++) {
-			sendData(blackimage[i + j * Width]);
+			if (blackimage) sendData(blackimage[i + j * Width]);
+			else sendData(FILL_BACKGROUND); 
 		}
 	}
 	
 	sendCommand(0x13);
 	for (uint16_t j = 0; j < Height; j++) {
 		for (uint16_t i = 0; i < Width; i++) {
-			if (ryimage) sendData(ryimage[i + j * Width]);
+			if (ryimage) sendData(~ryimage[i + j * Width]);
 			else sendData(~FILL_BACKGROUND);
 		}
 	}

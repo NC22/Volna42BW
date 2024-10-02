@@ -17,8 +17,6 @@ KellyEInk::KellyEInk(int16_t busy, int16_t rst, int16_t dc, int16_t cs, int16_t 
 
 void KellyEInk::displayReset()
 {
-	deepSleep = false;
-
 	if (ENK_PIN_RST < 0) {
 		return;
 	}

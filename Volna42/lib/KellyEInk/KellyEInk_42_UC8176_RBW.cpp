@@ -21,7 +21,8 @@ void KellyEInk_42_UC8176_RBW::display(const unsigned char *blackimage, const uns
 	sendCommand(0x10);
 	for (uint16_t j = 0; j < Height; j++) {
 		for (uint16_t i = 0; i < Width; i++) {
-			sendData(blackimage[i + j * Width]);
+			if (blackimage) sendData(blackimage[i + j * Width]);
+			else sendData(FILL_BACKGROUND); 
 		}
 	}
 	
@@ -29,7 +30,7 @@ void KellyEInk_42_UC8176_RBW::display(const unsigned char *blackimage, const uns
 	for (uint16_t j = 0; j < Height; j++) {
 		for (uint16_t i = 0; i < Width; i++) {
 			if (ryimage) sendData(ryimage[i + j * Width]);
-			else sendData(0xFF); // needs to be atleast filled with empty data to prevent white noise
+			else sendData(FILL_BACKGROUND); // needs to be atleast filled with empty data to prevent white noise
 		}
 	}
 	
