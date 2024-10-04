@@ -6,7 +6,7 @@
 extern const fontManifest font18x18Config PROGMEM;
 extern const fontManifest font44x44Config PROGMEM;
 
-#if defined(HELTEC_BW_15_S810F) 
+#if defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683) 
 extern imageData temp_15x48bw_settings PROGMEM;
 extern imageData temp_meter_15x48bw_settings PROGMEM;
 // extern imageData frog_new_year_hat174x139_settings PROGMEM;

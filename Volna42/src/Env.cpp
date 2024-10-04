@@ -320,6 +320,7 @@ void Env::tick() {
         resetTimers(true);
         lastState.sleepTimeCurrent = lastState.sleepTime;
         updateTelemetry();
+
         lastState.wakeUps++;
         
         if (isSyncRequired()) {
@@ -328,6 +329,7 @@ void Env::tick() {
             mqttSendCurrentData();
         }
         
+        updateExtIconState();
         updateScreen();
     } 
 }
@@ -953,7 +955,7 @@ void Env::updateExtIconState() {
     if (lastOWstate != kowUnknown) {
 
         lastState.extData.icon = lastOWstate;
-
+        
     } else {
       
       if (lastState.extData.isDataValid && lastState.lastTelemetrySize > 0) {
@@ -962,18 +964,32 @@ void Env::updateExtIconState() {
 
           if (lastState.extData.temperature > 0) {
 
-              if ((lastState.lastTelemetry[lastState.lastTelemetrySize-1].pressure / 100.0f) <= ICON_RAIN_DETECT_RAINY_HPA ) {
+              float priorityPressure = lastState.extData.pressure;
+              if (priorityPressure <= -1000) {
+                  priorityPressure = lastState.lastTelemetry[lastState.lastTelemetrySize-1].pressure;
+              } 
 
-                  if (lastState.extData.humidity >= ICON_RAIN_DETECT_RAINY_HUM) {
-                    lastState.extData.icon = kowRain;
-                  }
+              if (priorityPressure <= -1000) { 
 
-              } else if ((lastState.lastTelemetry[lastState.lastTelemetrySize-1].pressure / 100.0f) <= ICON_RAIN_DETECT_CLOUDY_HPA ) {
+                  // skip icon update, no pressure data
+                  Serial.print(F("priorityPressure skip icon update, no pressure data"));
 
-                  if (lastState.extData.humidity >= ICON_RAIN_DETECT_CLOUDY_HUM) {
-                    lastState.extData.icon = kowFewClouds;
+              } else {
+
+                  if ((priorityPressure / 100.0f) <= ICON_RAIN_DETECT_RAINY_HPA ) {
+
+                      if (lastState.extData.humidity >= ICON_RAIN_DETECT_RAINY_HUM) {
+                        lastState.extData.icon = kowRain;
+                      }
+
+                  } else if ((priorityPressure / 100.0f) <= ICON_RAIN_DETECT_CLOUDY_HPA ) {
+
+                      if (lastState.extData.humidity >= ICON_RAIN_DETECT_CLOUDY_HUM) {
+                        lastState.extData.icon = kowFewClouds;
+                      }
                   }
               }
+
           }
         #endif
 

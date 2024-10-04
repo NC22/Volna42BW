@@ -30,7 +30,7 @@ Env env = Env();
 KellyCanvas canvas = KellyCanvas(400, 300);
 Screen4in2UI screenController = Screen4in2UI(&env);
 
-#elif defined(HELTEC_BW_15_S810F)
+#elif defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
 
 KellyCanvas canvas = KellyCanvas(200, 200);
 Screen1in54UI screenController = Screen1in54UI(&env);
@@ -89,7 +89,6 @@ void setup()
 
         env.setupNTP();
         env.updateExtSensorData();
-        env.updateExtIconState();
         env.mqttSendCurrentData();
         env.wifiInfo = env.isSleepRequired() ? "" : wifi.getIP().toString(); 
 
@@ -121,6 +120,7 @@ void setup()
 
     Serial.println(F("Screen update"));    
     env.updateTelemetry();
+    env.updateExtIconState();
 
     // [extra exit] on battery low power
     // Из за неправильной каллибровки не разу не доходил до этого статуса - todo вынести переменную в конфиг для ручной калибровки порога срабатывания тригера

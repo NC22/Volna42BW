@@ -53,6 +53,7 @@
 // #define WAVESHARE_RY_BW_42_UC8176    // Waveshare 4.2inch, REV 2.1 [B&W + Red or B&W + Yellow, 3-colors (separate buffers)]
 // #define WAVESHARE_RY_BW_42_UC8176_B  // Waveshare 4.2inch, REV ??? - если при выводе WAVESHARE_RY_BW_42_UC8176 инвертирует цвета (фон красным \ отдельные элементы белым \ черным)
 // #define HELTEC_BW_15_S810F           // Heltec 1.54inch 200x200 or WeAct 1.54 200x200 [B&W]
+// #define WAVESHARE_R_BW_15_SSD1683    // Waveshare 1.54inch 200x200 [B&W + Red, 3-colors (separate buffers)]
 
 // [Battery sensor mode] | [Режим чтения показаний заряда батареи]
 
@@ -68,11 +69,12 @@
 // #define SLEEP_ALWAYS_IGNORE    // [DEBUG OPTION] Ignore sleep mode. Even if work from battery | Игнорировать режим сна. Не засыпать, даже если работаем от батареи. 
 // #define SLEEP_ALWAYS_SLEEP     // [DEBUG OPTION] Always go to sleep mode | Всегда уходить в режим сна 
 
-#if defined(HELTEC_BW_15_S810F)
+#if defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
 /*
-	WeAct, Heltec 1.54' and compatible displays
+	Пресет для дисплея 1.54 [200x200] - WeAct, Heltec, WaveShare 1.54' and compatible displays
     /api/clocktest - демо отображение полноэкранных часов с секундами
 */
+	// #define DOUBLE_BUFFER_MODE   // часть элементов может быть окрашена в доп. цвет дисплея (Желтый или Красный), требовательно к оперативке [если поддерживается дисплеем]
 	#define PARTIAL_UPDATE_SUPPORT  
 	#define COLORMODE_2BIT_SUPPORT  // Allow change image mode (1bit - 2-colors \ 2-bit 4-colors) from web panel if display supports 2-bit output 
 
@@ -92,15 +94,8 @@
 	
 
 #elif defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
-
 /*
-	[Дисплеи 4.2']  
-		
-	Выводы на плате Waveshare 4.2:
-   
-    [-1----2---3--------4-------------5-----------------6---------7---8--]
-    [BUSY|RST|DC|CS (SPI - CS)|CLK (SPI - SCLK)|DIN (SPI - MOSI)|GND|3.3V]
-   
+	Пресет для дисплея 4.2' [400x300]  - WeAct, WaveShare 4.2' and compatible displays   
 */
 
 	// [Partial screen update] | [Частичное обновление экрана]
@@ -159,11 +154,13 @@
 
 #endif
 
-// [ 4.2' Default interface ] [Оформление интерфейса по умолчанию]
+// [ 4.2' \ 1.54' Default interface ] [Оформление интерфейса по умолчанию]
 
 #define DUI_TECH_INFO true // Показывать техническую информацию мелким шрифтом (вольтаж батареи \ кол-во успешных синхронизаций с внешним датчиком, дата последней синх.) 
-#define DUI_PRESSURE_HOME false  // Показывать давление вместо надписи "влажность" если датчик поддерживает 
+#define DUI_PRESSURE_HOME true  // Показывать давление вместо надписи "влажность" если датчик поддерживает 
 #define DUI_PRESSURE_EXTERNAL true // тоже для улицы, если данные доступны
+
+// [ 4.2' Default interface ] [Оформление интерфейса по умолчанию]
 
 // Определение дождливой погоды по косвенным признакам (низкое давление + повышеная влажность)
 // закомментить если не нужно, если данные с OpenWeather, то тоже не используется
@@ -171,8 +168,8 @@
 // облачно, пока не задействовано
 #define ICON_RAIN_DETECT_CLOUDY_HPA 1000   	   
 #define ICON_RAIN_DETECT_CLOUDY_HUM 60 	
-// идет дождь [давление <= 900hPa (712 мм.рт.ст) + влажность >= 60%]		
-#define ICON_RAIN_DETECT_RAINY_HPA 950   	   
-#define ICON_RAIN_DETECT_RAINY_HUM 60 
+// идет дождь [давление <= 1009hPa (~757 мм.рт.ст) + влажность >= 74%]		
+#define ICON_RAIN_DETECT_RAINY_HPA 1009  	   
+#define ICON_RAIN_DETECT_RAINY_HUM 74 
 
 #endif	

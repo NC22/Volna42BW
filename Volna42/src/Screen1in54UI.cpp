@@ -1,10 +1,15 @@
 #include <Screen1in54UI.h>
 
-#ifdef HELTEC_BW_15_S810F
+#if defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
 
 Screen1in54UI::Screen1in54UI(Env * nenv) {
 
-    displayDriver = new KellyEInk_15_SSD1683_BW(EPD_BUSY_PIN, EPD_RST_PIN, EPD_DC_PIN, EPD_CS_PIN, EPD_CLK_PIN, EPD_DIN_PIN);
+    #if defined(HELTEC_BW_15_S810F)
+      displayDriver = new KellyEInk_15_SSD1683_BW(EPD_BUSY_PIN, EPD_RST_PIN, EPD_DC_PIN, EPD_CS_PIN, EPD_CLK_PIN, EPD_DIN_PIN);
+    #elif defined(WAVESHARE_R_BW_15_SSD1683)
+      displayDriver = new KellyEInk_15_SSD1683_RBW(EPD_BUSY_PIN, EPD_RST_PIN, EPD_DC_PIN, EPD_CS_PIN, EPD_CLK_PIN, EPD_DIN_PIN);
+    #endif
+
     env = nenv;
     constPowerTimerStart = millis();    
     widgetController = new WidgetController();
@@ -20,7 +25,7 @@ bool Screen1in54UI::is4ColorsSupported() {
   return false;  
 }
 
-int Screen1in54UI::drawTemp(int theight, String title, float temperature, float humidity, imageDrawModificators & mods) {
+int Screen1in54UI::drawTemp(int theight, bool indoor, float temperature, float humidity, float pressure, imageDrawModificators & mods) {
   
   KellyCanvas * screen = env->getCanvas();
   screen->color = tBLACK;
@@ -30,12 +35,15 @@ int Screen1in54UI::drawTemp(int theight, String title, float temperature, float 
     temperature = 22.4;
   } 
 
+  String title;
+
   if (temperature <= -1000) {
-    title = "no data";
+    title = FPSTR(locUnavailable);
     humidity = 0.0;
     temperature = -10;
   } else {
 
+    title = env->getFormattedSensorTitle(indoor);
     if (!env->celsius) {
       temperature = env->toFahrenheit(temperature);
     }
@@ -50,7 +58,18 @@ int Screen1in54UI::drawTemp(int theight, String title, float temperature, float 
   screen->setFont(&font18x18Config);
   screen->drawString(10, theight - 20, title, false);
   
-  if (humidity > -1000) {
+  bool showPressure = false;
+  if (pressure > -1000) {
+    if (indoor) {
+      showPressure = DUI_PRESSURE_HOME;
+    } else {
+      showPressure = DUI_PRESSURE_EXTERNAL;
+    }
+  } 
+
+  if (showPressure) {
+    screen->drawString(10, theight + 70 - 20,  widgetController->getPressureFormattedString(pressure, PRESSURE_HPA), false);
+  } else {
     screen->drawString(10, theight + 70 - 20,  FPSTR(locHumidity), false);
   }
 
@@ -67,10 +86,8 @@ int Screen1in54UI::drawTemp(int theight, String title, float temperature, float 
     screen->drawImage(6 + twidth, theight + 4, &fahr_39x43bw_settings, false); // Fahrenheit glyph symbol    
   }
 
-  if (humidity > -1000) {
-      sprintf(buffer, "%.1f%%", humidity);  
-      screen->drawString(10, theight + 70, buffer, false);
-  }
+  sprintf(buffer, "%.1f%%", humidity > -1000 ? humidity : 0.0f);  
+  screen->drawString(10, theight + 70, buffer, false);
 
   // temperature bar icon
 
@@ -100,13 +117,9 @@ int Screen1in54UI::drawTemp(int theight, String title, float temperature, float 
   // 16 + twidth
   screen->drawImage(twidthTitle - 26, theight - 4, &temp_15x48bw_settings, false);
      
-  // screen->color = tRY;
-  screen->resetImageMods(mods, true, false, false, -1, -1, 48, 48); 
-  screen->drawImageMods(twidthTitle - 26, theight - 4, &temp_meter_15x48bw_settings, mods, false); 
-
-  screen->resetImageMods(mods, true, false, false, -1, -1, 48 - (int) round(pixelsPerPercent * tempPercent), 48); 
+  screen->color = tRY;
+  screen->resetImageMods(mods, true, false, false, -1, -1, 48 - (int) round(pixelsPerPercent * tempPercent), 48);   
   screen->drawImageMods(twidthTitle - 26, theight - 4, &temp_meter_15x48bw_settings, mods, true); 
-
   screen->color = tBLACK; 
 
   theight += 34;
@@ -198,7 +211,7 @@ void Screen1in54UI::drawUIToBuffer() {
 
       // sensors 
 
-      theight += drawTemp(theight, FPSTR(locTemp), env->lastState.lastTelemetry[lkey].temperature, env->lastState.lastTelemetry[lkey].humidity, mods);
+      theight += drawTemp(theight, true, env->lastState.lastTelemetry[lkey].temperature, env->lastState.lastTelemetry[lkey].humidity, env->lastState.lastTelemetry[lkey].pressure, mods);
 
       // battery
 
@@ -255,7 +268,7 @@ void Screen1in54UI::drawUIToBuffer() {
 
   } else {
 
-      theight += drawTemp(theight, FPSTR(locUnavailable), -1, 0, mods);
+      theight += drawTemp(theight, true, -1000, 0, 0, mods);
   }
 
   // time & date

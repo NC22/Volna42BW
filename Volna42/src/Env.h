@@ -71,13 +71,15 @@ extern const uint8_t textDateFormat PROGMEM;
 extern const char longDateFormat[] PROGMEM;
 extern const char shortDateFormat[] PROGMEM;
 
+// todo - replace -1000 by define BAD_SENSOR_DATA
+
 #include <EnvStructs.h>
 // todo - поддержка переворота экрана на 180 - нужно поменять порядок вывода полного буфера и делать правки для частичного обновления
 
 #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
 #include <Screen4in2UI.h>
 class Screen4in2UI;
-#elif defined(HELTEC_BW_15_S810F)
+#elif defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
 #include <Screen1in54UI.h>
 class Screen1in54UI;
 #endif
@@ -204,7 +206,7 @@ class Env {
         KellyCanvas * canvas;
         #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
         Screen4in2UI * screen;
-        #elif defined(HELTEC_BW_15_S810F)
+        #elif defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
         Screen1in54UI * screen;
         #endif
         rtcData lastState;

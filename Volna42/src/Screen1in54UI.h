@@ -3,9 +3,14 @@
 
 #include <UserDefines.h>
 
-#if defined(HELTEC_BW_15_S810F)
+#if defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
 
-#include "KellyEInk_15_SSD1683_BW.h"
+#if defined(HELTEC_BW_15_S810F)
+    #include "KellyEInk_15_SSD1683_BW.h"
+#elif defined(WAVESHARE_R_BW_15_SSD1683)
+    #include "KellyEInk_15_SSD1683_RBW.h"
+#endif
+
 
 
 #include <Env.h>
@@ -26,8 +31,13 @@ class Screen1in54UI {
         unsigned long partialRefreshStart;
         // updateTime();
 
-        KellyEInk_15_SSD1683_BW * displayDriver  = NULL;
-        int drawTemp(int theight, String title, float temperature, float humidity, imageDrawModificators & mods);        
+        #if defined(HELTEC_BW_15_S810F)
+            KellyEInk_15_SSD1683_BW * displayDriver  = NULL;
+        #elif defined(WAVESHARE_R_BW_15_SSD1683)
+            KellyEInk_15_SSD1683_RBW * displayDriver  = NULL;
+        #endif
+        
+        int drawTemp(int theight, bool indoor, float temperature, float humidity, float pressure, imageDrawModificators & mods);        
         Env * env;
         bool clearRequired = false;
         bool initPinsState = false;

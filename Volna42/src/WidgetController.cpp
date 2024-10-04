@@ -149,7 +149,7 @@ void WidgetController::drawClockWidget(int baseX, int baseY, bool border, bool f
 	screen->setFont(&font18x18Config);
 }
 
-void WidgetController::drawSystemInfoWidget(int baseX, int baseY) {
+void WidgetController::drawSystemInfoWidget(int baseX, int baseY, bool shortFormat) {
   
     KellyCanvas * screen = env->getCanvas();
     screen->setFont(&font18x18Config);
@@ -174,7 +174,7 @@ void WidgetController::drawSystemInfoWidget(int baseX, int baseY) {
     } else {
 
         if (env->wifiInfo.length() > 0) {
-          screen->drawString(baseX, baseY, "IP : " + env->wifiInfo, true);    
+          screen->drawString(baseX, baseY, shortFormat && env->wifiInfo.length() >= 14 ? env->wifiInfo : "IP : " + env->wifiInfo, true);    
           baseY += 20;      
         }
 

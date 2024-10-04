@@ -100,9 +100,7 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
     screen->drawString(humMarginX, theight - 20 + humMarginY, widgetController->getPressureFormattedString(pressure, PRESSURE_HPA), false);
 
   } else {
-    if (humidity > -1000) {
-      screen->drawString(humMarginX, theight - 20 + humMarginY, FPSTR(locHumidity), false);
-    }
+    screen->drawString(humMarginX, theight - 20 + humMarginY, FPSTR(locHumidity), false);
   }
 
   // big letters metrics
@@ -118,10 +116,8 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
     screen->drawImage(6 + twidth, theight + 4, &fahr_39x43bw_settings, false); // Fahrenheit glyph symbol    
   }
 
-  if (humidity > -1000) {
-      sprintf(buffer, "%.1f%%", humidity);  
-      screen->drawString(humMarginX, theight + humMarginY, buffer, false);
-  }
+  sprintf(buffer, "%.1f%%", humidity > -1000 ? humidity : 0.0f);  
+  screen->drawString(humMarginX, theight + humMarginY, buffer, false);
 
   // temperature bar icon
 
@@ -316,7 +312,7 @@ void Screen4in2UI::drawUIToBufferLand() {
 
         int batPosX = (localWidth / 2) - 50;
         widgetController->drawBatWidget(batPosX, 0, false, false, false);
-        widgetController->drawSystemInfoWidget(10, 5);
+        widgetController->drawSystemInfoWidget(10, 5, true);
 
     } else {
 

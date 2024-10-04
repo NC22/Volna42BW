@@ -139,7 +139,7 @@ void WebServerEink::router() {
 }
 
 void WebServerEink::apiClockTest() {
-    #if defined(HELTEC_BW_15_S810F)
+    #if defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
         env->screen->enableClockMode(true);
         server->send(200, "application/json", "{\"status\":\"ok\"}"); 
     #endif
