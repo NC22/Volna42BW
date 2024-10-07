@@ -699,7 +699,7 @@ int Screen4in2UI::drawCat(bool land) {
           if (env->lastState.extData.icon == kowRain || env->lastState.extData.icon == kowShowerRain) {
 
               hpad += 128; 
-              marginX = land ? calcMarginMiddle(localWidth/2, 122) : localWidth - 122;
+              marginX = land ? calcMarginMiddle(localWidth/2, 122) : localWidth - 135;
               screen->drawImage(marginX + 18, localHeight - hpad - 25, &rain_93x52bw_settings, true);
               
               screen->drawImage(marginX, localHeight - hpad, &cat_rain_127x125bw_settings, true);
