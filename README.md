@@ -9,7 +9,7 @@ A weather station project with a monochrome E-Ink display
 
 - E-Ink displays 4.2' (400x300), 1.5' (200x200)  
   (Waveshare, WeAct, Heltec or equivalents - [List of supported displays](https://volna42.com/displays/))
-- Temperature and humidity sensor - BME280; Optional CO2 - SCD41 sensor; Optional temperature - DS18B20 sensor;
+- Temperature and humidity sensor - BME280; Optional : CO2 - SCD41 sensor, Temp - DS18B20 sensor;
 - Arduino Framework (C++, PlatformIO); compatible with **ESP8266** and **ESP32**
 - Create and upload your own design through the web panel
 - Autonomous mode - the device wakes up every 10 minutes (default) and updates the screen. A 2000 mAh 18650 battery lasts for several months
