@@ -951,6 +951,13 @@ void Env::updateExtIconState() {
 
     lastState.extData.icon = kowUnknown;
 
+    // опционально наследуем данные по давлению с внутреннего датчика если данные по давлению не доступны
+    #if defined(DUI_PRESSURE_COPY_TO_EXT)
+      if (lastState.extData.isDataValid && lastState.extData.pressure <= -1000) {
+          lastState.extData.pressure = lastState.lastTelemetry[lastState.lastTelemetrySize-1].pressure;
+      }
+    #endif
+
     // openweather or other accurate method chached weather state
     if (lastOWstate != kowUnknown) {
 
@@ -995,6 +1002,7 @@ void Env::updateExtIconState() {
 
       }
     }
+
 }
 
 /*

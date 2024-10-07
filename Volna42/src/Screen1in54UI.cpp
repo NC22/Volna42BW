@@ -67,8 +67,36 @@ int Screen1in54UI::drawTemp(int theight, bool indoor, float temperature, float h
     }
   } 
 
+  bool showCO4 = false;
+  #if defined(CO2_SCD41) && defined(DUI_CO4)
+    if (indoor) {
+      showCO4 = true;
+      showPressure = false;
+    }
+  #endif
+
   if (showPressure) {
     screen->drawString(10, theight + 70 - 20,  widgetController->getPressureFormattedString(pressure, PRESSURE_HPA), false);
+
+  } else if (showCO4) {
+
+    #if defined(CO2_SCD41)  
+
+    if (!env->updateSCD4X()) {
+
+      screen->drawString(humMarginX, theight - 20 + humMarginY, "no data (SCD4X)", false);
+
+    } else {
+      
+      String result = String(env->scd4XCO2);
+      result += " ";
+      result += FPSTR(locCO2);
+
+      screen->drawString(10, theight + 70 - 20, result, false);
+    }
+
+    #endif
+
   } else {
     screen->drawString(10, theight + 70 - 20,  FPSTR(locHumidity), false);
   }

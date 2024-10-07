@@ -71,6 +71,78 @@ function KellyImgUplDebug() {
         return [src[key][0], src[key][1], src[key][2],];
     }
     
+    handler.bufferToText1PixelPerByte = function() {
+         
+        // 0x7FFF, 0x5AD6, 0x318C, 0x0000
+        // white, darker, more darker, darkes
+        var palete = {WHITE : 0, GRAY1 : 1, GRAY2 : 2, BLACK : 3};
+        var colorsBits = {WHITE : [1, 1], BLACK : [0, 0], GRAY1: [1, 0], GRAY2: [0, 1] };
+        
+        var sbController = window.ENV.getSB();
+        var bufferData = [];
+        var sb = window.ENV.getSB();
+        var byteN = 0, bitCursor = 0;
+        
+        for (var bufferY = 0; bufferY < sb.screenHeight; bufferY++) {
+              
+              for (var bufferX = 0; bufferX < sb.screenWidth; bufferX++) {                    
+                                             
+                    if (sbController.bufferBitPerPixel == 2) {
+                        
+                        var bitData = [sbController.getBit(sbController.buffer[byteN], bitCursor), sbController.getBit(sbController.buffer[byteN], bitCursor+1)];
+                        var color = palete.BLACK;
+                        
+                             if (colorsBits.WHITE[0] == bitData[0] && colorsBits.WHITE[1] == bitData[1]) color = palete.WHITE;
+                        else if (colorsBits.GRAY1[0] == bitData[0] && colorsBits.GRAY1[1] == bitData[1]) color = palete.GRAY1;
+                        else if (colorsBits.GRAY2[0] == bitData[0] && colorsBits.GRAY2[1] == bitData[1]) color = palete.GRAY2;
+                        
+                    } else {
+                       
+                        var pixel = !sbController.getBit(sbController.buffer[byteN], bitCursor) ? true : false; // 0 - black, 1 - white
+                        var color = palete.WHITE;
+                        if (pixel) {
+                            color = palete.BLACK;                           
+                        }
+                    }
+                    
+                    bufferData.push(color);
+                                        
+                    bitCursor+=sbController.bufferBitPerPixel;                    
+                    if (bitCursor > 7) {
+                        byteN++;
+                        bitCursor = 0;                            
+                    }                   
+              }
+        }
+        
+        handler.bufferToText(bufferData);
+    }
+    
+    handler.bufferToText = function(bufferData) {
+         
+        var bits = '';  
+        var byteData = '';
+        var sb = window.ENV.getSB();
+        if (!bufferData) bufferData = sb.buffer;
+        
+        var t = 1;
+        if (bufferData.length <= 0) return;
+        for(var y = 0; y < bufferData.length; y++) {
+
+             byteData += '0x' + bufferData[y].toString(16).toUpperCase() + ', ';   
+             t += 1;
+             
+             if (t > 20) {
+                byteData += "\r\n";
+                t = 1;
+             } else t++;
+             
+        }
+               
+        KellyTools.downloadFile(byteData, 'screen_buffer' + sb.screenWidth +'x' + sb.screenHeight + '_' + '.txt', "text/plain");
+        return byteData;
+    }
+    
     handler.init = function() {
         
             debugTools.id = "debug-tools";
@@ -142,5 +214,19 @@ function KellyImgUplDebug() {
             ENV.getSB().init(ENVDATA.screen.width, ENVDATA.screen.height);
             gid('img-up-fit-mode').onchange();              
         }
+        
+        var downloadTxt = document.createElement('BUTTON');
+            downloadTxt.innerText = 'Скачать текстовый массив (txt)';
+            downloadTxt.onclick = handler.bufferToText;
+                    
+        var downloadTxt2 = document.createElement('BUTTON');
+            downloadTxt2.innerText = 'Скачать 1 Pixel per Byte (txt)';
+            downloadTxt2.onclick = handler.bufferToText1PixelPerByte;
+            
+        var downloadsBlock = document.getElementById('disp-cui-download');
+            downloadsBlock.children[0].appendChild(downloadTxt);
+            downloadsBlock.children[0].appendChild(downloadTxt2);
+        
     }
+    
 }

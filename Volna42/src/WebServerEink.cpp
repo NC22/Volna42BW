@@ -1186,6 +1186,7 @@ void WebServerEink::apiUpdate() {
     env->resetPartialData();
     env->updateTelemetry();
     env->updateExtSensorData();
+    env->updateExtIconState();
     env->mqttSendCurrentData();
     env->resetTimers();
     env->updateScreen();
