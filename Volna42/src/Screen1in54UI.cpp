@@ -84,10 +84,10 @@ int Screen1in54UI::drawTemp(int theight, bool indoor, float temperature, float h
 
     if (!env->updateSCD4X()) {
 
-      screen->drawString(humMarginX, theight - 20 + humMarginY, "no data (SCD4X)", false);
+      screen->drawString(10, theight + 70 - 20, "no data (SCD4X)", false);
 
     } else {
-      
+
       String result = String(env->scd4XCO2);
       result += " ";
       result += FPSTR(locCO2);
