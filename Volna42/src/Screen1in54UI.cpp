@@ -68,7 +68,7 @@ int Screen1in54UI::drawTemp(int theight, bool indoor, float temperature, float h
   } 
 
   bool showCO4 = false;
-  #if defined(CO2_SCD41) && defined(DUI_CO4)
+  #if defined(CO2_SCD41) && defined(DUI_CO2)
     if (indoor) {
       showCO4 = true;
       showPressure = false;

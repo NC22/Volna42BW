@@ -95,7 +95,7 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
   } 
 
   bool showCO4 = false;
-  #if defined(CO2_SCD41) && defined(DUI_CO4) 
+  #if defined(CO2_SCD41) && defined(DUI_CO2) 
     if (indoor) {
       showCO4 = true; 
       showPressure = false;
@@ -118,7 +118,8 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
 
     } else {
 
-      String result = String(env->scd4XCO2);
+      String result = "CO2 : ";
+      result += String(env->scd4XCO2);
       result += " ";
       result += FPSTR(locCO2);
 
