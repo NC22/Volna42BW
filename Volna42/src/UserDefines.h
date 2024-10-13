@@ -27,7 +27,7 @@
 #define EXTERNAL_SENSOR_CONNECT_TIMEOUT 15000 // Connection timeout in milliseconds | Максимальное время ожидания ответа сервера (HA & Domoticz & Openweather) 
 #define NTP_CONNECT_ATTEMPTS 3
 
-#define PARTIAL_UPDATE_INTERVAL 120           // Интервал частичного обновления экрана (если поддерживается) В секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
+#define PARTIAL_UPDATE_INTERVAL 120           // Интервал частичного обновления экрана по умолчанию (если поддерживается) в секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
 
 // [Внутренний сенсор температуры]
 
@@ -77,11 +77,6 @@
 	// #define DOUBLE_BUFFER_MODE   // часть элементов может быть окрашена в доп. цвет дисплея (Желтый или Красный), требовательно к оперативке [если поддерживается дисплеем]
 	#define PARTIAL_UPDATE_SUPPORT  
 	#define COLORMODE_2BIT_SUPPORT  // Allow change image mode (1bit - 2-colors \ 2-bit 4-colors) from web panel if display supports 2-bit output 
-
-  // [Deprecated, Dont use] Не используется - сейчас везде порядок вывода пикселей инициализируется командами на уровне контроллера
-  // #define WEB_BUFFER_MOD_FLIPX  // для кастомных картинок экрана - приведение к единому начальному положению интерфейса и чистого буфера, для тестов ENVDATA.screen.bufferMod = "flipx";
-  // #define WEB_BUFFER_MOD_FLIPX
-  // #define WEB_BUFFER_MOD_FLIPXY
 
   // ESP8266
 

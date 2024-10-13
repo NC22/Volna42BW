@@ -426,9 +426,10 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
           screen->drawRoundedSquare(baseX-2, baseY-2, widgetWidth+2, widgetHeight+2, 4, false, 0);
       }
 
-      if (!env->updateSCD4X()) {
-
+      if (env->scd4XCO2 == 0) {
+        
         screen->drawString(baseX, baseY, "no data (SCD4X)", true);
+        
       } else {
 
             char buffer[128];

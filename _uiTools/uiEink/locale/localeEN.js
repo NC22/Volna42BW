@@ -10,7 +10,7 @@ var ENVLOCALE = {
     "cfg_timezone" : "Timezone",
     "cfg_toFahrenheit" : "Temperature units (0 - Celsius, 1 - Fahrenheit)",
     "cfg_timeFormat12" : "12-hours format (0-1)",
-    "cfg_updateMinutes" : "Update minutes (0-1)",
+    "cfg_updateMinutes" : "Update minutes (0-1 or number of seconds)",
     "cfg_titleIndoor" : "Indoor title",
     "cfg_titleExternal" : "Outdoor title",
     "cfg_timestamp" : "Date & Time",

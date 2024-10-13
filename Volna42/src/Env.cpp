@@ -17,7 +17,6 @@ Env::Env() {
     
     secondTimerStart = millis();
     cuiWidgets.clear();
-    resetTimers(true);
     resetPartialData(); // pos will restore from RTC memory
 
     #if defined(SLEEP_SWITCH_PIN)    
@@ -42,6 +41,7 @@ void Env::begin() {
       Serial.println(F("[CONFIG] IGNORED -> Run in SAFE MODE"));   
   #endif
 
+  resetTimers(true);
   initSensors();
 
   #if defined(ESP32)
@@ -83,9 +83,10 @@ void Env::begin() {
         #if defined(PARTIAL_UPDATE_SUPPORT)
 
           if (lastState.updateMinutes) {
-
-              lastState.sleepTimeCurrent -= PARTIAL_UPDATE_INTERVAL;
-              lastState.t += PARTIAL_UPDATE_INTERVAL;
+            
+              int partialUpdateTime = getPartialSleepTime();
+              lastState.sleepTimeCurrent -= partialUpdateTime;
+              lastState.t += partialUpdateTime;
               defaultTime = lastState.t;
 
               if (lastState.sleepTimeCurrent > 0) {
@@ -274,7 +275,7 @@ void Env::initDefaultTime() {
 
     } else {
 
-      setenv("TZ", timezone.c_str(), 1);
+      setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
       tzset();
     }
 
@@ -364,7 +365,7 @@ void Env::restartNTP(bool resetOnly) {
     ntp = false;
     lastError = "";
 
-    setenv("TZ", timezone.c_str(), 1);
+    setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
     tzset();
 
     timeval tv = { 0, 0 };
@@ -388,9 +389,9 @@ bool Env::setupNTP(unsigned int attempt) {
     ntp = true;
 
     #if defined(ESP32)
-      configTzTime(timezone.c_str(), ntpServer.c_str());
+      configTzTime(cfg.cfgValues[cTimezone].c_str(), ntpServer.c_str());
     #else 
-      configTime(timezone.c_str(), ntpServer);
+      configTime(cfg.cfgValues[cTimezone].c_str(), ntpServer);
     #endif
 
     yield();
@@ -486,9 +487,10 @@ void Env::sleep()  {
         Serial.print(F("[Deep sleep] FIX_DEEPSLEEP "));  
 
         if (lastState.updateMinutes) {
-          Serial.println(PARTIAL_UPDATE_INTERVAL); 
+          int partialSleepTime = getPartialSleepTime();
+          Serial.println(partialSleepTime); 
           delay(300); // may be can be removed, just serial output will be broken
-          nkDeepsleep(PARTIAL_UPDATE_INTERVAL * 1000000, FIX_DEEPSLEEP);
+          nkDeepsleep(partialSleepTime * 1000000, FIX_DEEPSLEEP);
         } else {
           Serial.println(lastState.sleepTime); 
           delay(300);
@@ -500,8 +502,9 @@ void Env::sleep()  {
       Serial.print(F("[Deep sleep] "));  
 
       if (lastState.updateMinutes) {
-        Serial.println(PARTIAL_UPDATE_INTERVAL); 
-        ESP.deepSleep(PARTIAL_UPDATE_INTERVAL * 1000000);
+        int partialSleepTime = getPartialSleepTime();
+        Serial.println(partialSleepTime); 
+        ESP.deepSleep(partialSleepTime * 1000000);
       } else {
         Serial.println(lastState.sleepTime); 
         ESP.deepSleep(lastState.sleepTime * 1000000);
@@ -584,7 +587,6 @@ void Env::mqttHAAutodetectionInit() {
 
       Serial.println(F("Home Assistant auto-discovery device initialize ...")); 
       String tmp;
-      String base;
       String comm;
 
       Serial.println(rawMqttIds[0]); 
@@ -609,6 +611,22 @@ void Env::mqttHAAutodetectionInit() {
       if (!_mqttClient.publish(comm.c_str(), tmp.c_str(), true)) {
         Serial.println(F("[mqttHAAutodetectionInit] Fail send - pressure info")); 
       }
+
+      #if defined(CO2_SCD41) 
+      
+      String tmp2 = tmp;
+      tmp2.replace(F("\"name\":\"pressure\""), F("\"name\":\"CO2\""));
+      tmp2.replace(F("pressure"), F("carbon_dioxide"));
+      tmp2.replace(F("hPa"), F("ppm"));
+      comm = cfg.cfgValues[cMqttHAPrefix] + String("/sensor/" + rawMqttIds[0] + "/carbon_dioxide/config");   
+
+      if (!_mqttClient.publish(comm.c_str(), tmp2.c_str(), true)) {
+        Serial.println(F("[mqttHAAutodetectionInit] Fail send - carbon_dioxide info")); 
+      }
+      tmp2 = "";
+      // tmp.replace(F("carbon_dioxide"), F("pressure"));
+      // tmp.replace(F("ppm"), F("hPa"));
+      #endif      
 
       tmp.replace(F("pressure"), F("humidity"));
       tmp.replace(F("hPa"), F("%"));
@@ -736,11 +754,10 @@ bool Env::mqttSendCurrentData() {
         String tmp;
         String metric;                
         int testMqttId;
-
         
         Serial.println(F("[Domoticz] Send data")); 
         
-        for (int i = 2; i >= 0; i--) {
+        for (int i = 3; i >= 0; i--) {
           
           if (i+1 > (int) rawMqttIds.size()) {
             testMqttId = -1;
@@ -752,11 +769,15 @@ bool Env::mqttSendCurrentData() {
                if (i == 2) metric = String(readTemperature());  // temp
           else if (i == 1) metric += ";" + String(h) + ";" + String(hStat); // temp & hum
           else if (i == 0) metric += ";" + String((float) (readPressure() / 100.0)) + ";0"; // temp & hum & bar
-
-          tmp = "{\"idx\":" + String(testMqttId) + ",\"nvalue\":0,\"svalue\":\"" + metric + "\"}";
-
-          //    Serial.println(i); 
-          //    Serial.println(metric); 
+          else if (i == 3) {
+            #if defined(CO2_SCD41) 
+              updateSCD4X();
+              metric += String(scd4XCO2);
+            #else 
+              metric += "0";
+              testMqttId = -1;
+            #endif
+          }
 
           if (testMqttId <= 0) {
               
@@ -766,6 +787,14 @@ bool Env::mqttSendCurrentData() {
 
           } else {
 
+              // air quality - reads from nvalue
+              if (i == 3) {
+                tmp = "{\"idx\":" + String(testMqttId) + ",\"nvalue\":" + metric +",\"svalue\":\"" + metric + "\"}";
+              } else {
+                tmp = "{\"idx\":" + String(testMqttId) + ",\"nvalue\":0,\"svalue\":\"" + metric + "\"}";
+              }
+
+              Serial.println(tmp); 
               _mqttClient.publish(cfg.cfgValues[cMqttPrefixIn].c_str(), tmp.c_str());
               mqttSuccess = true;
           }
@@ -787,6 +816,11 @@ bool Env::mqttSendCurrentData() {
               payload += ",\"battery\":" + String((int) round(getBatteryLvlfromV(lastState.lastTelemetrySize)));
           } else payload += ",\"battery\":100";
         } else payload += ",\"battery\":100";
+
+        #if defined(CO2_SCD41) 
+          updateSCD4X();
+          payload += ",\"carbon_dioxide\":" + String(scd4XCO2);
+        #endif 
 
         payload += "}";
 
@@ -818,13 +852,8 @@ bool Env::cuiIsEnabled() {
 }
 
 void Env::resetTimers(bool minuteTimerOnly) {
-
-  #if defined(PARTIAL_UPDATE_INTERVAL)
-    minuteTimer = PARTIAL_UPDATE_INTERVAL;
-  #else
-    minuteTimer = 60;
-  #endif
-
+  
+  minuteTimer = getPartialSleepTime();
   if (minuteTimerOnly) return;  
   
   unsigned long now = millis();
@@ -1135,12 +1164,17 @@ bool Env::updateExtSensorData(unsigned int attempt) {
           /*
             Domoticz
 
+            old url format - /json.htm?type=devices&rid=___ID___ 
+            new url format - /json.htm?type=command&param=getdevices&rid=___ID___
+
             "BatteryLevel" : 89,
             "Data" : "34.8 C, 36 %",
             "Name" : "\u0414\u0430\u0442\u0447\u0438\u043a ... \u043a (Temperature + Humidity)",
             "Humidity" : 36.0,
 
             HA
+
+            url format - /api/states/___ID___
 
             "battery": 87,
             "battery_low": false,
@@ -1245,6 +1279,7 @@ void Env::updateTelemetry()  {
     Serial.println(lastState.lastTelemetry[key].temperature);
     Serial.println(lastState.lastTelemetry[key].humidity);
     Serial.println(lastState.lastTelemetry[key].bat);
+    updateSCD4X();
 }
 
 bool Env::updateSCD4X() {
@@ -1255,27 +1290,48 @@ bool Env::updateSCD4X() {
 
   #else
 
+    // sensor api return errors when read faster -> return cached value
+    if (scd4XLastRead > 0 && millis() - scd4XLastRead < 1000) {  
+        Serial.println(F("[updateSCD4X] Reading delay. Prevent read faster then once per second"));
+        return (scd4XCO2 > 0) ? true : false;
+    }
+
+    scd4XLastRead = millis();
     uint16_t error; 
     char errorMessage[256];
     error = scd4x.readMeasurement(scd4XCO2, scd4XTemp, scd4XHumidity);
     if (error) {
-        Serial.print("Error trying to execute readMeasurement(): ");
+
+        Serial.print(F("Error trying to execute readMeasurement(): "));
         errorToString(error, errorMessage, 256);
+
         Serial.println(errorMessage);
         scd4XerrorTick++;
-        return (scd4XerrorTick <= 3 && scd4XTemp > -1000) ? true : false;
+
+        if (scd4XerrorTick > 3) {
+          scd4XCO2 = 0;
+        } 
+
+        return (scd4XCO2 > 0) ? true : false;
+
     } else if (scd4XCO2 == 0) {
-        Serial.println("Invalid sample detected, skipping.");
+
+        Serial.println(F("Invalid sample detected, skipping."));
         scd4XerrorTick++;
-        return (scd4XerrorTick <= 3 && scd4XTemp > -1000) ? true : false;
+
+        if (scd4XerrorTick > 3) {
+          scd4XCO2 = 0;
+        }
+
+        return (scd4XCO2 > 0) ? true : false;
+
     } else {
-        Serial.print("Co2:");
-        Serial.print(scd4XCO2);
-        Serial.print("\t");
-        Serial.print("Temperature:");
-        Serial.print(scd4XTemp);
-        Serial.print("\t");
-        Serial.print("Humidity:");
+
+        Serial.print(F("[SCD4X] CO2: "));
+        Serial.println(scd4XCO2);
+        Serial.print(F("[SCD4X] Temperature: "));
+        Serial.println(scd4XTemp);
+        Serial.print(F("[SCD4X] Humidity: "));
         Serial.println(scd4XHumidity);
         scd4XerrorTick = 0;
         return true;
@@ -2585,6 +2641,25 @@ bool Env::cuiReadStorageFile(bool widgetsOnly) {
   return true;
 }
 
+/*
+  Get Partial update time based on user config.
+  If user setted cUpdateMinutes = 1, default PARTIAL_UPDATE_INTERVAL or 60sec will be used, if setted any correct integer seconds value > 60 it will be accepted instead
+*/
+int Env::getPartialSleepTime() {
+  
+    int partialSleepTime = cfg.getInt(cUpdateMinutes);
+    if (cfg.sanitizeError || partialSleepTime < 60 || partialSleepTime > lastState.sleepTime) {
+      
+        #if defined(PARTIAL_UPDATE_INTERVAL)
+          partialSleepTime = PARTIAL_UPDATE_INTERVAL;
+        #else
+          partialSleepTime = 60;
+        #endif
+    }
+
+    return partialSleepTime;
+}
+
 // sync config sensetive variables stored in RTC
 
 void Env::applyConfigToRTC(bool configUpdate) {
@@ -2683,7 +2758,7 @@ void Env::validateConfig(unsigned int version, std::vector<cfgOptionKeys> * upda
         rawMqttIds[1].trim();
 
       } else if (cfg.cfgValues[cMqttDevicesIds].length() > 0) {
-          cfg.getStringList(cfg.cfgValues[cMqttDevicesIds], rawMqttIds, ',', 3);
+          cfg.getStringList(cfg.cfgValues[cMqttDevicesIds], rawMqttIds, ',', 4);
       }
     }
 
@@ -2694,8 +2769,6 @@ void Env::validateConfig(unsigned int version, std::vector<cfgOptionKeys> * upda
     if (cfg.cfgValues[cTimezone].length() <= 0) {
         cfg.cfgValues[cTimezone] = FPSTR(cdTimezone);
     }  
-
-    timezone = cfg.cfgValues[cTimezone];
 
     if (cfg.cfgValues[cNtpHosts].length() <= 0) {
        cfg.cfgValues[cNtpHosts] = FPSTR(cdNtpHosts);

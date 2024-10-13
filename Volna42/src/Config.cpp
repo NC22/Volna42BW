@@ -133,6 +133,10 @@ bool Config::set(cfgOptionKeys key, String value) {
     return true;
 }   
 
+/*
+    Return copy of config value string
+    use cfg.cfgValues for direct access strings data
+*/
 String Config::getString(cfgOptionKeys key) {
 
     String state = "";

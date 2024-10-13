@@ -82,7 +82,7 @@ int Screen1in54UI::drawTemp(int theight, bool indoor, float temperature, float h
 
     #if defined(CO2_SCD41)  
 
-    if (!env->updateSCD4X()) {
+    if (env->scd4XCO2 == 0) {
 
       screen->drawString(10, theight + 70 - 20, "no data (SCD4X)", false);
 

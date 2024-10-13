@@ -65,7 +65,7 @@ const char longDateFormat[] PROGMEM = "%d.%m.%y";   // Date string format (2-str
 
 const uint8_t cfgCelsius PROGMEM = 1;                  // 0-1 | Use Celsius instead of Fahrenheit by default
 const uint8_t cfg12HourFormat PROGMEM = 0;             // 0-1 | Use 12 hour PM / AM clock format by default 
-const uint8_t cfgUpdateMinutes PROGMEM = 0;            // 0-1 | Update clock widget every minute (actual period is defined in PARTIAL_UPDATE_INTERVAL)
+const uint8_t cfgUpdateMinutes PROGMEM = 0;            // 0-1 or number of seconds | Update clock widget interval (if = 1, PARTIAL_UPDATE_INTERVAL will be used as defaul update interval time)
 
 const char cdTimezone[] PROGMEM = "MSK-3";             // timezone - list https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h
 const char cdNtpHosts[] PROGMEM = "pool.ntp.org";      // ntp server - если не используется, задать - off и очистить поле timezone, в таком случае время можно определить вручную через панель управления

@@ -10,7 +10,7 @@ var ENVLOCALE = {
     "cfg_timezone" : "Часовой пояс",
     "cfg_toFahrenheit" : "Единицы измерения температуры (0 - Цельсий, 1 - Фаренгейт)",
     "cfg_timeFormat12" : "12-часовой формат (0-1)",
-    "cfg_updateMinutes" : "Обновлять минуты (0-1)",    
+    "cfg_updateMinutes" : "Обновлять минуты (0-1 или кол-во секунд)",    
     "cfg_titleIndoor" : "Заголовок датчика помещения",
     "cfg_titleExternal" : "Заголовок внешнего датчика",
     "cfg_timestamp" : "Дата & Время",

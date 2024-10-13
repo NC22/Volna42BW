@@ -112,7 +112,7 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
     #if defined(CO2_SCD41)  
     if (!land) humMarginX -= 10;
 
-    if (!env->updateSCD4X()) {
+    if (env->scd4XCO2 == 0) {
 
       screen->drawString(humMarginX, theight - 20 + humMarginY, "no data (SCD4X)", false);
 

@@ -111,6 +111,9 @@ void WebServerEink::router() {
     } else if (server->uri().indexOf("/api/delete/notification") != -1) {
         env->lastError = "";
         server->send(200, "application/json", "{\"status\":\"ok\"}"); 
+    } else if (server->uri().indexOf("/api/hide/ip") != -1) {
+        env->wifiInfo = "127.0.0.1"; // default
+        server->send(200, "application/json", "{\"status\":\"ok\"}"); 
     } else if (server->uri().indexOf("/api/buffer") != -1) {
         apiGetBuffer();
     } else if (server->uri().indexOf("/api/testloop") != -1) {
@@ -822,18 +825,7 @@ void WebServerEink::showUploadImagePage() {
     currentCfg += "\"width\":" + String(env->canvas->getWidth()) + ",";
     currentCfg += "\"height\":" + String(env->canvas->getHeight()) + ",";
     currentCfg += "\"bitPerPixel\":" + String(env->canvas->bitPerPixel) + ",";
-    
-    // for align wth default rotation
-    #if defined(WEB_BUFFER_MOD_FLIPXY)
-        currentCfg += "\"bufferMod\":\"flipxy\",";
-    #elif defined(WEB_BUFFER_MOD_FLIPX)
-        currentCfg += "\"bufferMod\":\"flipx\",";
-    #elif defined(WEB_BUFFER_MOD_FLIPY)
-        currentCfg += "\"bufferMod\":\"flipy\",";
-    #else
-        currentCfg += "\"bufferMod\":false,";
-    #endif
-    
+        
     if (env->screen->is4ColorsSupported()) {
         currentCfg += "\"color4\":true,";
     } else {
@@ -928,7 +920,7 @@ String WebServerEink::getInfo() {
             }
 
             #if defined(CO2_SCD41)
-            if (env->updateSCD4X()) {
+            if (env->scd4XCO2 != 0) {
 
                 json += "\"temperature__scd4x\":" + String(env->scd4XTemp) + ",";
                 json += "\"humidity__scd4x\":" + String(env->scd4XHumidity) + ",";

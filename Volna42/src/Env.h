@@ -166,6 +166,7 @@ class Env {
         void setDefaultLastStateData();
         bool restoreRTCmem();
         void applyConfigToRTC(bool configUpdate = false);
+        int getPartialSleepTime();
         
         void mqttMessageReceivedCallback(char* topic, uint8_t* payload, unsigned int length);
 
@@ -174,7 +175,6 @@ class Env {
         KellyOWIconType lastOWstate = kowUnknown;
 
     public:
-        String timezone = "MSK-3";
         time_t defaultTime = 1510592825;
 
         #if defined(CO2_SCD41) 
@@ -182,6 +182,7 @@ class Env {
             float scd4XTemp = -1000;
             float scd4XHumidity = -1000;
             unsigned int scd4XerrorTick = 0;
+            unsigned long scd4XLastRead = 0;
         #endif
 
         bool batteryInit = false;
