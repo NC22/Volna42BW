@@ -1281,7 +1281,8 @@ void Env::updateTelemetry()  {
     Serial.println(lastState.lastTelemetry[key].temperature);
     Serial.println(lastState.lastTelemetry[key].humidity);
     Serial.println(lastState.lastTelemetry[key].bat);
-    
+
+  #if defined(CO2_SCD41) 
     if (updateSCD4X()) {
         Serial.print(F("[SCD4X] CO2: "));
         Serial.println(scd4XCO2);
@@ -1290,6 +1291,7 @@ void Env::updateTelemetry()  {
         Serial.print(F("[SCD4X] Humidity: "));
         Serial.println(scd4XHumidity);
     }
+  #endif
 }
 
 bool Env::updateSCD4X() {
