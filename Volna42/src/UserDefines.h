@@ -3,8 +3,8 @@
 
 #if defined(ESP32)
 
-#define DEFAULT_I2C_SCL 35 // I2C SCL [ESP32] Can be assigned any unused pin
-#define DEFAULT_I2C_SDA 36 // I2C SDA [ESP32] Can be assigned any unused pin
+#define DEFAULT_I2C_SCL 41 // I2C SCL [ESP32] Can be assigned any unused pin
+#define DEFAULT_I2C_SDA 42 // I2C SDA [ESP32] Can be assigned any unused pin
 
 #define DEEPSLEEP_MEMORY 1  // 1 - Использовать RTC (энергозависимая память) при уходе в режим глубокого сна, 2 - Использовать NVS память (постоянная память - рекомендуется использовать если есть проблемы с RTC)
 
