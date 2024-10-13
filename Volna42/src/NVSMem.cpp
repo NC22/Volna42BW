@@ -2,31 +2,25 @@
 #include <NVSMem.h>
 #if defined(ESP32)
 
-
-RTC_DATA_ATTR rtcData RTCLastState;                      
+RTC_DATA_ATTR uint8_t RTCLastStateRaw[sizeof(rtcData)];
+RTC_DATA_ATTR bool RTCLastStateRawWrited = false;
 
 bool readRTCUserMemoryActualRTC(rtcData &lastState) {
-    if (RTCLastState.t == 0 && RTCLastState.cfgVersion == 0) return false;
 
-    lastState = RTCLastState;
+    if (!RTCLastStateRawWrited) return false;
+
+    memcpy(&lastState, RTCLastStateRaw, sizeof(rtcData));
     return true;
 }
 
 bool writeRTCUserMemoryActualRTC(rtcData &lastState) {
-    RTCLastState.t = lastState.t;
-    RTCLastState.cfgVersion = lastState.cfgVersion;
+
+    memcpy(RTCLastStateRaw, &lastState, sizeof(rtcData));
+    RTCLastStateRawWrited = true;
     return true;
 }
 
-/* 
-    через RTC_DATA_ATTR не срабатывает, надо проверять более детально
-
-    вариант замены методов ESP8266 для работы с энергозависимой памятью (сохранение переменных при переходе в сон)
-    в ESP32 память постоянная
-    опционально при необходимости можно расширить функционал добавлением хранилищ с другими названиями
-*/
-
-bool readRTCUserMemory(uint32_t index, uint32_t* data, size_t len) {
+bool readRTCUserMemoryNVS(uint32_t* data, size_t len) {
     nvs_handle_t nvsHandle;
     esp_err_t err = nvs_open("storage", NVS_READONLY, &nvsHandle);
     if (err != ESP_OK) {
@@ -40,7 +34,7 @@ bool readRTCUserMemory(uint32_t index, uint32_t* data, size_t len) {
     return (err == ESP_OK);
 }
 
-bool writeRTCUserMemory(uint32_t index, uint32_t* data, size_t len) {
+bool writeRTCUserMemoryNVS(uint32_t* data, size_t len) {
     nvs_handle_t nvsHandle;
     esp_err_t err = nvs_open("storage", NVS_READWRITE, &nvsHandle);
     if (err != ESP_OK) {

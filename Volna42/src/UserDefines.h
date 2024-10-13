@@ -3,8 +3,10 @@
 
 #if defined(ESP32)
 
-#define DEFAULT_I2C_SCL 41 // I2C SCL [ESP32] Can be assigned any unused pin
-#define DEFAULT_I2C_SDA 42 // I2C SDA [ESP32] Can be assigned any unused pin
+#define DEFAULT_I2C_SCL 35 // I2C SCL [ESP32] Can be assigned any unused pin
+#define DEFAULT_I2C_SDA 36 // I2C SDA [ESP32] Can be assigned any unused pin
+
+#define DEEPSLEEP_MEMORY 1  // 1 - Использовать RTC (энергозависимая память) при уходе в режим глубокого сна, 2 - Использовать NVS память (постоянная память - рекомендуется использовать если есть проблемы с RTC)
 
 #else
 
@@ -29,17 +31,17 @@
 
 #define PARTIAL_UPDATE_INTERVAL 120           // Интервал частичного обновления экрана по умолчанию (если поддерживается) в секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
 
-// [Внутренний сенсор температуры]
+// [Main temperature sensor] | [Внутренний сенсор температуры]
 
 #define INTERNAL_SENSOR_BME280   true         // BME280, подхватывается по I2C 
-// #define INTERNAL_SENSOR_DS18B20  2         // DS18B20 - сенсор температуры - указать пин подключения (2 - GPIO2 - D4), если BME280 так же присутствует на I2C шине то c него будут взяты Hum & Pressure
+// #define INTERNAL_SENSOR_DS18B20  2         // DS18B20 - сенсор температуры - указать пин подключения (2 - GPIO2 - D4). если используется, добавить библиотеку в platformio.ini из типовых конфигов, если BME280 так же присутствует на I2C шине то c него будут взяты Hum & Pressure
 
-// [Дополнительные внутренние датчики]
+// [Addition internal sensors] | [Дополнительные внутренние датчики]
 
 // Поддержка датчика CO2 - SCD41 (Вывод данных через виджеты в кастомном интерфейсе и веб-панели)
-// #define CO2_SCD41  // если используется, раскомментить библиотеку в platformio.ini ~требует +3-4кб оперативки (может не хватать памяти для некоторых действий в web-ui если используется 2-bit графика на ESP8266)
+// #define CO2_SCD41  // если используется, добавить библиотеку в platformio.ini из типовых конфигов ~требует +3-4кб оперативки (может не хватать памяти для некоторых действий в web-ui если используется 2-bit графика на ESP8266)
 
-// [Language] - заголовки "улица" \ "дом" вынесен в настройки веб-интерфейса в раздел "Общие настройки"
+// [Language] | [Язык интерфейса] - заголовки "улица" \ "дом" вынесен в настройки веб-интерфейса в раздел "Общие настройки"
 
 #define LOCALE_RU  // Русский
 // #define LOCALE_JA  // Japan
@@ -57,6 +59,8 @@
 
 // [Battery sensor mode] | [Режим чтения показаний заряда батареи]
 
+#define BAT_MIN_V 3.25           // 0%
+#define BAT_MAX_V 4.2            // 100%, low bat tick 10%
 // #define BAT_NO                // Disable battery sensor - always ON | Выключить чтение показаний батареи - не засыпать
 // #define BAT_ADS1115           // Read V by ADS1115 module | Чтение V батареи через I2C модуль ADS1115 [Input = A1, R1V=50.7kOm, R2GND=99.26kOm, Env::readBatteryV()]
 #define BAT_A0 0                 // Read V by analog pin A0 (or by PIN N in ESP32) | Чтение V через аналоговый вход A0 (или через заданый пин в ESP32) [ESP8266, R1V=180kOm], [ESP32, R1V=50.7kOm, R2GND=99.26kOm, Env::readBatteryV()]
@@ -113,8 +117,9 @@
 
 	#if defined(ESP32)
 
-		// https://docs.platformio.org/en/latest/boards/espressif32/esp32-s3-devkitc-1.html
-		// ESP32 мало проверял, но вроде ок. Там практически нет ограничений на какие пины что можно назначать, в тестовой сборке работало с такой распиновкой
+		// WEMOS LOLIN S2 Mini - протестировано, наиболее оптимальный вариант замены ESP8266 по размерам, функционалу
+		// клон ESP32-S3-DevKitC - протестировано
+		// В ESP32 практически нет ограничений на какие пины что можно назначать, в тестовой сборке работало с такой распиновкой, избегайте использования пинов SPI RAM (PSRAM), RX, TX, 0
 
 		#define EPD_BUSY_PIN 4  
 		#define EPD_RST_PIN  5 

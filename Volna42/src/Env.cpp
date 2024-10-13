@@ -190,8 +190,15 @@ bool Env::restoreRTCmem() {
 
 #if defined(ESP32)
 
-    if (!readRTCUserMemory(0, (uint32_t*) &lastState, sizeof(lastState))) {
-    // if (!readRTCUserMemoryActualRTC(lastState)) {
+    bool restoreResult = false;
+    
+    #if !defined(DEEPSLEEP_MEMORY) || DEEPSLEEP_MEMORY == 1
+        restoreResult = readRTCUserMemoryActualRTC(lastState);        
+    #else
+        restoreResult = readRTCUserMemoryNVS((uint32_t*) &lastState, sizeof(lastState));
+    #endif
+
+    if (!restoreResult) {
         lastState.cfgVersion = 0;
         lastState.t = 0;
     }
@@ -469,8 +476,11 @@ void Env::saveCurrentState()  {
 
 #if defined(ESP32)
 
-  writeRTCUserMemory(0, (uint32_t*)&lastState, sizeof(lastState));
-  // writeRTCUserMemoryActualRTC(lastState);
+  #if !defined(DEEPSLEEP_MEMORY) || DEEPSLEEP_MEMORY == 1
+      writeRTCUserMemoryActualRTC(lastState);
+  #else
+      writeRTCUserMemoryNVS((uint32_t*)&lastState, sizeof(lastState));
+  #endif
 
 #else
     ESP.rtcUserMemoryWrite (0, (uint32_t*) &lastState, sizeof(lastState));
@@ -1574,8 +1584,14 @@ float Env::getBatteryLvlfromV(float v) {
   
     // float min = 3.0;
     // ~3.25V [ESP8266] - подключен экран + BME280 + ADS1115 не смог выйти из сна в один момент, начинаются перебои в работе
+
+    #if defined(BAT_MIN_V) && defined(BAT_MAX_V)
+    float min = BAT_MIN_V;
+    float max = BAT_MAX_V;
+    #else
     float min = 3.25;
     float max = 4.2;
+    #endif
 
     if (v <= min) return 0.0;
     if (v >= max) return 100.0;

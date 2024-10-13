@@ -93,8 +93,8 @@ class Screen1in54UI;
     #define REASON_DEEP_SLEEP_AWAKE ESP_RST_DEEPSLEEP
     #define REASON_SOFT_RESTART ESP_RST_SW
 
-    extern bool readRTCUserMemory(uint32_t index, uint32_t* data, size_t len);
-    extern bool writeRTCUserMemory(uint32_t index, uint32_t* data, size_t len);
+    extern bool readRTCUserMemoryNVS(uint32_t* data, size_t len);
+    extern bool writeRTCUserMemoryNVS(uint32_t* data, size_t len);
     extern bool readRTCUserMemoryActualRTC(rtcData &lastState);
     extern bool writeRTCUserMemoryActualRTC(rtcData &lastState);
 #else

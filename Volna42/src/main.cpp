@@ -44,6 +44,8 @@ void setup()
 {
   Serial.begin(115200);
 
+  // delay(5000);
+
   env.canvas = &canvas;
   env.screen = &screenController;
   env.begin(); 
@@ -122,8 +124,7 @@ void setup()
     env.updateTelemetry();
     env.updateExtIconState();
 
-    // [extra exit] on battery low power
-    // Из за неправильной каллибровки не разу не доходил до этого статуса - todo вынести переменную в конфиг для ручной калибровки порога срабатывания тригера
+    // [extra exit] on battery low power, lowBatTick - 10% от заряда
     // По наблюдениям - для запуска ESP8266 + экран + I2S датчики критическое напряжение аккумулятора ~3.57v-3.50v - после, в определенный цикл запуска устройство может выключится в процессе работы
     // или просто не проснутся
 
