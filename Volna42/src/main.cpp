@@ -80,7 +80,7 @@ void setup()
     if (wifiStatus != WL_CONNECTED && env.getConfig()->getString(cWifiNetworkFallback).length()) {
         wifiStatus = wifi.connect(env.getConfig()->getString(cWifiNetworkFallback), env.getConfig()->getString(cWifiPasswordFallback)); 
         fallBackWifi = true;
-        Serial.println(F("Fail to connect main Wifi. Fallback wifi used"));
+        Serial.println(F("FAIL to connect main Wifi. Fallback wifi used"));
     }
 
     if (wifiStatus == WL_CONNECTED) {
@@ -96,7 +96,7 @@ void setup()
 
       // Not on battery & WiFi connection fail -> Run as Access Point
 
-      Serial.print(F("fail to connect Wifi - ")); 
+      Serial.print(F("FAIL to connect Wifi - ")); 
       if (!fallBackWifi) Serial.println(env.getConfig()->getString(cWifiNetwork)); 
       else {
         Serial.print(F("Fallback - ")); 
@@ -115,10 +115,10 @@ void setup()
       // если на устройстве сохранено время по умолчанию, оно будет использовано
 
       env.wifiInfo = FPSTR(noWiFi);
-      Serial.println(F("fail to connect Wifi - critical - device not configured"));    
+      Serial.println(F("FAIL to connect Wifi - critical - device not configured"));    
     }
 
-    Serial.println(F("Screen update"));    
+    Serial.println(F("[Screen update]"));    
     env.updateTelemetry();
     env.updateExtIconState();
 

@@ -596,8 +596,8 @@ void Env::mqttHAAutodetectionInit() {
 
       tmp = "{\"device_class\":\"temperature\",\"name\":\"temperature\",\"state_topic\":\"" + tstate + "/info\",\"unit_of_measurement\":\"°C\",\"value_template\":\"{{value_json.temperature}}\",\"unique_id\":\"" + rawMqttIds[0] + "_temperature\",\"device\":{\"identifiers\":[\"" + rawMqttIds[0] + "_device\"],\"name\":\"" + rawMqttIds[1] + "\",\"model\":\"KellyC42ESP8266\",\"manufacturer\":\"Nradiowave\"}}";
       comm = cfg.cfgValues[cMqttHAPrefix] + String("/sensor/" + rawMqttIds[0] + "/temperature/config");
-      Serial.println(comm); 
-      Serial.println(tmp); 
+      // Serial.println(comm); 
+      // Serial.println(tmp); 
 
       if (!_mqttClient.publish(comm.c_str(), tmp.c_str(), true)) {
         Serial.println(F("[mqttHAAutodetectionInit] Fail send - temperature info")); 
@@ -632,8 +632,8 @@ void Env::mqttHAAutodetectionInit() {
       tmp.replace(F("hPa"), F("%"));
 
       comm = cfg.cfgValues[cMqttHAPrefix] + String("/sensor/" + rawMqttIds[0] + "/humidity/config");      
-      Serial.println(comm); 
-      Serial.println(tmp); 
+      // Serial.println(comm); 
+      // Serial.println(tmp); 
 
       if (!_mqttClient.publish(comm.c_str(), tmp.c_str(), true)) {
         Serial.println(F("[mqttHAAutodetectionInit] Fail send - humidity info")); 
@@ -755,7 +755,7 @@ bool Env::mqttSendCurrentData() {
         String metric;                
         int testMqttId;
         
-        Serial.println(F("[Domoticz] Send data")); 
+        Serial.print(F("[Domoticz]...")); 
         
         for (int i = 3; i >= 0; i--) {
           
@@ -769,7 +769,7 @@ bool Env::mqttSendCurrentData() {
                if (i == 2) metric = String(readTemperature());  // temp
           else if (i == 1) metric += ";" + String(h) + ";" + String(hStat); // temp & hum
           else if (i == 0) metric += ";" + String((float) (readPressure() / 100.0)) + ";0"; // temp & hum & bar
-          else if (i == 3) {
+          else if (i == 3) { // air quality
             #if defined(CO2_SCD41) 
               updateSCD4X();
               metric += String(scd4XCO2);
@@ -794,7 +794,7 @@ bool Env::mqttSendCurrentData() {
                 tmp = "{\"idx\":" + String(testMqttId) + ",\"nvalue\":0,\"svalue\":\"" + metric + "\"}";
               }
 
-              Serial.println(tmp); 
+              // Serial.println(tmp); 
               _mqttClient.publish(cfg.cfgValues[cMqttPrefixIn].c_str(), tmp.c_str());
               mqttSuccess = true;
           }
@@ -807,6 +807,7 @@ bool Env::mqttSendCurrentData() {
         
         String tstate; String payload;
         
+        Serial.print(F("[Home Assistant]...")); 
         tstate = "home/" + rawMqttIds[0] + "/info";
 
         payload = "{\"temperature\":" + String(readTemperature()) + ",\"humidity\":" + String(readHumidity()) + ",\"pressure\":" + String((float) (readPressure() / 100.0));
@@ -824,13 +825,14 @@ bool Env::mqttSendCurrentData() {
 
         payload += "}";
 
-        Serial.println(tstate); 
-        Serial.println(payload); 
-        if (!_mqttClient.publish(tstate.c_str(), payload.c_str())) {
+        // Serial.println(tstate); 
+        // Serial.println(payload); 
 
-           Serial.println("FAIL to send INFO");
+        if (!_mqttClient.publish(tstate.c_str(), payload.c_str())) {
+           Serial.println("FAIL to publish INFO via MQTT");
         } else {
-          mqttSuccess = true;
+          mqttSuccess = true;            
+          Serial.println("OK");
         }
 
         /*
@@ -1275,11 +1277,19 @@ void Env::updateTelemetry()  {
       lastState.lowBatTick = 0;
     }
 
-    Serial.println(F("updateTelemetry"));
+    Serial.println(F("[updateTelemetry] - Internal sensors data : "));
     Serial.println(lastState.lastTelemetry[key].temperature);
     Serial.println(lastState.lastTelemetry[key].humidity);
     Serial.println(lastState.lastTelemetry[key].bat);
-    updateSCD4X();
+    
+    if (updateSCD4X()) {
+        Serial.print(F("[SCD4X] CO2: "));
+        Serial.println(scd4XCO2);
+        Serial.print(F("[SCD4X] Temperature: "));
+        Serial.println(scd4XTemp);
+        Serial.print(F("[SCD4X] Humidity: "));
+        Serial.println(scd4XHumidity);
+    }
 }
 
 bool Env::updateSCD4X() {
@@ -1302,7 +1312,7 @@ bool Env::updateSCD4X() {
     error = scd4x.readMeasurement(scd4XCO2, scd4XTemp, scd4XHumidity);
     if (error) {
 
-        Serial.print(F("Error trying to execute readMeasurement(): "));
+        Serial.print(F("[updateSCD4X] Error trying to execute readMeasurement(): "));
         errorToString(error, errorMessage, 256);
 
         Serial.println(errorMessage);
@@ -1316,7 +1326,7 @@ bool Env::updateSCD4X() {
 
     } else if (scd4XCO2 == 0) {
 
-        Serial.println(F("Invalid sample detected, skipping."));
+        Serial.println(F("[updateSCD4X] Invalid sample detected, skipping."));
         scd4XerrorTick++;
 
         if (scd4XerrorTick > 3) {
@@ -1327,12 +1337,6 @@ bool Env::updateSCD4X() {
 
     } else {
 
-        Serial.print(F("[SCD4X] CO2: "));
-        Serial.println(scd4XCO2);
-        Serial.print(F("[SCD4X] Temperature: "));
-        Serial.println(scd4XTemp);
-        Serial.print(F("[SCD4X] Humidity: "));
-        Serial.println(scd4XHumidity);
         scd4XerrorTick = 0;
         return true;
     }
@@ -2649,7 +2653,7 @@ int Env::getPartialSleepTime() {
   
     int partialSleepTime = cfg.getInt(cUpdateMinutes);
     if (cfg.sanitizeError || partialSleepTime < 60 || partialSleepTime > lastState.sleepTime) {
-      
+        
         #if defined(PARTIAL_UPDATE_INTERVAL)
           partialSleepTime = PARTIAL_UPDATE_INTERVAL;
         #else

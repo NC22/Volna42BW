@@ -80,7 +80,7 @@ const cfgOption cfgOptions[] = {
     {cSyncEvery, ctypeString, false, pgmCfgSyncEvery, false},
     {cTimeFormat12, ctypeBool, false, pgmCfgTimeFormat12, false},
 
-    {cUpdateMinutes, ctypeBool, false, pgmCfgUpdateMinutes, false},
+    {cUpdateMinutes, ctypeInt, false, pgmCfgUpdateMinutes, false},
     {cTitleIndoor, ctypeString, false, pgmCfgTitleIndoor, false},
     {cTitleExternal, ctypeString, false, pgmCfgTitleExternal, false},
 };
