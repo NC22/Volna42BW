@@ -19,6 +19,7 @@
 
 #include <EnvConfigOptions.h>
 #include <UserDefines.h>
+#include <SystemDefines.h>
 #include <UserSettings.h>
 #include <LocalData.h>
 #include <KellyCanvas.h>

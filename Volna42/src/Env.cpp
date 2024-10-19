@@ -1011,13 +1011,13 @@ void Env::updateExtIconState() {
         #if defined(ICON_RAIN_DETECT)
 
           if (lastState.extData.temperature > 0) {
-
+              
               float priorityPressure = lastState.extData.pressure;
-              if (priorityPressure <= -1000) {
+              if (priorityPressure <= BAD_SENSOR_DATA) {
                   priorityPressure = lastState.lastTelemetry[lastState.lastTelemetrySize-1].pressure;
               } 
 
-              if (priorityPressure <= -1000) { 
+              if (priorityPressure <= BAD_SENSOR_DATA) { 
 
                   // skip icon update, no pressure data
                   Serial.print(F("priorityPressure skip icon update, no pressure data"));
@@ -1028,12 +1028,16 @@ void Env::updateExtIconState() {
 
                       if (lastState.extData.humidity >= ICON_RAIN_DETECT_RAINY_HUM) {
                         lastState.extData.icon = kowRain;
+                        return;
                       }
 
-                  } else if ((priorityPressure / 100.0f) <= ICON_RAIN_DETECT_CLOUDY_HPA ) {
+                  }
+                  
+                  if ((priorityPressure / 100.0f) <= ICON_RAIN_DETECT_CLOUDY_HPA ) {
 
                       if (lastState.extData.humidity >= ICON_RAIN_DETECT_CLOUDY_HUM) {
                         lastState.extData.icon = kowFewClouds;
+                        return;
                       }
                   }
               }
@@ -1117,10 +1121,10 @@ bool Env::updateExtSensorData(unsigned int attempt) {
      
     externalSensorData newData;
     newData.isDataValid = false;
-    newData.temperature = -1000;
-    newData.humidity = -1000;
-    newData.bat = -1000;
-    newData.pressure = -1000;
+    newData.temperature = BAD_SENSOR_DATA;
+    newData.humidity = BAD_SENSOR_DATA;
+    newData.bat = BAD_SENSOR_DATA;
+    newData.pressure = BAD_SENSOR_DATA;
     newData.t = time(nullptr);
 
     #if defined(ESP32)
@@ -1205,22 +1209,29 @@ bool Env::updateExtSensorData(unsigned int attempt) {
             
             newData.temperature = KellyOWParserTools::validateFloatVal(collectedData);
             if (newData.temperature <= -1000) {   
+
                Serial.print(F("Bad data : no temperature")); Serial.println(payload.substring(0, 255));
                lastError = "External sensor error : no temperature data";
+
             } else {
+
                 newData.isDataValid = true;
                 
                 KellyOWParserTools::collectJSONFieldData(homeAssistant ? "humidity" : "Humidity", payload, collectedData, maxLength);
                 newData.humidity = KellyOWParserTools::validateFloatVal(collectedData);
-                KellyOWParserTools::collectJSONFieldData(homeAssistant ? "pressure" : "Barometer", payload, collectedData, maxLength);
+
+                KellyOWParserTools::collectJSONFieldData(homeAssistant ? "pressure" : "Barometer", payload, collectedData, maxLength);                
                 newData.pressure = KellyOWParserTools::validateFloatVal(collectedData);
+
                 if (newData.pressure > -1000) {
                     newData.pressure = newData.pressure * 100.0f;
                 }
+
                 KellyOWParserTools::collectJSONFieldData(homeAssistant ? "battery" : "BatteryLevel", payload, collectedData, maxLength);
                 newData.bat = KellyOWParserTools::validateFloatVal(collectedData);
-                      if (newData.bat > 100) newData.bat = 100;
-                 else if (newData.bat < 0) newData.bat = -1000;
+
+                     if (newData.bat > 100) newData.bat = 100;
+                else if (newData.bat < 0) newData.bat = -1000;
             }
             
             Serial.println(F("Collect data - OK, Result :")); 

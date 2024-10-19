@@ -37,7 +37,7 @@ int Screen1in54UI::drawTemp(int theight, bool indoor, float temperature, float h
 
   String title;
 
-  if (temperature <= -1000) {
+  if (temperature <= BAD_SENSOR_DATA) {
     title = FPSTR(locUnavailable);
     humidity = 0.0;
     temperature = -10;
@@ -59,7 +59,7 @@ int Screen1in54UI::drawTemp(int theight, bool indoor, float temperature, float h
   screen->drawString(10, theight - 20, title, false);
   
   bool showPressure = false;
-  if (pressure > -1000) {
+  if (pressure > BAD_SENSOR_DATA) {
     if (indoor) {
       showPressure = DUI_PRESSURE_HOME;
     } else {
@@ -114,7 +114,7 @@ int Screen1in54UI::drawTemp(int theight, bool indoor, float temperature, float h
     screen->drawImage(6 + twidth, theight + 4, &fahr_39x43bw_settings, false); // Fahrenheit glyph symbol    
   }
 
-  sprintf(buffer, "%.1f%%", humidity > -1000 ? humidity : 0.0f);  
+  sprintf(buffer, "%.1f%%", humidity > BAD_SENSOR_DATA ? humidity : 0.0f);  
   screen->drawString(10, theight + 70, buffer, false);
 
   // temperature bar icon
@@ -296,7 +296,7 @@ void Screen1in54UI::drawUIToBuffer() {
 
   } else {
 
-      theight += drawTemp(theight, true, -1000, 0, 0, mods);
+      theight += drawTemp(theight, true, BAD_SENSOR_DATA, 0, 0, mods);
   }
 
   // time & date
@@ -579,14 +579,27 @@ void Screen1in54UI::updatePartialClock() {
     widgetController->partialDataApplyMaxBounds();
     KellyCanvas * screen = env->getCanvas();
 
+    /*
+        displayDriver->displayPartial(
+          screen->bufferBW, 
+          env->lastState.lastPartialPos.xStart, 
+          env->lastState.lastPartialPos.yStart, 
+          env->lastState.lastPartialPos.xEnd, 
+          env->lastState.lastPartialPos.yEnd, 
+          true, 
+          true
+        );
+    */
+
+    // less visual artifacts
     displayDriver->displayPartial(
-      screen->bufferBW, 
+      NULL, 
       env->lastState.lastPartialPos.xStart, 
       env->lastState.lastPartialPos.yStart, 
       env->lastState.lastPartialPos.xEnd, 
       env->lastState.lastPartialPos.yEnd, 
       true, 
-      true
+      false
     );
 
     displayDriver->displayPartial(

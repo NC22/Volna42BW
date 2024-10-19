@@ -34,6 +34,8 @@ extern imageData rain_93x52bw_settings PROGMEM;
 extern imageData snowflakes_116x39bw_settings PROGMEM;
 extern imageData moon_clear_93x63bw_settings PROGMEM;
 extern imageData sun_clear_68x66bw_settings PROGMEM;
+extern imageData sun_cloudy_82x56bw_settings PROGMEM;
+extern imageData moon_cloudy_78x60bw_settings PROGMEM;
 
 extern const char locIndoor[] PROGMEM;
 extern const char locOutdoor[] PROGMEM;

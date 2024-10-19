@@ -1,5 +1,6 @@
 #include <EnvConfigTypes.h>
 #include <UserDefines.h>
+#include <SystemDefines.h>
 #include <Arduino.h>
 
 const char pgmCfgWifiNetwork[] PROGMEM = "wifiNetwork";

@@ -8,6 +8,7 @@
 
 
 #include <UserDefines.h>
+#include <SystemDefines.h>
 #include <WidgetTypes.h>
 #include "Config.h"
 

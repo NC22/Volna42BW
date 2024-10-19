@@ -3,7 +3,7 @@
    @description    Library for draw frame buffer
    @author         Rubchuk Vladimir <torrenttvi@gmail.com> aka nradiowave
    @license        GPLv3
-   @version        v0.7 
+   @version        v0.71 
 	
 	Part of Volna 42 project  |  https://42volna.com/
 

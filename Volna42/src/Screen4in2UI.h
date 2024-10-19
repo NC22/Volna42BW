@@ -2,6 +2,7 @@
 #define Screen4in2_h
 
 #include <UserDefines.h>
+#include <SystemDefines.h>
 #include <Env.h>
 #include <ScreenExternData.h>
 
@@ -35,7 +36,7 @@ class Screen4in2UI {
         #endif
         
         int drawTemp(int theight, bool indoor, float temperature, float humidity, float pressure, imageDrawModificators & mods, bool land = false);        
-        int drawCat(bool land = false);        
+        void drawCat(bool land = false);        
         void drawWidget(uiWidgetStyle & widget);
         void drawBat(int baseX, int baseY, bool invert, bool ext, bool shortFormat);
 
@@ -57,7 +58,7 @@ class Screen4in2UI {
         WidgetController * widgetController;
 
         void initPins();
-        int drawWeaterIcon(KellyCanvas * screen, bool cold, bool night, int hpad, bool land = false);
+        int drawWeaterIcon(KellyCanvas * screen, bool night, bool clouds, bool land = false, int baseX = -1, int baseY = -1);
         int calcMarginMiddle(int spaceWidth, int objectWidth);
         int getDevidedBy8Num(int x, bool upper = false);
 

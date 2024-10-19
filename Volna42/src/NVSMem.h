@@ -9,6 +9,7 @@
 #include <nvs.h>
 #include <EnvStructs.h>
 #include <UserDefines.h>
+#include <SystemDefines.h>
 
 // My replacement methods to ESP8266 RTC read functions, with similar input vars
 

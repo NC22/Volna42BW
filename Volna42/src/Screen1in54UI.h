@@ -2,6 +2,7 @@
 #define Screen1in54_h
 
 #include <UserDefines.h>
+#include <SystemDefines.h>
 
 #if defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
 

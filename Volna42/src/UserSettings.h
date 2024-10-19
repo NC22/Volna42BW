@@ -33,7 +33,7 @@
 #include <ui/out/locale_en/locale.h>
 #endif
 
-const char productVersion[] PROGMEM = "0.93";
+const char productVersion[] PROGMEM = "0.94";
 
 // [Режим точки доступа в случае отсутствия возможности подключится к Wifi]
 

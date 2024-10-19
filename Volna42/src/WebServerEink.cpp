@@ -121,6 +121,9 @@ void WebServerEink::router() {
         env->updateScreen();
         server->send(200, "application/json", "{\"status\":\"ok\"}"); 
         return; 
+    } else if (server->uri().indexOf("/api/mqttsync") != -1) {
+        server->send(200, "application/json", env->mqttSendCurrentData() ? "{\"status\":\"ok\"}" : "{\"status\":\"fail\"}"); 
+        return; 
     } else if (server->uri().indexOf("/api/testdata") != -1) {
         apiTestData();
     } else {
@@ -914,7 +917,7 @@ String WebServerEink::getInfo() {
 
                 json += "\"temperature__external\":" + String(lastState.extData.temperature) + ",";
                 json += "\"humidity__external\":" + String(lastState.extData.humidity) + ",";
-                if (lastState.extData.pressure > -1000) {
+                if (lastState.extData.pressure > BAD_SENSOR_DATA) {
                     json += "\"pressure__external\":" + String(lastState.extData.pressure) + ",";
                 }
             }
@@ -960,17 +963,63 @@ String WebServerEink::getInfo() {
     return json;
 }
 
+/*
+    Test display states & scenarios
+
+    http://192.168.0.1/api/testdata?preset=ext_winter
+
+    // changes Date & Time + Temperature & Humidity
+
+    ext_winter -- cold day, no clouds 
+    ext_summer || ext_day -- warm summer day, no clouds
+    ext_overheat -- summer day +35C
+    ext_rain   -- summer rainy
+    ext_night  -- after 20:00
+    ext_night_cloudy -- after 20:00 with clouds
+    ext_night_sleep -- after 00:00
+    ext_night_sleep_cloudy -- after 00:00 with clouds
+    ext_day_cloudy  -- summer day, clouds
+
+    // changes Battery level
+
+    ext_bat_full --  100%
+    ext_bat_mid -- ~50%
+    ext_bat_low | ext_bat_low2 -- 5-11%
+
+    // bad input from external sensor
+
+    ext_bad_data
+
+    // partial update test mode 
+
+    partial_update | partial_update2
+
+*/
 void WebServerEink::apiTestData() {
 
+    String result = "fail";
     for (int i = 0; i < server->args(); i++)  {
 
         if (server->argName(i).indexOf("preset") == -1) continue;
+
+        if (env->lastState.lastTelemetrySize <= 0 || env->lastState.lastTelemetry[env->lastState.lastTelemetrySize-1].temperature <= BAD_SENSOR_DATA) {
+            
+            Serial.println(F("[apiTestData] No sensor detected - used default telemetry"));
+
+            env->lastState.lastTelemetrySize = 1;
+            env->lastState.lastTelemetry[0].bat = 50;
+            env->lastState.lastTelemetry[0].humidity = 40.0f;
+            env->lastState.lastTelemetry[0].temperature = 23.0f;
+            env->lastState.lastTelemetry[0].pressure = 1200.0f  * 100.0f;
+        }
     
         if (server->arg(i) == "ext_bad_data") {   
-
-            env->lastState.extData.temperature = -1000;
-            env->lastState.extData.humidity = -1000;
-            env->lastState.extData.bat = -1000;      
+            
+            result = server->arg(i);
+            env->lastState.extData.temperature = BAD_SENSOR_DATA;
+            env->lastState.extData.humidity = BAD_SENSOR_DATA;
+            env->lastState.extData.bat = BAD_SENSOR_DATA;
+            env->lastState.extData.pressure = BAD_SENSOR_DATA;
             env->lastState.extData.isDataValid = false;
             env->lastState.extData.t = time(nullptr);
 
@@ -987,22 +1036,24 @@ void WebServerEink::apiTestData() {
                 
                 // ESP.deepSleep(4 * 1000000);
                 
-                server->send(200, "application/json", "{\"status\":\"ok\"}");
+                server->send(200, "application/json", "{\"status\":\"updateTestPartial\"}");
                 return;
             #endif
 
         } else if (server->arg(i) == "partial_update2") {   
             
+            result = server->arg(i);
             #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
             
                 if (server->method() == HTTP_POST) env->screen->updateTestPartial2();
                 
-                server->send(200, "application/json", "{\"status\":\"ok\"}");
+                server->send(200, "application/json", "{\"status\":\"updateTestPartial2\"}");
                 return;
             #endif
 
         } else if (server->arg(i) == "ext_bat_full" || server->arg(i) == "ext_bat_mid" || server->arg(i) == "ext_bat_low" || server->arg(i) == "ext_bat_low2"){
 
+            result = server->arg(i);
             env->lastState.extData.temperature = 12.12f;
             env->lastState.extData.humidity = 48.7f;
 
@@ -1019,8 +1070,19 @@ void WebServerEink::apiTestData() {
             env->lastState.extData.isDataValid = true;
             env->lastState.extData.t = time(nullptr);
 
-        } else if (server->arg(i) == "ext_summer" || server->arg(i) == "ext_winter" || server->arg(i) == "ext_overheat" || server->arg(i) == "ext_rain"){
+        } else if (server->arg(i) == "ext_summer" || 
+                   server->arg(i) == "ext_winter" || 
+                   server->arg(i) == "ext_overheat" || 
+                   server->arg(i) == "ext_rain" || 
+                   server->arg(i) == "ext_night_cloudy" || 
+                   server->arg(i) == "ext_night" || 
+                   server->arg(i) == "ext_night_sleep" || 
+                   server->arg(i) == "ext_night_sleep_cloudy" || 
+                   server->arg(i) == "ext_day" || 
+                   server->arg(i) == "ext_day_cloudy"
+        ){
 
+            result = server->arg(i);
             if (server->arg(i) == "ext_winter") {
 
                 env->getConfig()->cfgValues[cTimestamp] = "2024-02-03 12:32:04";
@@ -1029,7 +1091,7 @@ void WebServerEink::apiTestData() {
 
             } else if (server->arg(i) == "ext_overheat") {
 
-                env->getConfig()->cfgValues[cTimestamp] = "2024-02-03 15:32:04";
+                env->getConfig()->cfgValues[cTimestamp] = "2024-07-03 15:32:04";
                 env->lastState.extData.temperature = 40.12f;
                 env->lastState.extData.humidity = 10.8f;
 
@@ -1037,11 +1099,47 @@ void WebServerEink::apiTestData() {
 
                 env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 15:32:04";
                 env->lastState.extData.temperature = 25.12f;
-                env->lastState.extData.humidity = ICON_RAIN_DETECT_RAINY_HUM+1;                
-                env->lastState.lastTelemetry[env->lastState.lastTelemetrySize-1].pressure = (ICON_RAIN_DETECT_RAINY_HPA-10) * 100.0f;
+                env->lastState.extData.humidity = ICON_RAIN_DETECT_RAINY_HUM+1;             
+                env->lastState.extData.pressure = (ICON_RAIN_DETECT_RAINY_HPA-10) * 100.0f; 
 
-            }  else {
+            } else if (server->arg(i) == "ext_night") {
 
+                env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 22:32:04";
+                env->lastState.extData.temperature = 25.12f;
+                env->lastState.extData.humidity = 20.0f;
+                env->lastState.extData.pressure = 1200.0f * 100.0f;
+
+            } else if (server->arg(i) == "ext_night_cloudy") {
+
+                env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 22:30:04";
+                env->lastState.extData.temperature = 25.12f;
+                env->lastState.extData.humidity = ICON_RAIN_DETECT_CLOUDY_HUM+1;                
+                env->lastState.extData.pressure = (ICON_RAIN_DETECT_CLOUDY_HPA-10) * 100.0f;
+
+            } else if (server->arg(i) == "ext_night_sleep") {
+
+                env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 00:30:04";
+                env->lastState.extData.temperature = 25.12f;
+                env->lastState.extData.humidity = 20.0f;
+                env->lastState.extData.pressure = 1200.0f * 100.0f;
+
+            }  else if (server->arg(i) == "ext_night_sleep_cloudy") {
+
+                env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 00:30:04";
+                env->lastState.extData.temperature = 25.12f;
+                env->lastState.extData.humidity = ICON_RAIN_DETECT_CLOUDY_HUM+1;                
+                env->lastState.extData.pressure = (ICON_RAIN_DETECT_CLOUDY_HPA-10) * 100.0f;
+
+            }  else if (server->arg(i) == "ext_day_cloudy") {
+
+                env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 15:30:04";
+                env->lastState.extData.temperature = 25.12f;
+                env->lastState.extData.humidity = ICON_RAIN_DETECT_CLOUDY_HUM+1;                
+                env->lastState.extData.pressure = (ICON_RAIN_DETECT_CLOUDY_HPA-10) * 100.0f;
+
+            } else { // summer
+
+                result = "default preset - summer day";
                 env->lastState.extData.temperature = 27.12f;
                 env->lastState.extData.humidity = 50.7f;
                 env->getConfig()->cfgValues[cTimestamp] = "2024-06-12 15:44:04";
@@ -1054,6 +1152,9 @@ void WebServerEink::apiTestData() {
             std::vector<cfgOptionKeys> updatedKeys;
             updatedKeys.push_back(cTimestamp);
             env->validateConfig(-1, &updatedKeys);
+        } else {
+            
+            result = "unknown preset";
         }
 
         break;
@@ -1061,7 +1162,7 @@ void WebServerEink::apiTestData() {
     
     env->updateExtIconState();
     env->updateScreen();
-    server->send(200, "application/json", "{\"status\":\"ok\"}");
+    server->send(200, "application/json", "{\"status\":\"" + result + "\"}");
 
 }
 
@@ -1175,11 +1276,20 @@ void WebServerEink::apiUpdate() {
 
     server->send(200, "application/json", "{\"status\":\"ok\"}");
 
+    
+    Serial.println(F("[apiUpdate] : refresh telemetry "));
+
     env->resetPartialData();
     env->updateTelemetry();
+    
+    Serial.println(F("[apiUpdate] : update external sensor "));
+
     env->updateExtSensorData();
     env->updateExtIconState();
-    env->mqttSendCurrentData();
+
+    // mqttSendCurrentData, keep less operations to prevent soft-wdt-reset
+    Serial.println(F("[apiUpdate] : update screen"));
+
     env->resetTimers();
     env->updateScreen();
 

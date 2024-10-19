@@ -2,11 +2,6 @@
 
 #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
 
-/*
-  Todo  
-  Частичное обновление отключено для 2-bit режима тк нет совместимости (нужно выводить все равно в 1 битном режиме) и работает криво
-*/
-
 Screen4in2UI::Screen4in2UI(Env * nenv) {
 
     #if defined(WAVESHARE_BW_42_UC8176) 
@@ -26,8 +21,6 @@ Screen4in2UI::Screen4in2UI(Env * nenv) {
     env = nenv;
     widgetController = new WidgetController();
     widgetController->setEnv(env);
-
-
 }
 
 bool Screen4in2UI::is4ColorsSupported() {
@@ -48,8 +41,8 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
   KellyCanvas * screen = env->getCanvas();
   screen->color = tBLACK;
 
-  if (temperature > 1000 || temperature < -1000) temperature = -1000;
-  if (humidity > 1000 || humidity < -1000) humidity = -1000;
+  if (temperature > 1000 || temperature < -1000) temperature = BAD_SENSOR_DATA;
+  if (humidity > 1000 || humidity < -1000) humidity = BAD_SENSOR_DATA;
 
   int humMarginX = 178;
   int humMarginY = 0;
@@ -62,7 +55,7 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
     humMarginY = 70;
   }
   
-  if (temperature <= -1000) {
+  if (temperature <= BAD_SENSOR_DATA) {
 
     screen->drawString(tempMarginX, theight - 20, FPSTR(locUnavailable), false);
     return theight + 34;
@@ -86,7 +79,7 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
   }
 
   bool showPressure = false;
-  if (pressure > -1000) {
+  if (pressure > BAD_SENSOR_DATA) {
     if (indoor) {
       showPressure = DUI_PRESSURE_HOME;
     } else {
@@ -145,7 +138,7 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
     screen->drawImage(6 + twidth, theight + 4, &fahr_39x43bw_settings, false); // Fahrenheit glyph symbol    
   }
 
-  sprintf(buffer, "%.1f%%", humidity > -1000 ? humidity : 0.0f);  
+  sprintf(buffer, "%.1f%%", humidity > BAD_SENSOR_DATA ? humidity : 0.0f);  
   screen->drawString(humMarginX, theight + humMarginY, buffer, false);
 
   // temperature bar icon
@@ -345,7 +338,7 @@ void Screen4in2UI::drawUIToBufferLand() {
 
     } else {
 
-      drawTemp(theight, true, -1000, 0, 0, mods, true);
+      drawTemp(theight, true, BAD_SENSOR_DATA, 0, 0, mods, true);
     }
 
   }
@@ -363,8 +356,6 @@ void Screen4in2UI::drawUIToBufferLand() {
   int rwidth = -1; int rheight = -1;
   widgetController->drawClockWidget(baseX, theight, false, false, false, rwidth, rheight);
 }
-
-// todo separate classes for screens
 
 void Screen4in2UI::drawUIToBuffer() {
 
@@ -418,7 +409,7 @@ void Screen4in2UI::drawUIToBuffer() {
 
     } else {
         
-        drawTemp(theight, true, -1000, 0, 0, mods);
+        drawTemp(theight, true, BAD_SENSOR_DATA, 0, 0, mods);
     }
 
   }
@@ -471,30 +462,30 @@ void Screen4in2UI::updatePartialClock() {
     delay(100);
 
     KellyCanvas * screen = env->getCanvas();
-    
+
+    // [исправлено, не требуется]
     // заполняем буфер контроллера дисплея, без обновления, чтобы он проинициализировал оперативку после сна, иначе может рандомно высыпать белый шум на весь экран
-    #if defined(WAVESHARE_BW_42_SSD1683)
-    displayDriver->display(screen->bufferBW, NULL, false);  
-    #endif
+    // #if defined(WAVESHARE_BW_42_SSD1683)
+    // displayDriver->display(screen->bufferBW, NULL, false);  
+    // #endif
 
     Serial.println(F("[drawPartial] redraw part CLOCK"));  
     
     // исключаем ситуацию когда прошлая область может быть больше новой - чтобы не осталось старого не перересованного участка
     // если не выщитывать, тогда просто нужно брать с запасом в несколько пикселей
-
     widgetController->partialDataApplyMaxBounds();
 
 
-    // for proper refresh background, inverted buffer draw
+    // для корректного обновления заполняем область фоновым цветом, иначе на контроллере SSD1683 после выхода из сна обноляет некорректно
     #if defined(WAVESHARE_BW_42_SSD1683)
     displayDriver->displayPartial(
-      screen->bufferBW, 
+      NULL, // screen->bufferBW
       env->lastState.lastPartialPos.xStart, 
       env->lastState.lastPartialPos.yStart, 
       env->lastState.lastPartialPos.xEnd, 
       env->lastState.lastPartialPos.yEnd, 
-      true, 
-      true
+      true, // true
+      false // true - инвертировать буфер
     );
     #endif
 
@@ -662,9 +653,9 @@ void Screen4in2UI::updateTestPartial(bool afterWakeup) {
     displayDriver->displaySleep();
 }
 
-int Screen4in2UI::drawCat(bool land) {
+void Screen4in2UI::drawCat(bool land) {
 
-  if (partial) return 0;
+  if (partial) return;
 
   clockFormatted dt = env->getFormattedTime();
   KellyCanvas * screen = env->getCanvas();
@@ -674,22 +665,21 @@ int Screen4in2UI::drawCat(bool land) {
   int marginX = 0;
 
   bool catShown = false;
+  bool clouds = env->lastState.extData.icon == kowFewClouds || env->lastState.extData.icon == kowBrokenClouds || env->lastState.extData.icon == kowScatterClouds;
 
-  // currently simple logic - may be be more complex later, by pressure table
-  
+  // Sleep time
   // cat at home after 12pm - no check cold, show sleepy cat & moon icon
-  // Serial.println("[TEST]: " + String(dt.h));  
     
   if (dt.h >= 0 && dt.h <=  7) {
 
     hpad = 72 + 8;
 
-    marginX = land ? calcMarginMiddle(localWidth/2, 110) +10 : localWidth - 110;
+    marginX = land ? calcMarginMiddle(localWidth/2, 110) +10 : localWidth - 130;
 
     screen->drawImage(marginX, localHeight - hpad, &cat_night_96x72bw_settings, true);
     hpad -= 10;
     catShown = true;
-    hpad = drawWeaterIcon(screen, false, true, hpad, land);
+    drawWeaterIcon(screen, true, clouds, land);
 
   } else {
 
@@ -700,29 +690,27 @@ int Screen4in2UI::drawCat(bool land) {
           if (env->lastState.extData.icon == kowRain || env->lastState.extData.icon == kowShowerRain) {
 
               hpad += 128; 
-              marginX = land ? calcMarginMiddle(localWidth/2, 122) : localWidth - 135;
+              marginX = land ? calcMarginMiddle(localWidth/2, 122) : localWidth - 145;
               screen->drawImage(marginX + 18, localHeight - hpad - 25, &rain_93x52bw_settings, true);
               
               screen->drawImage(marginX, localHeight - hpad, &cat_rain_127x125bw_settings, true);
               catShown = true;
-          
-          // todo - add clouds, drawWeaterIcon - controll only clouds + sunny \ moon, draw snow just with icon
-              
+                        
           } else if (env->lastState.extData.icon == kowSnow || env->lastState.extData.temperature < 5) { // wear warm clothes
 
               hpad = 97 + 2;
-              marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 105;
+              marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 115;
 
               screen->drawImage(marginX, localHeight - hpad, &cat_winter_93x97bw_settings, true);
-              hpad -= 20;
-              catShown = true;
-              hpad = drawWeaterIcon(screen, true, false, hpad, land);
+              catShown = true;    
+              hpad += 36;          
+              screen->drawImage(marginX - 20, localHeight - hpad, &snowflakes_116x39bw_settings, true);
 
           } else if (env->lastState.extData.temperature > 35) { // overheat
 
               hpad = 159 + 2;
-              if (!land) hpad += 2;
-              marginX = land ? calcMarginMiddle(localWidth/2, 110) : localWidth - 130;
+              if (!land) hpad += 0;
+              marginX = land ? calcMarginMiddle(localWidth/2, 110) : localWidth - 140;
 
               screen->drawImage(marginX, localHeight - hpad, &cat_heat_110x159bw_settings, true);
               catShown = true;
@@ -735,36 +723,77 @@ int Screen4in2UI::drawCat(bool land) {
 
   if (!catShown) {
       hpad = 94;
-      marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 105;
+      marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 125;
 
       screen->drawImage(marginX, localHeight - hpad, &cat_happy_80x94bw_settings, true);
-      hpad -= 20;
-      hpad = drawWeaterIcon(screen, false, (dt.h > 20 && dt.h <= 23) || (dt.h >= 0 && dt.h <= 7) ? true : false, hpad, land);
+      drawWeaterIcon(screen, (dt.h > 20 && dt.h <= 23) || (dt.h >= 0 && dt.h <= 7) ? true : false, clouds, land);
   } 
-
-  return hpad; 
 }
 
 int Screen4in2UI::calcMarginMiddle(int spaceWidth, int objectWidth) {
    return ceil((float) ((spaceWidth - objectWidth) / 2));
 }
 
-int Screen4in2UI::drawWeaterIcon(KellyCanvas * screen, bool cold, bool night, int hpad, bool land) {
-
-    int marginX = land ? calcMarginMiddle(localWidth/2, 125) : localWidth - 125;
-    if (cold) {
-      hpad += 56; 
-      screen->drawImage(marginX - 2, localHeight - hpad, &snowflakes_116x39bw_settings, true);
-    } else if (night) {
-      hpad += 80; 
-      screen->drawImage(marginX, localHeight - hpad, &moon_clear_93x63bw_settings, true);
-    } else {
-      hpad += 90;
-      marginX = land ? calcMarginMiddle(localWidth/2, 100) + 40: localWidth - 100;
-      screen->drawImage(marginX, land ? localHeight - hpad + 30 : localHeight - hpad, &sun_clear_68x66bw_settings, true);
+int Screen4in2UI::drawWeaterIcon(KellyCanvas * screen, bool night, bool clouds, bool land, int baseX, int baseY) {
+   
+    if (baseX == -1) {
+        baseX = land ? calcMarginMiddle(localWidth/2, 100) : localWidth - 120; 
     }
 
-    return hpad;
+    bool autoBaseY = false;
+    if (baseY == -1) {
+        autoBaseY = true;
+        baseY = localHeight - 90;
+    }
+
+    if (night) {
+
+      if (clouds) {
+
+        if (autoBaseY) baseY -= moon_cloudy_78x60bw_settings.height;
+
+        // icon offsets
+        baseX += 30;
+        baseY += 0;
+
+        screen->drawImage(baseX, baseY, &moon_cloudy_78x60bw_settings, true);
+
+      } else {
+
+        if (autoBaseY) baseY -= moon_clear_93x63bw_settings.height;
+
+        // icon offsets
+        baseX += 15;
+        baseY += 0;
+
+        screen->drawImage(baseX, baseY, &moon_clear_93x63bw_settings, true);
+      }
+
+    } else {      
+      
+      if (clouds) {
+                
+        if (autoBaseY) baseY -= sun_cloudy_82x56bw_settings.height;
+
+        // icon offsets
+        baseX += 20;
+        baseY += 0;
+
+        screen->drawImage(baseX, baseY, &sun_cloudy_82x56bw_settings, true);
+
+      } else {
+
+        if (autoBaseY) baseY -= sun_clear_68x66bw_settings.height;
+
+        // icon offsets
+        baseX += 40;
+        baseY += 20;
+
+        screen->drawImage(baseX, baseY, &sun_clear_68x66bw_settings, true);
+      }
+    }
+
+    return baseY;
 }
 
 void Screen4in2UI::initPins() {

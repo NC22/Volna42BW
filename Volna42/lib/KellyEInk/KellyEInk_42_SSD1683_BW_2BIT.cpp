@@ -310,22 +310,26 @@ void KellyEInk_42_SSD1683_BW_2BIT::displayInit(unsigned int newBitMode, bool par
 	sendCommand(0x11); // Data Entry mode setting
 	sendData(0x03);
 
-	sendCommand(0x44);  // Set RAM X - address 
-	sendData(0x00);
-	sendData(((displayWidth / 8) - 1) & 0xff); // 0x31
-	
-	sendCommand(0x45); // Set RAM Y - address 
-	sendData(0x00);
-	sendData(0x00);  
-	sendData((displayHeight - 1) & 0xff); // 0x2B
-	sendData(((displayHeight - 1) >> 8) & 0x01); // 0x01
+	if (!partialMode) {
 
-	sendCommand(0x4E);  // Make initial settings for the RAM X address in the address counter
-	sendData(0x00);
+		sendCommand(0x44);  // Set RAM X - address 
+		sendData(0x00);
+		sendData(((displayWidth / 8) - 1) & 0xff); // 0x31
+		
+		sendCommand(0x45); // Set RAM Y - address 
+		sendData(0x00);
+		sendData(0x00);  
+		sendData((displayHeight - 1) & 0xff); // 0x2B
+		sendData(((displayHeight - 1) >> 8) & 0x01); // 0x01
 
-	sendCommand(0x4F);  // Make initial settings for the RAM Y address in the address counter
-	sendData(0x00);
-	sendData(0x00);  
+		sendCommand(0x4E);  // Make initial settings for the RAM X address in the address counter
+		sendData(0x00);
+
+		sendCommand(0x4F);  // Make initial settings for the RAM Y address in the address counter
+		sendData(0x00);
+		sendData(0x00);
+	}
+
 	readBusy();
 		
 	delay(dispInitDelay);
