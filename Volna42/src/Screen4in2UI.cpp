@@ -431,11 +431,12 @@ void Screen4in2UI::drawUIToBuffer() {
 void Screen4in2UI::updatePartialClock() {
 	
     int returnBitPerPixel = -1;
+    bool coldStart = false;
     renderWidgetsOnly = false;
 
     // we only wakedUp & CUI was in 2-bit mode
     if (!env->canvas->bufferBW && env->lastState.cuiBitsPerPixel > 1) {
-
+        coldStart = true;
         renderWidgetsOnly = true;
         env->canvas->setBitsPerPixel(1); // init buffer, since in widgets only mode buffer initialization is ignored
 
@@ -458,48 +459,68 @@ void Screen4in2UI::updatePartialClock() {
     }
     
     initPins(); 
-    displayDriver->displayInit(1, true);  
-    delay(100);
 
     KellyCanvas * screen = env->getCanvas();
+    Serial.println(F("[drawPartial] redraw part CLOCK")); 
 
-    // [исправлено, не требуется]
-    // заполняем буфер контроллера дисплея, без обновления, чтобы он проинициализировал оперативку после сна, иначе может рандомно высыпать белый шум на весь экран
-    // #if defined(WAVESHARE_BW_42_SSD1683)
-    // displayDriver->display(screen->bufferBW, NULL, false);  
-    // #endif
-
-    Serial.println(F("[drawPartial] redraw part CLOCK"));  
-    
     // исключаем ситуацию когда прошлая область может быть больше новой - чтобы не осталось старого не перересованного участка
     // если не выщитывать, тогда просто нужно брать с запасом в несколько пикселей
     widgetController->partialDataApplyMaxBounds();
 
+    #if defined(WAVESHARE_BW_42_SSD1683)
+
+        bool methodInvert = false;
+        #if defined(PARTIAL_UPDATE_METHOD_INVERT)
+              methodInvert = true;
+        #endif
+
+        // исключение при переходе из 2-bit в 1-bit режим (частичное обновление на контроллере возможно только в режиме 1-bit) на контроллере SSD1683
+        // при переходе с 2-bit режима в 1-bit, нужно перезаполнять буфер для корректного вызова partialUpdate, для этого нужно восстановить RAM 
+        // SW \ HW RESET не помогает и не влияет на RAM, реализован метод displayInitWithCleanUpBuffer - других способов сброса мной не найдено
+
+        if (returnBitPerPixel > 0 || coldStart) {      
+          // Разное заполнение начального буфера дает разное визуальное отображение процесса частичного обновления и влияет на проверку контроллером какие пиксели были изменены
+          displayDriver->displayInitWithCleanUpBuffer(methodInvert ? screen->bufferBW : NULL);
+        } else {
+          displayDriver->displayInit(1, true);
+        }
+
+    #else 
+        // типовой вариант инициализации работающий на любых других экранах
+        displayDriver->displayInit(1, true);
+    #endif
+
+    delay(100); 
 
     // для корректного обновления заполняем область фоновым цветом, иначе на контроллере SSD1683 после выхода из сна обноляет некорректно
     #if defined(WAVESHARE_BW_42_SSD1683)
-    displayDriver->displayPartial(
-      NULL, // screen->bufferBW
-      env->lastState.lastPartialPos.xStart, 
-      env->lastState.lastPartialPos.yStart, 
-      env->lastState.lastPartialPos.xEnd, 
-      env->lastState.lastPartialPos.yEnd, 
-      true, // true
-      false // true - инвертировать буфер
-    );
-    #endif
 
-    // reduce ghosting for R + BW disp, but this possibly can be fixed by more proper LUT tables
-    // #if defined(WAVESHARE_RY_BW_42_UC8176)
-    // EPD_4IN2B_V2_Display_Partial(
-    //  NULL, 
-    //  env->lastState.lastPartialPos.xStart, 
-    //  env->lastState.lastPartialPos.yStart, 
-    //  env->lastState.lastPartialPos.xEnd, 
-    //  env->lastState.lastPartialPos.yEnd, 
-    //  true
-    // );
-    // #endif
+      if (methodInvert) {
+
+          displayDriver->displayPartial(
+            screen->bufferBW,
+            env->lastState.lastPartialPos.xStart, 
+            env->lastState.lastPartialPos.yStart, 
+            env->lastState.lastPartialPos.xEnd, 
+            env->lastState.lastPartialPos.yEnd, 
+            true, 
+            true 
+          );
+
+      } else {
+
+          displayDriver->displayPartial(
+            NULL, 
+            env->lastState.lastPartialPos.xStart, 
+            env->lastState.lastPartialPos.yStart, 
+            env->lastState.lastPartialPos.xEnd, 
+            env->lastState.lastPartialPos.yEnd, 
+            true, 
+            false 
+          );
+      }
+
+    #endif
 
     displayDriver->displayPartial(
       screen->bufferBW, 

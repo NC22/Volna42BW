@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include <SystemDefines.h>
 #if defined(ESP32)
     #include <WiFi.h>
 #else 

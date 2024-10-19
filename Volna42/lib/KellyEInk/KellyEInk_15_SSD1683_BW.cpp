@@ -32,7 +32,7 @@ void KellyEInk_15_SSD1683_BW::displayInit(unsigned int newBitMode, bool partialM
 	KellyEInk_42_SSD1683_BW_2BIT::displayInit(newBitMode, false);
 	// displayReset();
 	// readBusy();
-	// sendCommand(0x12); // 软件复位    soft  reset
+	// sendCommand(0x12); //  soft reset
 	// readBusy();
 
 	if (partialMode) {
@@ -56,7 +56,8 @@ void KellyEInk_15_SSD1683_BW::displayInit(unsigned int newBitMode, bool partialM
 		sendCommand(0x2c);
 		sendData(pgm_read_byte(&LUT_TABLE_LUT_WF_PARTIAL[158]));
 
-		sendCommand(0x37);  //  局刷功能开启， pingpong 模式使能
+		sendCommand(0x37);  //  Write Register for Display Option, Ping-Pong for black/white mode
+
 		sendData(0x00);  
 		sendData(0x00);  
 		sendData(0x00);  
@@ -68,7 +69,7 @@ void KellyEInk_15_SSD1683_BW::displayInit(unsigned int newBitMode, bool partialM
 		sendData(0x00);  
 		sendData(0x00);
 
-		sendCommand(0x3C);  //  border设定
+		sendCommand(0x3C);  // Border Waveform Control 
 		sendData(0x80);  
 	} 
 }

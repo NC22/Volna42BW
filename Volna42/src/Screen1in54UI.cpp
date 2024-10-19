@@ -575,11 +575,10 @@ void Screen1in54UI::updatePartialClock() {
 
     delay(100);
 
-
     widgetController->partialDataApplyMaxBounds();
     KellyCanvas * screen = env->getCanvas();
 
-    /*
+    #if defined(PARTIAL_UPDATE_METHOD_INVERT)
         displayDriver->displayPartial(
           screen->bufferBW, 
           env->lastState.lastPartialPos.xStart, 
@@ -589,18 +588,18 @@ void Screen1in54UI::updatePartialClock() {
           true, 
           true
         );
-    */
-
-    // less visual artifacts
-    displayDriver->displayPartial(
-      NULL, 
-      env->lastState.lastPartialPos.xStart, 
-      env->lastState.lastPartialPos.yStart, 
-      env->lastState.lastPartialPos.xEnd, 
-      env->lastState.lastPartialPos.yEnd, 
-      true, 
-      false
-    );
+    #else
+        // less visual artifacts
+        displayDriver->displayPartial(
+          NULL, 
+          env->lastState.lastPartialPos.xStart, 
+          env->lastState.lastPartialPos.yStart, 
+          env->lastState.lastPartialPos.xEnd, 
+          env->lastState.lastPartialPos.yEnd, 
+          true, 
+          false
+        );
+    #endif
 
     displayDriver->displayPartial(
       screen->bufferBW, 

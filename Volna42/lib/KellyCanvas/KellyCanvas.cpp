@@ -45,14 +45,14 @@ void KellyCanvas::setBitsPerPixel(unsigned int bits, bool skipRealloc) {
             Serial.print(F(" | Size : ")); Serial.println(bufferWidth);
 
         } else {
-            
+
             Serial.println(F("[Screen buffer reinit] : Buffer already allocated : "));
         }
 
     } else {
 
         bufferWidth = newWidth;        
-        Serial.println(F("[Screen buffer] [Unsafe Skip memory realloc] : BitsPerPixel : ")); Serial.println(bitPerPixel);
+        Serial.print(F("[Screen buffer] [Unsafe Skip memory realloc] : BitsPerPixel : ")); Serial.println(bitPerPixel);
     }
 }
 

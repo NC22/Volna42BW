@@ -41,6 +41,18 @@ const unsigned char KellyEInk_42_SSD1683_BW_2BIT::LUT_TABLE_LUT_4gray_all[233] P
     0x32,	0x30,						
 };	
 
+void KellyEInk_42_SSD1683_BW_2BIT::displayInitWithCleanUpBuffer(const unsigned char *Image) {	
+	
+    displayInit(1, false);
+
+	if (Image) {
+		display(Image, NULL, false);
+	} else {
+		FILL_BACKGROUND = ~FILL_BACKGROUND;
+		display(NULL, NULL, false);
+		FILL_BACKGROUND = ~FILL_BACKGROUND;
+	}
+}
 
 /*	
 	Set partial data for display RAM
@@ -57,7 +69,7 @@ void KellyEInk_42_SSD1683_BW_2BIT::displayPartial(const unsigned char *Image, un
     unsigned int ByteXstart = Xstart / 8;
     unsigned int ByteXend = (Xend + 7) / 8; // округляем вверх, чтобы захватить все пиксели
 
-	displayReset();
+	// displayReset();
 
 	sendCommand(0x3C); // BorderWaveform
 	sendData(0x80);

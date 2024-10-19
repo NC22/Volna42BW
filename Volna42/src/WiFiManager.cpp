@@ -96,6 +96,10 @@ void WiFiManager::runAsAccesspoint(String ssid, String pass) {
     IPAddress subnet(255, 255, 255, 0);
     
     int channel = 12;
+    #if defined(AP_NETWORK_WIFI_CHANNEL) 
+        channel = AP_NETWORK_WIFI_CHANNEL;
+    #endif
+
     bool result = false;
     while (result == false && channel > 0 && channel <= 12) {
       result = WiFi.softAP(ssid.c_str(), pass.c_str(), channel);
