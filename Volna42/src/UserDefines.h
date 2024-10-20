@@ -57,8 +57,6 @@
 // #define HELTEC_BW_15_S810F           // SSD1683 Heltec 1.54inch 200x200 or WeAct 1.54 200x200 [B&W]
 // #define WAVESHARE_R_BW_15_SSD1683    // Waveshare 1.54inch 200x200 [B&W + Red, 3-colors (separate buffers)]
 
-// #define PARTIAL_UPDATE_METHOD_INVERT // только для SSD1683 4.2 - частичное обновление экрана через инвертирование области, а не через зачистку (может оставатся больше визуальных артифактов)
-
 // [Battery sensor mode] | [Режим чтения показаний заряда батареи]
 
 #define BAT_MIN_V 3.25           // 0%
@@ -109,6 +107,7 @@
 
 	// USE /api/partialtest link to test if partial update works on your display without issues, and comment defines if its not, to prevent unexpected behavior
 
+	// #define PARTIAL_UPDATE_METHOD_INVERT      // только для SSD1683 4.2 - частичное обновление экрана через инвертирование области, а не через зачистку (может оставатся больше визуальных артифактов)
 	#define PARTIAL_UPDATE_SUPPORT               // Partial update is configurable in web UI. Default value - cfgUpdateMinutes in UserSettings.h. Used for update clock widget each minute
 	// #define RESET_MINUTE_TIMER_ON_WEB_REQUEST // Display updates could stuck web UI during screen refresh, so this can be usefull if you enter web interface frequently,
 	#define COLORMODE_2BIT_SUPPORT               // Allow change image mode (1bit - 2-colors \ 2-bit 4-colors) from web panel if display supports 2-bit output 
@@ -133,24 +132,24 @@
 	#else
 		
 		// [https://42volna.com/scheme/] Основная распиновка, с освобождением ножки CS
-	
+	/*
 		#define EPD_BUSY_PIN 12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_RST_PIN  15  // D8 - GPIO - 15 (CS)
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0
 		#define EPD_CS_PIN   -1  // GND (-1)    
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-	
+	*/
 		// [Optional, my old setup] | НЕ Основная
 		// моя старая алт. распиновка, через резистор
-	/*
+	
 		#define EPD_BUSY_PIN 2   // D4 - GPIO - 2 (+20кОм резистор на VCC)
 		#define EPD_RST_PIN  12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0
 		#define EPD_CS_PIN   15  // D8 - GPIO - 15 (CS) или опционально GND (-1)
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-	*/
+
 	
 	#endif
 

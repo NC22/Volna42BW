@@ -783,7 +783,7 @@ int Screen4in2UI::drawWeaterIcon(KellyCanvas * screen, bool night, bool clouds, 
         if (autoBaseY) baseY -= moon_clear_93x63bw_settings.height;
 
         // icon offsets
-        baseX += 5;
+        baseX += 10;
         baseY += 0;
 
         screen->drawImage(baseX, baseY, &moon_clear_93x63bw_settings, true);

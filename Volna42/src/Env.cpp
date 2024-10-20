@@ -951,58 +951,19 @@ void Env::cuiResetWidgets() {
     cuiWidgets.clear();
 }
 
-String Env::sanitizeResponse(String var) {
-  
-  int responseLength = var.length();
-  var = var.substring(0, 128);
-  String sanitized = "";
-  bool valid = false;
-
-  unsigned char c;
-
-  for (int i = 0; i < responseLength; i++)  {
-
-    c = var[i];
-    
-    if ((unsigned int) c == 34 || (unsigned int) c == 58 || (unsigned int) c == 47) {
-      
-      sanitized += "-";
-      continue;
-
-    } else {
-
-      valid = false;
-      
-           if ((unsigned int) c == 32) valid = true; // space
-      else if ((unsigned int) c >= 45 || (unsigned int) c <= 57) valid = true; // 0123456789.- 
-      else if ((unsigned int) c >= 97 || (unsigned int) c <= 122) valid = true; // a-z
-      else if ((unsigned int) c >= 65 || (unsigned int) c <= 90) valid = true;  // A-Z
-
-      if (!valid) continue;
-    }
-
-
-    sanitized += (char) c;
-  }
-
-  return sanitized;
-}
 
 void Env::updateExtIconState() {
 
-    lastState.extData.icon = kowUnknown;
-
     // опционально наследуем данные по давлению с внутреннего датчика если данные по давлению не доступны
     #if defined(DUI_PRESSURE_COPY_TO_EXT)
-      if (lastState.extData.isDataValid && lastState.extData.pressure <= -1000) {
+      if (lastState.extData.isDataValid && lastState.extData.pressure <= BAD_SENSOR_DATA) {
           lastState.extData.pressure = lastState.lastTelemetry[lastState.lastTelemetrySize-1].pressure;
       }
     #endif
 
-    // openweather or other accurate method chached weather state
-    if (lastOWstate != kowUnknown) {
+    if (lastState.extData.icon != kowUnknown) {
 
-        lastState.extData.icon = lastOWstate;
+      // already detected some accurate state
         
     } else {
       
@@ -1047,223 +1008,27 @@ void Env::updateExtIconState() {
 
       }
     }
-
 }
 
 /*
-  reciew data from remote sensor if configured
+  Request data from remote sensor if configured
 */
+bool Env::updateExtSensorData() {
 
-bool Env::updateExtSensorData(unsigned int attempt) {
+    if (getConfig()->cfgValues[cExtSensorLink].length() < 0) return false;
 
-    String &url = getConfig()->cfgValues[cExtSensorLink]; 
-    String &login = getConfig()->cfgValues[cExtSensorLogin]; 
-    String &pass = getConfig()->cfgValues[cExtSensorPassword]; 
-    lastOWstate = kowUnknown;
-
-    if (url.length() <= 0 || url.equals(F("off"))) {
-      Serial.print(F("updateExtSensorData - external sensor not configured or disabled. INPUT : ")); Serial.println(url);
+    if (ExternalSensor::requestData(
+      getConfig()->cfgValues[cExtSensorLink], 
+      getConfig()->cfgValues[cExtSensorLogin], 
+      getConfig()->cfgValues[cExtSensorPassword], 
+      lastState.extData, 
+      lastError
+    )) {
+      lastState.connectTimes++;
+      return true;
+    } else {
       return false;
     }
-
-    if (url.indexOf("openweather") != -1) {
-
-      KellyOpenWeather openWeatherLoader = KellyOpenWeather(url, EXTERNAL_SENSOR_CONNECT_TIMEOUT);  
-      
-      Serial.println(F("OpenWeather parser"));
-      int resultCode = openWeatherLoader.loadCurrent();
-      if (resultCode == 200) {    
-        Serial.println(F("OpenWeather parser - success"));
-        // Serial.println(openWeatherLoader.temp);
-        // Serial.println(openWeatherLoader.hum);
-        // Serial.println(openWeatherLoader.pressure);
-
-        lastState.extData.isDataValid = true;
-        lastState.extData.temperature = openWeatherLoader.temp;
-        lastState.extData.pressure = openWeatherLoader.pressure;
-        lastState.extData.humidity = openWeatherLoader.hum;
-        lastState.extData.t = time(nullptr);
-
-        lastOWstate = openWeatherLoader.weatherType;
-        lastState.connectTimes++;
-
-        openWeatherLoader.end();
-        return true;
-        
-      } else {
-        
-        Serial.println(F("OpenWeather parser - error"));       
-        Serial.println(resultCode);   
-
-        // lastState.extData.isDataValid = false;
-
-        lastError = openWeatherLoader.error;
-        Serial.println(lastError);
-        
-        openWeatherLoader.end();
-
-        if (resultCode == -1) {
-
-          Serial.println(F("Fail to connect OpenWeather server - no response or unavailable..."));
-          if (attempt < EXTERNAL_SENSOR_CONNECT_ATTEMPTS) {
-            delay(100);
-            Serial.println(F("Retry to connect OpenWeather..."));
-            return updateExtSensorData(attempt + 1);
-          }
-
-        } else return false;
-      }
-    
-    }
-
-    WiFiClient client;
-    HTTPClient http;
-     
-    externalSensorData newData;
-    newData.isDataValid = false;
-    newData.temperature = BAD_SENSOR_DATA;
-    newData.humidity = BAD_SENSOR_DATA;
-    newData.bat = BAD_SENSOR_DATA;
-    newData.pressure = BAD_SENSOR_DATA;
-    newData.t = time(nullptr);
-
-    #if defined(ESP32)
-        http.setTimeout(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
-        client.setTimeout(EXTERNAL_SENSOR_CONNECT_TIMEOUT / 1000);
-    #else 
-        http.setTimeout(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
-        client.setTimeout(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
-    #endif
-
-    http.begin(client, url);
-
-    if (login.length() > 0) {
-
-      http.setAuthorization(login.c_str(), pass.c_str());
-      Serial.println(F("[AUTH] Basic auth mode"));
-
-    } else if (pass.length() > 0) {
-        
-      http.setAuthorization("");
-      String token = "Bearer " + pass;
-      http.addHeader("Authorization", token.c_str());
-
-      Serial.println(F("[AUTH] Bearer auth mode"));
-    } else {
-      
-      Serial.println(F("[AUTH] Anonimous mode"));
-    }
-
-    Serial.println(F("updateExtSensorData"));
-
-    int httpResponseCode = http.GET();
-    if (httpResponseCode < 0) {
-      Serial.print(F("Fail to connect ext sensor... Code "));
-      Serial.println(httpResponseCode);
-      if (attempt < EXTERNAL_SENSOR_CONNECT_ATTEMPTS) {
-        delay(100);
-        Serial.println(F("Retry to connect ext sensor..."));
-        return updateExtSensorData(attempt + 1);
-      }
-    }
-
-    if (httpResponseCode > 0) {
-      
-        String payload = http.getString();
-
-        String collectedData;
-        String resultData = "";
-        bool homeAssistant = false;
-        if (url.indexOf("/api/states") != -1) homeAssistant = true;
-        Serial.println(homeAssistant ? F("[HomeAssistant] parser") : F("[Domoticz] parser"));
-
-          /*
-            Domoticz
-
-            old url format - /json.htm?type=devices&rid=___ID___ 
-            new url format - /json.htm?type=command&param=getdevices&rid=___ID___
-
-            "BatteryLevel" : 89,
-            "Data" : "34.8 C, 36 %",
-            "Name" : "\u0414\u0430\u0442\u0447\u0438\u043a ... \u043a (Temperature + Humidity)",
-            "Humidity" : 36.0,
-
-            HA
-
-            url format - /api/states/___ID___
-
-            "battery": 87,
-            "battery_low": false,
-            "humidity": 40.85,
-            "temperature": 26.32,
-            "friendly_name": "Датчик почвы (каланхое спальня) Влага"
-          */
-          
-          int maxLength = 12;
-          if (!KellyOWParserTools::collectJSONFieldData(homeAssistant ? "temperature" : "Temp", payload, collectedData, maxLength)) {
-
-            Serial.print(F("Bad data : ")); Serial.println(payload.substring(0, 255));
-            lastError = "External sensor error : " + sanitizeResponse(payload);
-
-          } else {
-            
-            newData.temperature = KellyOWParserTools::validateFloatVal(collectedData);
-            if (newData.temperature <= -1000) {   
-
-               Serial.print(F("Bad data : no temperature")); Serial.println(payload.substring(0, 255));
-               lastError = "External sensor error : no temperature data";
-
-            } else {
-
-                newData.isDataValid = true;
-                
-                KellyOWParserTools::collectJSONFieldData(homeAssistant ? "humidity" : "Humidity", payload, collectedData, maxLength);
-                newData.humidity = KellyOWParserTools::validateFloatVal(collectedData);
-
-                KellyOWParserTools::collectJSONFieldData(homeAssistant ? "pressure" : "Barometer", payload, collectedData, maxLength);                
-                newData.pressure = KellyOWParserTools::validateFloatVal(collectedData);
-
-                if (newData.pressure > -1000) {
-                    newData.pressure = newData.pressure * 100.0f;
-                }
-
-                KellyOWParserTools::collectJSONFieldData(homeAssistant ? "battery" : "BatteryLevel", payload, collectedData, maxLength);
-                newData.bat = KellyOWParserTools::validateFloatVal(collectedData);
-
-                     if (newData.bat > 100) newData.bat = 100;
-                else if (newData.bat < 0) newData.bat = -1000;
-            }
-            
-            Serial.println(F("Collect data - OK, Result :")); 
-          }
-
-    } else {
-
-      if (httpResponseCode == -1) {
-         lastError = "External sensor error : Server not accessable";
-      } else {
-         lastError = "External sensor error : Unknown error code: " + String(httpResponseCode);
-      }
-
-      Serial.print(F("Error code: ")); Serial.println(httpResponseCode);
-      // logReport("cant get ext sensor data " + String(httpResponseCode))
-    }
-
-    http.end();
-    
-    if (newData.isDataValid) {
-      
-      Serial.print(F("temperature: ")); Serial.println(newData.temperature);
-      Serial.print(F("humidity: ")); Serial.println(newData.humidity);
-      Serial.print(F("pressure: ")); Serial.println(newData.pressure);
-      Serial.print(F("bat: ")); Serial.println(newData.bat);
-
-      lastState.extData = newData;
-      lastState.connectTimes++;
-      // lastState.syncT = time(nullptr);
-    }
-
-    return newData.isDataValid;
 }
 
 // collect current internal sensors data to structure
@@ -1335,7 +1100,7 @@ bool Env::updateSCD4X() {
     error = scd4x.readMeasurement(scd4XCO2, scd4XTemp, scd4XHumidity);
     if (error) {
 
-        Serial.print(F("[updateSCD4X] Error trying to execute readMeasurement(): "));
+        Serial.println(F("[updateSCD4X] Error trying to execute readMeasurement(): "));
         errorToString(error, errorMessage, 256);
 
         Serial.println(errorMessage);

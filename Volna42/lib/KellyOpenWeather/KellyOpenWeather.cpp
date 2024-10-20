@@ -1,8 +1,7 @@
 #include "KellyOpenWeather.h"
 
-KellyOpenWeather::KellyOpenWeather(String nurl, int timeout) {
-
-    url = nurl;
+KellyOpenWeather::KellyOpenWeather(int timeout) {
+  
     connectionTimeout = timeout;
     // parser = new JsonStreamingParser();
     // KellyOWParserListener parseListener = KellyOWParserListener();
@@ -26,7 +25,7 @@ void KellyOpenWeather::end() {
   1-4 - response parsing errors
   5 - response "cod" value != 200
 */
-int KellyOpenWeather::loadCurrent() {
+int KellyOpenWeather::loadCurrent(String & nurl) {
   
   weatherLoaded = false;
   error = "";
@@ -41,7 +40,7 @@ int KellyOpenWeather::loadCurrent() {
   String host;
   String path;
 
-  if (parseURL(host, port, path)) {
+  if (parseURL(nurl, host, port, path)) {
 
     if (port == 443) https = true;
     
@@ -229,12 +228,13 @@ KellyOWIconType KellyOpenWeather::getMeteoIconState(String icon)
   return kowUnknown;
 }
 
-bool KellyOpenWeather::parseURL(String &host, int &port, String &path) {
+bool KellyOpenWeather::parseURL(String &url, String &host, int &port, String &path) {
 
   int protocolEnd = url.indexOf("://");
   if (protocolEnd == -1) {
     return false;
   }
+
   String proto = url.substring(0, protocolEnd);
 
   int hostStart = protocolEnd + 3;

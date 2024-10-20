@@ -30,6 +30,7 @@
 
 #include <WiFiClient.h>
 #include <PubSubClient.h>
+#include <ExternalSensor.h>
 
 
 #if defined(CO2_SCD41) 
@@ -67,6 +68,7 @@ extern const size_t widgetsDefaultsSize PROGMEM;
 extern const uint8_t cfgCelsius PROGMEM;
 extern const uint8_t cfg12HourFormat PROGMEM;
 extern const uint8_t cfgUpdateMinutes PROGMEM;
+
 
 extern const uint8_t textDateFormat PROGMEM;	
 extern const char longDateFormat[] PROGMEM;
@@ -163,7 +165,6 @@ class Env {
             DeviceAddress dsTermometr;
         #endif
 
-        String sanitizeResponse(String var);
         void setDefaultLastStateData();
         bool restoreRTCmem();
         void applyConfigToRTC(bool configUpdate = false);
@@ -173,7 +174,7 @@ class Env {
 
         clockFormatted fTime;
         float tempOffset = 0.0;
-        KellyOWIconType lastOWstate = kowUnknown;
+        externalSensorData * internalSensorExt = NULL;
 
     public:
         time_t defaultTime = 1510592825;
@@ -226,7 +227,7 @@ class Env {
 
         void updateTelemetry();
         void updateScreen();
-        bool updateExtSensorData(unsigned int attempt = 1);
+        bool updateExtSensorData();
         void initDefaultTime();
         void resetTimers(bool minuteTimerOnly = false);
         void resetPartialData();

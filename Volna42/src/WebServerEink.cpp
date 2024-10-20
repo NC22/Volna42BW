@@ -1001,7 +1001,7 @@ void WebServerEink::apiTestData() {
     for (int i = 0; i < server->args(); i++)  {
 
         if (server->argName(i).indexOf("preset") == -1) continue;
-
+        
         if (env->lastState.lastTelemetrySize <= 0 || env->lastState.lastTelemetry[env->lastState.lastTelemetrySize-1].temperature <= BAD_SENSOR_DATA) {
             
             Serial.println(F("[apiTestData] No sensor detected - used default telemetry"));
@@ -1160,6 +1160,7 @@ void WebServerEink::apiTestData() {
         break;
     }
     
+    env->lastState.extData.icon = kowUnknown;
     env->updateExtIconState();
     env->updateScreen();
     server->send(200, "application/json", "{\"status\":\"" + result + "\"}");

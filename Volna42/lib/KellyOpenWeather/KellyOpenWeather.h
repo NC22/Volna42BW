@@ -16,7 +16,7 @@ class KellyOpenWeather {
     private :
         // JsonStreamingParser * parser;
         // KellyOWParserListener * listener;
-        bool parseURL(String &host, int &port, String &path);
+        bool parseURL(String &inputUrl, String &host, int &port, String &path);
         bool collectJSONFieldDataRaw(int paramStart, int len, String & data, String & storage);
         bool collectJSONFieldData(String fieldName, String & payload, String & storage);
 
@@ -32,10 +32,9 @@ class KellyOpenWeather {
         float pressure;
         KellyOWIconType weatherType;
         
-        String url;
-        KellyOpenWeather(String url = "", int timeout = 5000);
+        KellyOpenWeather(int timeout = 5000);
         KellyOWIconType getMeteoIconState(String icon);
-        int loadCurrent();
+        int loadCurrent(String & nurl);
         void end();
         
 };

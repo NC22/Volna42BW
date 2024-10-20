@@ -11,6 +11,7 @@ public:
     static int validateIntVal(String v);
     static bool collectJSONFieldDataRaw(int paramStart, int len, String &data, String &storage, unsigned int maxLength = 255);
     static bool collectJSONFieldData(String fieldName, String & payload, String & storage, unsigned int maxLength = 255);
+    static String sanitizeResponse(String var);
 };
 
 #endif 
