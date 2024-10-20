@@ -885,11 +885,11 @@ String WebServerEink::getInfo() {
 
     String json = WebServerBase::getInfo(); // "{";
 
-    rtcData & lastState = env->getCurrentState();
     env->updateTelemetry();
+    rtcData & lastState = env->getCurrentState();
     
     int lkey = lastState.lastTelemetrySize - 1;
-    Serial.print(F("Currently collected telemetry size : ")); Serial.println(lkey); 
+    Serial.print(F("Currently collected telemetry size : ")); Serial.println(lastState.lastTelemetrySize); 
    
     json += ",";
     json += "\"notifications\":[";

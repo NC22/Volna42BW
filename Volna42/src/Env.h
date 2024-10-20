@@ -157,7 +157,7 @@ class Env {
         Adafruit_ADS1115 aInputSensor;
         #endif
         
-        void keepTelemetry(int key);
+        void keepTelemetry(int &key);
 
         #if defined(CO2_SCD41) 
         SensirionI2CScd4x scd4x;

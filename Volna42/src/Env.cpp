@@ -244,7 +244,7 @@ void Env::setDefaultLastStateData() {
     lastState.cuiResetOnReboot = false;
     lastState.wakeUps = 0;
     lastState.connectTimes = 0;
-    lastState.lastTelemetrySize = 1;
+    lastState.lastTelemetrySize = 0;
     lastState.extData.isDataValid = false;
     lastState.t = defaultTime;
     lastState.onBattery = false;
@@ -449,23 +449,22 @@ bool Env::setupNTP(unsigned int attempt) {
     return true;
 }
 
-// Call to reset internal sensors data buffer
-// also we can send buffered telemetry somewhere if needed before clear
-// reset telemetry buffer structure
-// reset wakeup counter
-
+// Reset WakeUp counter
+// Optionaly we can reset telemetry pool if we have some sync methods for send data to remote server (currently used sync via MQTT)
 void Env::sync() {
 
+    lastState.wakeUps = 0;
+
+/*
     if (lastState.lastTelemetrySize <= 0) {
       updateTelemetry();
     }
 
-    lastState.wakeUps = 0;
-
-    if (lastState.lastTelemetrySize > 1) {
+    if (lastState.lastTelemetrySize > 0) {
         lastState.lastTelemetry[0] = lastState.lastTelemetry[lastState.lastTelemetrySize-1];
         lastState.lastTelemetrySize = 1;
     }
+*/
 }
 
 rtcData & Env::getCurrentState() {  
@@ -522,7 +521,7 @@ void Env::sleep()  {
     #endif
   }
 
-void Env::keepTelemetry(int key)  {
+void Env::keepTelemetry(int &key)  {
         
     lastState.lastTelemetry[key].temperature = readTemperature();
     lastState.lastTelemetry[key].pressure = readPressure();
@@ -1119,6 +1118,12 @@ void Env::updateTelemetry()  {
     }
   #endif
 
+  lastState.lastTelemetrySize++;
+
+  if (lastState.lastTelemetrySize > ENV_TELEMETRY_MAX) {
+      lastState.lastTelemetrySize = 1; // reinit pool with set size to 1 element (current new one)
+  }
+
   int key = lastState.lastTelemetrySize-1;
   keepTelemetry(key);
 
@@ -1127,23 +1132,17 @@ void Env::updateTelemetry()  {
       lastState.lastTelemetry[key].humidity == 0
   ) {
     delay(500);
-    keepTelemetry(key); // cold start second attempt
+    keepTelemetry(key); // fail, cold start second attempt
   }
 
   updateBattery(key);
   lastState.lastTelemetry[key].t = defaultTime;
-  lastState.lastTelemetrySize++;
-
-  if (lastState.lastTelemetrySize > ENV_TELEMETRY_MAX) {
-    lastState.lastTelemetrySize = 1;
-    Serial.println(F("[lastTelemetrySize] - reached limit, go from begin"));
-  }
 
   Serial.println(F("[updateTelemetry] - Internal sensors data : "));
   Serial.println(lastState.lastTelemetry[key].temperature);
   Serial.println(lastState.lastTelemetry[key].humidity);
+  Serial.println(lastState.lastTelemetry[key].pressure);
   Serial.println(lastState.lastTelemetry[key].bat);
-
 }
 
 bool Env::updateSCD4X() {
