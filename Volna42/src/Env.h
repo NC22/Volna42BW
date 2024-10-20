@@ -174,7 +174,6 @@ class Env {
 
         clockFormatted fTime;
         float tempOffset = 0.0;
-        externalSensorData * internalSensorExt = NULL;
 
     public:
         time_t defaultTime = 1510592825;
