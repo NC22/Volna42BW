@@ -1035,6 +1035,7 @@ void Env::updateExtIconState() {
 */
 bool Env::updateExtSensorData() {
 
+  #if defined(ENV_INDOOR_EXTERNAL_SUPPORT) 
     if (pgm_read_byte(&cfgExtLocal) > 0) {
       
       Serial.print(F("Load External sensor data for INDOOR"));
@@ -1061,6 +1062,7 @@ bool Env::updateExtSensorData() {
         lastState.lastTelemetry[index].temperature = newData.temperature;
       }
     }
+  #endif
 
     if (getConfig()->cfgValues[cExtSensorLink].length() < 0) return false;
 
@@ -1098,39 +1100,6 @@ void Env::updateBattery(int &telemetryIndex) {
 // lastState.lastTelemetrySize -- current size of lastState.lastTelemetry 
 
 void Env::updateTelemetry()  {
-      
-  if (pgm_read_byte(&cfgExtLocal) > 0) {
-    
-    Serial.println(F("[updateTelemetry] - Internal sensor data will be taken from External source - skip"));
-
-  } else {
-    
-    int key = lastState.lastTelemetrySize-1;
-    keepTelemetry(key);
-
-    if (tsensor && 
-        lastState.lastTelemetry[key].temperature == 0 && 
-        lastState.lastTelemetry[key].humidity == 0
-    ) {
-      delay(500);
-      keepTelemetry(key); // cold start second attempt
-    }
-
-    updateBattery(key);
-    lastState.lastTelemetry[key].t = defaultTime;
-    lastState.lastTelemetrySize++;
-
-    if (lastState.lastTelemetrySize > ENV_TELEMETRY_MAX) {
-      lastState.lastTelemetrySize = 1;
-      Serial.println(F("[lastTelemetrySize] - reached limit, go from begin"));
-    }
-
-    Serial.println(F("[updateTelemetry] - Internal sensors data : "));
-    Serial.println(lastState.lastTelemetry[key].temperature);
-    Serial.println(lastState.lastTelemetry[key].humidity);
-    Serial.println(lastState.lastTelemetry[key].bat);
-    
-  }
 
   #if defined(CO2_SCD41) 
     if (updateSCD4X()) {
@@ -1142,6 +1111,39 @@ void Env::updateTelemetry()  {
         Serial.println(scd4XHumidity);
     }
   #endif
+
+  #if defined(ENV_INDOOR_EXTERNAL_SUPPORT) 
+    if (pgm_read_byte(&cfgExtLocal) > 0) {      
+      Serial.println(F("[updateTelemetry] - Internal sensor data will be taken from External source - skip"));
+      return;
+    }
+  #endif
+
+  int key = lastState.lastTelemetrySize-1;
+  keepTelemetry(key);
+
+  if (tsensor && 
+      lastState.lastTelemetry[key].temperature == 0 && 
+      lastState.lastTelemetry[key].humidity == 0
+  ) {
+    delay(500);
+    keepTelemetry(key); // cold start second attempt
+  }
+
+  updateBattery(key);
+  lastState.lastTelemetry[key].t = defaultTime;
+  lastState.lastTelemetrySize++;
+
+  if (lastState.lastTelemetrySize > ENV_TELEMETRY_MAX) {
+    lastState.lastTelemetrySize = 1;
+    Serial.println(F("[lastTelemetrySize] - reached limit, go from begin"));
+  }
+
+  Serial.println(F("[updateTelemetry] - Internal sensors data : "));
+  Serial.println(lastState.lastTelemetry[key].temperature);
+  Serial.println(lastState.lastTelemetry[key].humidity);
+  Serial.println(lastState.lastTelemetry[key].bat);
+
 }
 
 bool Env::updateSCD4X() {

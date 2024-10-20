@@ -17,7 +17,7 @@ var ENVLOCALE = {
     "cfg_tempOffset" : "Корректировка температуры (от -10℃ до 10℃)",  
     "cfg_ntpHosts" : "NTP сервер (off - не использовать)",
 
-    "cfg__extSensor" : "Внешний датчик (Domoticz & Home Assistant)",      
+    "cfg__extSensor" : "Внешний датчик (Domoticz & HA & OpenWeather)",      
     "cfg__extSensor_help" : "<b>DZ (Domoticz)</b><br>http:/" + "/[IP или домен сервера]:8080/json.htm?type=devices&rid=[ID устройства]<br>Опционально требуется доступ по логину и паролю, можно создать пользователя в разделе Настройка -> Users (/#/Users)<br><br><b>HA (Home Assistant)</b><br>http:/" + "/[IP или домен сервера]:8123/api/states/[ID устройства]<br>Токен можно получить в HA в разделе Безопасность (/profile/security) -> Долгосрочные токены доступа",
     "cfg_extSensorLink" : "Url-адрес",
     "cfg_extSensorLogin" : "Логин",

@@ -17,7 +17,7 @@ var ENVLOCALE = {
     "cfg_tempOffset" : "Temperature offset (from -10℃ to 10℃)",
     "cfg_ntpHosts" : "NTP Server (off - for disable)",
 
-    "cfg__extSensor" : "External sensor (Domoticz & Home Assistant)",      
+    "cfg__extSensor" : "External sensor (Domoticz & HA & OpenWeather)",      
     "cfg__extSensor_help" : "<b>DZ (Domoticz)</b><br>http:/" + "/[IP or domain name]:8080/json.htm?type=devices&rid=[device id]<br> Optionaly user login and password required, you can create user in DZ Options -> Users (/#/Users)<br><br><b>HA (Home Assistant)</b><br>http:/" + "/[IP or domain name]:8123/api/states/[device id]<br>Token can be created in HA Security section (/profile/security) -> Long access token",
     "cfg_extSensorLink" : "Link",
     "cfg_extSensorLogin" : "Login",

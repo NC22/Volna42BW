@@ -16,19 +16,9 @@
 // Workaround wakeup from deepsleep issue - https://github.com/esp8266/Arduino/issues/6318
 // Решение для исправления проблемы дешевых клонов плат ESP8266 D1 Mini с зависанием при выходе из сна 
 #define FIX_DEEPSLEEP   0                     // 0 - OFF, 1 - первый метод - непроверен \ first method - untested, 2 - второй, проверен в долгих тестах \ second, tested in long tests
-
 #endif
 
-#define CUI_MAX_WIDGETS 20                    // Максимально возможное кол-во выводимых виджетов для кастомного интерфейса
-#define CUI_LOOP_INTERVAL 14400               // Интервал смены оформления в режиме -loop - смена кастомных оформлений по порядку из того что загружено раз в 4 часа (тестовый функционал) 
-
 #define PRESSURE_HPA false                    // pressure in hPa (default - mmHg - мм.рт.ст)
-#define SAFE_MODE false                       // [DEBUG] игнорировать настройки сохраненные в EEPROM при запуске - на случай если по каким-то причинам конфиг вызывает зависания при запуске или иные проблемы
-
-#define EXTERNAL_SENSOR_CONNECT_ATTEMPTS 3    // Reconnect attempts on HTTP GET external data fail | Кол-во попыток подключения (HA & Domoticz & Openweather)
-#define EXTERNAL_SENSOR_CONNECT_TIMEOUT 15000 // Connection timeout in milliseconds | Максимальное время ожидания ответа сервера (HA & Domoticz & Openweather) 
-#define NTP_CONNECT_ATTEMPTS 3
-
 #define PARTIAL_UPDATE_INTERVAL 120           // Интервал частичного обновления экрана по умолчанию (если поддерживается) в секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
 
 // [Main temperature sensor] | [Внутренний сенсор температуры]
@@ -59,19 +49,9 @@
 
 // [Battery sensor mode] | [Режим чтения показаний заряда батареи]
 
-#define BAT_MIN_V 3.25           // 0%
-#define BAT_MAX_V 4.2            // 100%, low bat tick 10%
 // #define BAT_NO                // Disable battery sensor - always ON | Выключить чтение показаний батареи - не засыпать
 // #define BAT_ADS1115           // Read V by ADS1115 module | Чтение V батареи через I2C модуль ADS1115 [Input = A1, R1V=50.7kOm, R2GND=99.26kOm, Env::readBatteryV()]
 #define BAT_A0 0                 // Read V by analog pin A0 (or by PIN N in ESP32) | Чтение V через аналоговый вход A0 (или через заданый пин в ESP32) [ESP8266, R1V=180kOm], [ESP32, R1V=50.7kOm, R2GND=99.26kOm, Env::readBatteryV()]
-
-// [Optional sleep switch] | [Опциональный тригер режима сна]
-// По умолчанию переход в режим сна осуществляется всегда при наличии данных от сенсора уровня батареи, но можно вынести на отдельную кнопку \ переключатель
-// Если установлен SLEEP_SWITCH_PIN, переход в режим сна осуществляется только если SLEEP_SWITCH_PIN в состоянии digitalRead = LOW
-
-// #define SLEEP_SWITCH_PIN -1    // [ESP32] [ESP8266 - not enough pins, if 4.2' display used]
-// #define SLEEP_ALWAYS_IGNORE    // [DEBUG OPTION] Ignore sleep mode. Even if work from battery | Игнорировать режим сна. Не засыпать, даже если работаем от батареи. 
-// #define SLEEP_ALWAYS_SLEEP     // [DEBUG OPTION] Always go to sleep mode | Всегда уходить в режим сна 
 
 #if defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
 /*
@@ -101,7 +81,7 @@
 
 	// B\W displays WeAct - worked & tested
 	// B\W displays WaveShare rev 2.2 - worked & tested
-	// B\W\Red displays WaveShare rev 2.1 - not work
+	// B\W\Red displays WaveShare rev 2.1 - not work, revision (B) - work 
 	// B\W\Yelow displays WaveShare rev 2.1 - kinda work, but possible artifacts
 	// B\W displays WaveShare rev 2.1 - partial buffer push works, but no frame update availabe (orig examples also not works)
 
@@ -132,7 +112,7 @@
 	#else
 		
 		// [https://42volna.com/scheme/] Основная распиновка, с освобождением ножки CS
-
+	
 		#define EPD_BUSY_PIN 12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_RST_PIN  15  // D8 - GPIO - 15 (CS)
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0
@@ -184,5 +164,28 @@
 // идет снег t < 0 + [давление <= 1030hPa (~772 мм.рт.ст) + влажность >= 75%]		
 #define ICON_SNOW_DETECT_SNOW_HPA 1030  	   
 #define ICON_SNOW_DETECT_SNOW_HUM 75
+
+// [Other, system vars] [Разное, системное]
+
+#define CUI_MAX_WIDGETS 20                    // Максимально возможное кол-во выводимых виджетов для кастомного интерфейса
+#define CUI_LOOP_INTERVAL 14400               // Интервал смены оформления в режиме -loop - смена кастомных оформлений по порядку из того что загружено раз в 4 часа (тестовый функционал) 
+
+#define SAFE_MODE false                       // [DEBUG] игнорировать настройки сохраненные в EEPROM при запуске - на случай если по каким-то причинам конфиг вызывает зависания при запуске или иные проблемы
+
+#define EXTERNAL_SENSOR_CONNECT_ATTEMPTS 3    // Reconnect attempts on HTTP GET external data fail | Кол-во попыток подключения (HA & Domoticz & Openweather)
+#define EXTERNAL_SENSOR_CONNECT_TIMEOUT 15000 // Connection timeout in milliseconds | Максимальное время ожидания ответа сервера (HA & Domoticz & Openweather) 
+#define ENV_INDOOR_EXTERNAL_SUPPORT			  // Поддержка функции загрузки данных для внутреннего датчика из внешнего источника (опция для совместимости со старыми конфигами)
+#define NTP_CONNECT_ATTEMPTS 3
+
+#define BAT_MIN_V 3.25           // 0%
+#define BAT_MAX_V 4.2            // 100%, low bat tick 10%
+
+// [Optional sleep switch] | [Опциональный тригер режима сна]
+// По умолчанию переход в режим сна осуществляется всегда при наличии данных от сенсора уровня батареи, но можно вынести на отдельную кнопку \ переключатель
+// Если установлен SLEEP_SWITCH_PIN, переход в режим сна осуществляется только если SLEEP_SWITCH_PIN в состоянии digitalRead = LOW
+
+// #define SLEEP_SWITCH_PIN -1    // [ESP32] [ESP8266 - not enough pins, if 4.2' display used]
+// #define SLEEP_ALWAYS_IGNORE    // [DEBUG OPTION] Ignore sleep mode. Even if work from battery | Игнорировать режим сна. Не засыпать, даже если работаем от батареи. 
+// #define SLEEP_ALWAYS_SLEEP     // [DEBUG OPTION] Always go to sleep mode | Всегда уходить в режим сна 
 
 #endif	

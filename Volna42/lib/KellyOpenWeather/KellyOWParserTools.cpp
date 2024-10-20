@@ -3,35 +3,39 @@
 String KellyOWParserTools::sanitizeResponse(String var) {
   
   int responseLength = var.length();
-  var = var.substring(0, 128);
   String sanitized = "";
   bool valid = false;
-
   unsigned char c;
 
   for (int i = 0; i < responseLength; i++)  {
 
-    c = var[i];
-    
+    c = var[i];    
     if ((unsigned int) c == 34 || (unsigned int) c == 58 || (unsigned int) c == 47) {
       
       sanitized += "-";
-      continue;
+
+    } else if ((unsigned int) c == 10 || (unsigned int) c == 13) {
+
+      sanitized += "<br>";
 
     } else {
 
       valid = false;
       
            if ((unsigned int) c == 32) valid = true; // space
-      else if ((unsigned int) c >= 45 || (unsigned int) c <= 57) valid = true; // 0123456789.- 
-      else if ((unsigned int) c >= 97 || (unsigned int) c <= 122) valid = true; // a-z
-      else if ((unsigned int) c >= 65 || (unsigned int) c <= 90) valid = true;  // A-Z
+      else if ((unsigned int) c >= 45 && (unsigned int) c <= 57) valid = true; // 0123456789.- 
+      else if ((unsigned int) c >= 97 && (unsigned int) c <= 122) valid = true; // a-z
+      else if ((unsigned int) c >= 65 && (unsigned int) c <= 90) valid = true;  // A-Z
 
-      if (!valid) continue;
+      if (valid) {
+        sanitized += (char) c;
+      }
     }
 
-
-    sanitized += (char) c;
+    if (sanitized.length() > 128) {
+      sanitized += "...";
+      break;
+    }
   }
 
   return sanitized;

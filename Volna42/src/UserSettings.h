@@ -79,10 +79,10 @@ const char cfgExtSensor[] PROGMEM = "";                // API ссылка на 
 const char cfgExtSensorL[] PROGMEM = "";               // Логин (Domoticz) - требуется в зависимости от настроек Domoticz
 const char cfgExtSensorP[] PROGMEM = "";               // Пароль (Domoticz) или Токен авторизации (Home Assistant)
 
-const uint8_t cfgExtLocal PROGMEM = 0;                 // Использовать внешние данные для домашнего датчика (тестовый \ эксперементальный метод)  
-const char cfgExtSensorLocal[] PROGMEM = "";
-const char cfgExtSensorLocalL[] PROGMEM = "";
-const char cfgExtSensorLocalP[] PROGMEM = "";
+const uint8_t cfgExtLocal PROGMEM = 1;                 // Использовать внешние данные для домашнего датчика (тестовый \ эксперементальный метод)  
+const char cfgExtSensorLocal[] PROGMEM = "http://10.4.1.110:8080/json.htm?type=devices&rid=52";
+const char cfgExtSensorLocalL[] PROGMEM = "guest1";
+const char cfgExtSensorLocalP[] PROGMEM = "guest1";
 
 // [MQTT server]
 const char cfgMqttHost[] PROGMEM = "";
