@@ -979,6 +979,8 @@ String WebServerEink::getInfo() {
     ext_night_sleep -- after 00:00
     ext_night_sleep_cloudy -- after 00:00 with clouds
     ext_day_cloudy  -- summer day, clouds
+    ext_day_cloudy_cold -- winter clouds
+    ext_day_snow -- winter snow
 
     // changes Battery level
 
@@ -994,172 +996,199 @@ String WebServerEink::getInfo() {
 
     partial_update | partial_update2
 
+    cold = 1 - force temperature < 0
+
 */
 void WebServerEink::apiTestData() {
 
     String result = "fail";
+    bool cold = false;
+
     for (int i = 0; i < server->args(); i++)  {
 
-        if (server->argName(i).indexOf("preset") == -1) continue;
+        if (server->argName(i).indexOf("cold") != -1) {
+
+            cold = true;
+            Serial.println(F("[apiTestData] Low temp - enabled"));
+
+        } else if (server->argName(i).indexOf("preset") != -1) {
         
-        if (env->lastState.lastTelemetrySize <= 0 || env->lastState.lastTelemetry[env->lastState.lastTelemetrySize-1].temperature <= BAD_SENSOR_DATA) {
-            
-            Serial.println(F("[apiTestData] No sensor detected - used default telemetry"));
-
-            env->lastState.lastTelemetrySize = 1;
-            env->lastState.lastTelemetry[0].bat = 50;
-            env->lastState.lastTelemetry[0].humidity = 40.0f;
-            env->lastState.lastTelemetry[0].temperature = 23.0f;
-            env->lastState.lastTelemetry[0].pressure = 1200.0f  * 100.0f;
-        }
-    
-        if (server->arg(i) == "ext_bad_data") {   
-            
-            result = server->arg(i);
-            env->lastState.extData.temperature = BAD_SENSOR_DATA;
-            env->lastState.extData.humidity = BAD_SENSOR_DATA;
-            env->lastState.extData.bat = BAD_SENSOR_DATA;
-            env->lastState.extData.pressure = BAD_SENSOR_DATA;
-            env->lastState.extData.isDataValid = false;
-            env->lastState.extData.t = time(nullptr);
-
-        } else if (server->arg(i) == "partial_update" ) {               
-            
-            #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
-            
-                // Serial.println("[Deep sleep INIT 4 sec]");  
-                // env->lastState.t = time(nullptr);
-                // env->lastState.partialUpdateTest = true;
-                // env->saveCurrentState();
-
-                if (server->method() == HTTP_POST) env->screen->updateTestPartial();
+            if (env->lastState.lastTelemetrySize <= 0 || env->lastState.lastTelemetry[env->lastState.lastTelemetrySize-1].temperature <= BAD_SENSOR_DATA) {
                 
-                // ESP.deepSleep(4 * 1000000);
+                Serial.println(F("[apiTestData] No sensor detected - used default telemetry"));
+
+                env->lastState.lastTelemetrySize = 1;
+                env->lastState.lastTelemetry[0].bat = 50;
+                env->lastState.lastTelemetry[0].humidity = 40.0f;
+                env->lastState.lastTelemetry[0].temperature = 23.0f;
+                env->lastState.lastTelemetry[0].pressure = 1200.0f  * 100.0f;
+            }
+        
+            if (server->arg(i) == "ext_bad_data") {   
                 
-                server->send(200, "application/json", "{\"status\":\"updateTestPartial\"}");
-                return;
-            #endif
+                result = server->arg(i);
+                env->lastState.extData.temperature = BAD_SENSOR_DATA;
+                env->lastState.extData.humidity = BAD_SENSOR_DATA;
+                env->lastState.extData.bat = BAD_SENSOR_DATA;
+                env->lastState.extData.pressure = BAD_SENSOR_DATA;
+                env->lastState.extData.isDataValid = false;
+                env->lastState.extData.t = time(nullptr);
 
-        } else if (server->arg(i) == "partial_update2") {   
-            
-            result = server->arg(i);
-            #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
-            
-                if (server->method() == HTTP_POST) env->screen->updateTestPartial2();
+            } else if (server->arg(i) == "partial_update" ) {               
                 
-                server->send(200, "application/json", "{\"status\":\"updateTestPartial2\"}");
-                return;
-            #endif
+                #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
+                
+                    // Serial.println("[Deep sleep INIT 4 sec]");  
+                    // env->lastState.t = time(nullptr);
+                    // env->lastState.partialUpdateTest = true;
+                    // env->saveCurrentState();
 
-        } else if (server->arg(i) == "ext_bat_full" || server->arg(i) == "ext_bat_mid" || server->arg(i) == "ext_bat_low" || server->arg(i) == "ext_bat_low2"){
+                    if (server->method() == HTTP_POST) env->screen->updateTestPartial();
+                    
+                    // ESP.deepSleep(4 * 1000000);
+                    
+                    server->send(200, "application/json", "{\"status\":\"updateTestPartial\"}");
+                    return;
+                #endif
 
-            result = server->arg(i);
-            env->lastState.extData.temperature = 12.12f;
-            env->lastState.extData.humidity = 48.7f;
+            } else if (server->arg(i) == "partial_update2") {   
+                
+                result = server->arg(i);
+                #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
+                
+                    if (server->method() == HTTP_POST) env->screen->updateTestPartial2();
+                    
+                    server->send(200, "application/json", "{\"status\":\"updateTestPartial2\"}");
+                    return;
+                #endif
 
-            if (server->arg(i) == "ext_bat_mid") {
+            } else if (server->arg(i) == "ext_bat_full" || server->arg(i) == "ext_bat_mid" || server->arg(i) == "ext_bat_low" || server->arg(i) == "ext_bat_low2"){
+
+                result = server->arg(i);
+                env->lastState.extData.temperature = 12.12f;
+                env->lastState.extData.humidity = 48.7f;
+
+                if (server->arg(i) == "ext_bat_mid") {
+                    env->lastState.extData.bat = 68;  
+                } else if (server->arg(i) == "ext_bat_low") {
+                    env->lastState.extData.bat = 5;  
+                } else if (server->arg(i) == "ext_bat_low2") {
+                    env->lastState.extData.bat = 11;  
+                } else {
+                    env->lastState.extData.bat = 100; 
+                }
+
+                env->lastState.extData.isDataValid = true;
+                env->lastState.extData.t = time(nullptr);
+
+            } else if (server->arg(i) == "ext_summer" || 
+                    server->arg(i) == "ext_winter" || 
+                    server->arg(i) == "ext_overheat" || 
+                    server->arg(i) == "ext_rain" || 
+                    server->arg(i) == "ext_night_cloudy" || 
+                    server->arg(i) == "ext_night" || 
+                    server->arg(i) == "ext_night_sleep" || 
+                    server->arg(i) == "ext_night_sleep_cloudy" || 
+                    server->arg(i) == "ext_day_cloudy_cold" ||
+                    server->arg(i) == "ext_day_snow" ||  
+                    server->arg(i) == "ext_day" || 
+                    server->arg(i) == "ext_day_cloudy"
+            ) {
+
+                result = server->arg(i);
+                if (server->arg(i) == "ext_winter") {
+
+                    env->getConfig()->cfgValues[cTimestamp] = "2024-02-03 12:32:04";
+                    env->lastState.extData.temperature = -21.12f;
+                    env->lastState.extData.humidity = 67.8f;
+
+                } else if (server->arg(i) == "ext_overheat") {
+
+                    env->getConfig()->cfgValues[cTimestamp] = "2024-07-03 15:32:04";
+                    env->lastState.extData.temperature = 40.12f;
+                    env->lastState.extData.humidity = 10.8f;
+
+                } else if (server->arg(i) == "ext_rain") {
+
+                    env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 15:32:04";
+                    env->lastState.extData.temperature = 25.12f;
+                    env->lastState.extData.humidity = ICON_RAIN_DETECT_RAINY_HUM+1;             
+                    env->lastState.extData.pressure = (ICON_RAIN_DETECT_RAINY_HPA-10) * 100.0f; 
+
+                } else if (server->arg(i) == "ext_day_cloudy_cold") {
+
+                    env->getConfig()->cfgValues[cTimestamp] = "2024-01-03 15:32:04";
+                    env->lastState.extData.temperature = -25.12f;
+                    env->lastState.extData.humidity = ICON_SNOW_DETECT_CLOUDY_HUM+1;             
+                    env->lastState.extData.pressure = (ICON_SNOW_DETECT_CLOUDY_HPA-10) * 100.0f; 
+
+                } else if (server->arg(i) == "ext_day_snow") {
+
+                    env->getConfig()->cfgValues[cTimestamp] = "2024-01-03 15:32:04";
+                    env->lastState.extData.temperature = -25.12f;
+                    env->lastState.extData.humidity = ICON_SNOW_DETECT_SNOW_HUM+1;             
+                    env->lastState.extData.pressure = (ICON_SNOW_DETECT_SNOW_HPA-10) * 100.0f; 
+
+                } else if (server->arg(i) == "ext_night") {
+
+                    env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 22:32:04";
+                    env->lastState.extData.temperature = 25.12f;
+                    env->lastState.extData.humidity = 20.0f;
+                    env->lastState.extData.pressure = 1200.0f * 100.0f;
+
+                } else if (server->arg(i) == "ext_night_cloudy") {
+
+                    env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 22:30:04";
+                    env->lastState.extData.temperature = 25.12f;
+                    env->lastState.extData.humidity = ICON_RAIN_DETECT_CLOUDY_HUM+1;                
+                    env->lastState.extData.pressure = (ICON_RAIN_DETECT_CLOUDY_HPA-10) * 100.0f;
+
+                } else if (server->arg(i) == "ext_night_sleep") {
+
+                    env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 00:30:04";
+                    env->lastState.extData.temperature = 25.12f;
+                    env->lastState.extData.humidity = 20.0f;
+                    env->lastState.extData.pressure = 1200.0f * 100.0f;
+
+                }  else if (server->arg(i) == "ext_night_sleep_cloudy") {
+
+                    env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 00:30:04";
+                    env->lastState.extData.temperature = 25.12f;
+                    env->lastState.extData.humidity = ICON_RAIN_DETECT_CLOUDY_HUM+1;                
+                    env->lastState.extData.pressure = (ICON_RAIN_DETECT_CLOUDY_HPA-10) * 100.0f;
+
+                }  else if (server->arg(i) == "ext_day_cloudy") {
+
+                    env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 15:30:04";
+                    env->lastState.extData.temperature = 25.12f;
+                    env->lastState.extData.humidity = ICON_RAIN_DETECT_CLOUDY_HUM+1;                
+                    env->lastState.extData.pressure = (ICON_RAIN_DETECT_CLOUDY_HPA-10) * 100.0f;
+
+                } else { // summer
+
+                    result = "default preset - summer day";
+                    env->lastState.extData.temperature = 27.12f;
+                    env->lastState.extData.humidity = 50.7f;
+                    env->getConfig()->cfgValues[cTimestamp] = "2024-06-12 15:44:04";
+                }
+
                 env->lastState.extData.bat = 68;  
-            } else if (server->arg(i) == "ext_bat_low") {
-                env->lastState.extData.bat = 5;  
-            } else if (server->arg(i) == "ext_bat_low2") {
-                env->lastState.extData.bat = 11;  
+                env->lastState.extData.isDataValid = true;
+                env->lastState.extData.t = time(nullptr);
+
+                std::vector<cfgOptionKeys> updatedKeys;
+                updatedKeys.push_back(cTimestamp);
+                env->validateConfig(-1, &updatedKeys);
             } else {
-                env->lastState.extData.bat = 100; 
+                
+                result = "unknown preset";
             }
-
-            env->lastState.extData.isDataValid = true;
-            env->lastState.extData.t = time(nullptr);
-
-        } else if (server->arg(i) == "ext_summer" || 
-                   server->arg(i) == "ext_winter" || 
-                   server->arg(i) == "ext_overheat" || 
-                   server->arg(i) == "ext_rain" || 
-                   server->arg(i) == "ext_night_cloudy" || 
-                   server->arg(i) == "ext_night" || 
-                   server->arg(i) == "ext_night_sleep" || 
-                   server->arg(i) == "ext_night_sleep_cloudy" || 
-                   server->arg(i) == "ext_day" || 
-                   server->arg(i) == "ext_day_cloudy"
-        ){
-
-            result = server->arg(i);
-            if (server->arg(i) == "ext_winter") {
-
-                env->getConfig()->cfgValues[cTimestamp] = "2024-02-03 12:32:04";
-                env->lastState.extData.temperature = -21.12f;
-                env->lastState.extData.humidity = 67.8f;
-
-            } else if (server->arg(i) == "ext_overheat") {
-
-                env->getConfig()->cfgValues[cTimestamp] = "2024-07-03 15:32:04";
-                env->lastState.extData.temperature = 40.12f;
-                env->lastState.extData.humidity = 10.8f;
-
-            } else if (server->arg(i) == "ext_rain") {
-
-                env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 15:32:04";
-                env->lastState.extData.temperature = 25.12f;
-                env->lastState.extData.humidity = ICON_RAIN_DETECT_RAINY_HUM+1;             
-                env->lastState.extData.pressure = (ICON_RAIN_DETECT_RAINY_HPA-10) * 100.0f; 
-
-            } else if (server->arg(i) == "ext_night") {
-
-                env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 22:32:04";
-                env->lastState.extData.temperature = 25.12f;
-                env->lastState.extData.humidity = 20.0f;
-                env->lastState.extData.pressure = 1200.0f * 100.0f;
-
-            } else if (server->arg(i) == "ext_night_cloudy") {
-
-                env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 22:30:04";
-                env->lastState.extData.temperature = 25.12f;
-                env->lastState.extData.humidity = ICON_RAIN_DETECT_CLOUDY_HUM+1;                
-                env->lastState.extData.pressure = (ICON_RAIN_DETECT_CLOUDY_HPA-10) * 100.0f;
-
-            } else if (server->arg(i) == "ext_night_sleep") {
-
-                env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 00:30:04";
-                env->lastState.extData.temperature = 25.12f;
-                env->lastState.extData.humidity = 20.0f;
-                env->lastState.extData.pressure = 1200.0f * 100.0f;
-
-            }  else if (server->arg(i) == "ext_night_sleep_cloudy") {
-
-                env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 00:30:04";
-                env->lastState.extData.temperature = 25.12f;
-                env->lastState.extData.humidity = ICON_RAIN_DETECT_CLOUDY_HUM+1;                
-                env->lastState.extData.pressure = (ICON_RAIN_DETECT_CLOUDY_HPA-10) * 100.0f;
-
-            }  else if (server->arg(i) == "ext_day_cloudy") {
-
-                env->getConfig()->cfgValues[cTimestamp] = "2024-06-03 15:30:04";
-                env->lastState.extData.temperature = 25.12f;
-                env->lastState.extData.humidity = ICON_RAIN_DETECT_CLOUDY_HUM+1;                
-                env->lastState.extData.pressure = (ICON_RAIN_DETECT_CLOUDY_HPA-10) * 100.0f;
-
-            } else { // summer
-
-                result = "default preset - summer day";
-                env->lastState.extData.temperature = 27.12f;
-                env->lastState.extData.humidity = 50.7f;
-                env->getConfig()->cfgValues[cTimestamp] = "2024-06-12 15:44:04";
-            }
-
-            env->lastState.extData.bat = 68;  
-            env->lastState.extData.isDataValid = true;
-            env->lastState.extData.t = time(nullptr);
-
-            std::vector<cfgOptionKeys> updatedKeys;
-            updatedKeys.push_back(cTimestamp);
-            env->validateConfig(-1, &updatedKeys);
-        } else {
-            
-            result = "unknown preset";
         }
-
-        break;
     }
     
+    if (cold) {
+        env->lastState.extData.temperature = -20.0f;
+    }
     env->lastState.extData.icon = kowUnknown;
     env->updateExtIconState();
     env->updateScreen();

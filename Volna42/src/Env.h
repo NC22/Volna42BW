@@ -69,6 +69,10 @@ extern const uint8_t cfgCelsius PROGMEM;
 extern const uint8_t cfg12HourFormat PROGMEM;
 extern const uint8_t cfgUpdateMinutes PROGMEM;
 
+extern const uint8_t cfgExtLocal PROGMEM;                 
+extern const char cfgExtSensorLocal[] PROGMEM;
+extern const char cfgExtSensorLocalL[] PROGMEM;
+extern const char cfgExtSensorLocalP[] PROGMEM;
 
 extern const uint8_t textDateFormat PROGMEM;	
 extern const char longDateFormat[] PROGMEM;
@@ -240,6 +244,7 @@ class Env {
         float toFahrenheit(float celsius);
         
         bool updateSCD4X();
+        void updateBattery(int &telemetryIndex);
 
         float readTemperature();
         float readPressure();

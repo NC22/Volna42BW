@@ -72,7 +72,7 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
     }
 
     if (connected) {
-      Serial.println(F("Connected to server"));
+      Serial.println(F("[OpenWeather] Connected to server...read response..."));
 
       String tmp = String("GET ") + path + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n";
       host = "";
@@ -166,12 +166,12 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
       return 200;
       
     } else {
-      Serial.println(F("Connection failed!"));
+      Serial.println(F("[OpenWeather] Connection failed!"));
       return -1;
     }
     
   } else {
-    Serial.println(F("Failed to parse URL"));
+    Serial.println(F("[OpenWeather] Failed to parse URL"));
     return -2;
   }
   

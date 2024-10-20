@@ -5,6 +5,7 @@
 
 #include <KellyOpenWeather.h>
 #include <WidgetTypes.h>
+#include <SystemDefines.h>
 
 typedef struct {
     
@@ -74,7 +75,7 @@ typedef struct {
     bool cuiLoop;                  // todo - exclude from loop [default] cui ?
     bool cuiResetOnReboot;         // needed when we reboot from web ui, but not when move cui loop cursor and need to reboot for realloc memory by switch form 1-bit to 2-bit mode       
 
-    telemetry lastTelemetry[5];   
+    telemetry lastTelemetry[ENV_TELEMETRY_MAX];   
     externalSensorData extData; 
 
     bool updateMinutes;

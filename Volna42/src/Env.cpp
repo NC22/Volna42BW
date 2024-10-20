@@ -244,7 +244,7 @@ void Env::setDefaultLastStateData() {
     lastState.cuiResetOnReboot = false;
     lastState.wakeUps = 0;
     lastState.connectTimes = 0;
-    lastState.lastTelemetrySize = 0;
+    lastState.lastTelemetrySize = 1;
     lastState.extData.isDataValid = false;
     lastState.t = defaultTime;
     lastState.onBattery = false;
@@ -951,7 +951,6 @@ void Env::cuiResetWidgets() {
     cuiWidgets.clear();
 }
 
-
 void Env::updateExtIconState() {
 
     // опционально наследуем данные по давлению с внутреннего датчика если данные по давлению не доступны
@@ -970,39 +969,60 @@ void Env::updateExtIconState() {
       if (lastState.extData.isDataValid && lastState.lastTelemetrySize > 0) {
           
         #if defined(ICON_RAIN_DETECT)
-
-          if (lastState.extData.temperature > 0) {
               
-              float priorityPressure = lastState.extData.pressure;
-              if (priorityPressure <= BAD_SENSOR_DATA) {
-                  priorityPressure = lastState.lastTelemetry[lastState.lastTelemetrySize-1].pressure;
-              } 
+          float priorityPressure = lastState.extData.pressure;
+          if (priorityPressure <= BAD_SENSOR_DATA) {
+              priorityPressure = lastState.lastTelemetry[lastState.lastTelemetrySize-1].pressure;
+          } 
 
-              if (priorityPressure <= BAD_SENSOR_DATA) { 
+          if (priorityPressure <= BAD_SENSOR_DATA) { 
 
-                  // skip icon update, no pressure data
-                  Serial.print(F("priorityPressure skip icon update, no pressure data"));
+            // skip icon update, no pressure data
+            Serial.print(F("priorityPressure skip icon update, no pressure data"));
 
-              } else {
+          } else {
+            
+            if (lastState.extData.temperature > 0) {
 
-                  if ((priorityPressure / 100.0f) <= ICON_RAIN_DETECT_RAINY_HPA ) {
+              if ((priorityPressure / 100.0f) <= ICON_RAIN_DETECT_RAINY_HPA ) {
 
-                      if (lastState.extData.humidity >= ICON_RAIN_DETECT_RAINY_HUM) {
-                        lastState.extData.icon = kowRain;
-                        return;
-                      }
-
+                  if (lastState.extData.humidity >= ICON_RAIN_DETECT_RAINY_HUM) {
+                    lastState.extData.icon = kowRain;
+                    return;
                   }
-                  
-                  if ((priorityPressure / 100.0f) <= ICON_RAIN_DETECT_CLOUDY_HPA ) {
 
-                      if (lastState.extData.humidity >= ICON_RAIN_DETECT_CLOUDY_HUM) {
-                        lastState.extData.icon = kowFewClouds;
-                        return;
-                      }
+              }
+              
+              if ((priorityPressure / 100.0f) <= ICON_RAIN_DETECT_CLOUDY_HPA ) {
+
+                  if (lastState.extData.humidity >= ICON_RAIN_DETECT_CLOUDY_HUM) {
+                    lastState.extData.icon = kowFewClouds;
+                    return;
                   }
               }
+              
+            } else {
 
+              #if defined(ICON_SNOW_DETECT_CLOUDY_HPA)       
+              
+              if ((priorityPressure / 100.0f) <= ICON_SNOW_DETECT_SNOW_HPA ) {
+
+                  if (lastState.extData.humidity >= ICON_SNOW_DETECT_SNOW_HUM) {
+                    lastState.extData.icon = kowSnow;
+                    return;
+                  }
+
+              }
+                           
+              if ((priorityPressure / 100.0f) <= ICON_SNOW_DETECT_CLOUDY_HPA ) {
+
+                  if (lastState.extData.humidity >= ICON_SNOW_DETECT_CLOUDY_HUM) {
+                    lastState.extData.icon = kowFewClouds;
+                    return;
+                  }
+              }
+              #endif
+            }
           }
         #endif
 
@@ -1014,6 +1034,33 @@ void Env::updateExtIconState() {
   Request data from remote sensor if configured
 */
 bool Env::updateExtSensorData() {
+
+    if (pgm_read_byte(&cfgExtLocal) > 0) {
+      
+      Serial.print(F("Load External sensor data for INDOOR"));
+      
+      String url = FPSTR(cfgExtSensorLocal);
+      String login = FPSTR(cfgExtSensorLocalL);
+      String pass = FPSTR(cfgExtSensorLocalP);
+
+      externalSensorData newData;
+      if (ExternalSensor::requestData(
+        url, 
+        login, 
+        pass, 
+        newData, 
+        lastError
+      )) {
+
+        lastState.lastTelemetrySize = 1;
+        int index = 0;
+        updateBattery(index);
+        lastState.lastTelemetry[index].t = defaultTime;
+        lastState.lastTelemetry[index].humidity = newData.humidity;        
+        lastState.lastTelemetry[index].pressure = newData.pressure;        
+        lastState.lastTelemetry[index].temperature = newData.temperature;
+      }
+    }
 
     if (getConfig()->cfgValues[cExtSensorLink].length() < 0) return false;
 
@@ -1031,17 +1078,34 @@ bool Env::updateExtSensorData() {
     }
 }
 
+void Env::updateBattery(int &telemetryIndex) {
+  
+  lastState.lastTelemetry[telemetryIndex].bat = readBatteryV();
+
+  if (isOnBattery() && getBatteryLvlfromV(lastState.lastTelemetry[telemetryIndex].bat) < 10) {
+
+    lastState.lowBatTick++;      
+    Serial.println("[LOW BAT] tick +1 [" + String(lastState.lowBatTick) + "]");
+      
+  } else {
+
+    lastState.lowBatTick = 0;
+  }
+}
+
 // collect current internal sensors data to structure
 // structure is limited by telemetryBufferMax and rewriten by loop
 // lastState.lastTelemetrySize -- current size of lastState.lastTelemetry 
 
 void Env::updateTelemetry()  {
       
-    if (lastState.lastTelemetrySize >= telemetryBufferMax) {
-        lastState.lastTelemetrySize = 0;
-    }
+  if (pgm_read_byte(&cfgExtLocal) > 0) {
     
-    int key = lastState.lastTelemetrySize;
+    Serial.println(F("[updateTelemetry] - Internal sensor data will be taken from External source - skip"));
+
+  } else {
+    
+    int key = lastState.lastTelemetrySize-1;
     keepTelemetry(key);
 
     if (tsensor && 
@@ -1052,21 +1116,21 @@ void Env::updateTelemetry()  {
       keepTelemetry(key); // cold start second attempt
     }
 
-    lastState.lastTelemetry[key].bat = readBatteryV();
+    updateBattery(key);
     lastState.lastTelemetry[key].t = defaultTime;
     lastState.lastTelemetrySize++;
 
-    if (isOnBattery() && getBatteryLvlfromV(lastState.lastTelemetry[key].bat) < 10) {
-      lastState.lowBatTick++; 
-      Serial.println("[LOW BAT] tick +1 [" + String(lastState.lowBatTick) + "]");
-    } else {
-      lastState.lowBatTick = 0;
+    if (lastState.lastTelemetrySize > ENV_TELEMETRY_MAX) {
+      lastState.lastTelemetrySize = 1;
+      Serial.println(F("[lastTelemetrySize] - reached limit, go from begin"));
     }
 
     Serial.println(F("[updateTelemetry] - Internal sensors data : "));
     Serial.println(lastState.lastTelemetry[key].temperature);
     Serial.println(lastState.lastTelemetry[key].humidity);
     Serial.println(lastState.lastTelemetry[key].bat);
+    
+  }
 
   #if defined(CO2_SCD41) 
     if (updateSCD4X()) {

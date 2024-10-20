@@ -75,7 +75,7 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
   int textMarginX = screen->drawString(tempMarginX, theight - 20, env->getFormattedSensorTitle(indoor), false);
 
   if (!indoor && (textMarginX - tempMarginX <= 89)) {    
-    widgetController->drawBatWidget(textMarginX + 2, theight - 28, true, true, true);
+    textMarginX += widgetController->drawBatWidget(textMarginX + 2, theight - 28, true, true, true);    
   }
 
   bool showPressure = false;
@@ -133,17 +133,47 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
   int twidth = screen->drawString(tempMarginX, theight, buffer, false);  
 
   if (env->celsius) {
-    screen->drawImage(10 + twidth, theight + 4, &cels_39x43bw_settings, false); // Celsius glyph symbol    
+
+    if (!land && twidth > 90) twidth += 3;
+    else twidth += 10;
+
+    screen->drawImage(twidth, theight + 4, &cels_39x43bw_settings, false); // Celsius glyph symbol    
   } else {
-    screen->drawImage(6 + twidth, theight + 4, &fahr_39x43bw_settings, false); // Fahrenheit glyph symbol    
+
+    if (!land && twidth > 90) twidth += 2;
+    else twidth += 6;
+
+    screen->drawImage(twidth, theight + 4, &fahr_39x43bw_settings, false); // Fahrenheit glyph symbol    
   }
 
+  if (!land && humidity >= 100) humidity = 99.9;
+   
   sprintf(buffer, "%.1f%%", humidity > BAD_SENSOR_DATA ? humidity : 0.0f);  
   screen->drawString(humMarginX, theight + humMarginY, buffer, false);
 
-  // temperature bar icon
+  // addition spacing before meter bar
 
+  if (land) {
+
+    twidth += 12;
+
+  } else {
+
+    if (twidth > 90) { // will be very close to humidity side
+      twidth += 2;
+    } else {
+      twidth += 10;
+    }
+
+  }
+
+  // count temperature bar icon
   twidth += 39;
+
+  // prevent overlap with text title
+  if (twidth < textMarginX) {
+    twidth = textMarginX + 2;
+  }
 
   float tempMax = 42.0; float tempMin = -20.0; 
 
@@ -166,11 +196,11 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
 
   float pixelsPerPercent = 68.0 / 100.0; // icon 68 pixels max  
 
-  screen->drawImage(land ? twidth + 29 : humMarginX - 26, theight - 20, &temp_15x68bw_settings, false);
+  screen->drawImage(twidth, theight - 20, &temp_15x68bw_settings, false);
      
   screen->color = tRY;       
   screen->resetImageMods(mods, true, false, false, -1, -1, 68 - (int) round(pixelsPerPercent * tempPercent), 68); 
-  screen->drawImageMods(land ? twidth + 29 : humMarginX - 26, theight - 20, &temp_meter_15x68bw_settings, mods, true); 
+  screen->drawImageMods(twidth, theight - 20, &temp_meter_15x68bw_settings, mods, true); 
 
   screen->color = tBLACK; 
 
@@ -711,20 +741,22 @@ void Screen4in2UI::drawCat(bool land) {
 
               hpad += 128; 
               marginX = land ? calcMarginMiddle(localWidth/2, 122) : localWidth - 145;
+
               screen->drawImage(marginX + 18, localHeight - hpad - 25, &rain_93x52bw_settings, true);
-              
               screen->drawImage(marginX, localHeight - hpad, &cat_rain_127x125bw_settings, true);
               catShown = true;
-                        
-          } else if (env->lastState.extData.icon == kowSnow || env->lastState.extData.temperature < 5) { // wear warm clothes
 
-              hpad = 97 + 2;
+          // wear warm clothes  
+
+          } else if (env->lastState.extData.icon == kowSnow) { 
+
+              hpad = 99;
               marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 115;
 
-              screen->drawImage(marginX, localHeight - hpad, &cat_winter_93x97bw_settings, true);
-              catShown = true;    
+              screen->drawImage(marginX, localHeight - hpad, &cat_winter_93x97bw_settings, true);   
               hpad += 36;          
               screen->drawImage(marginX - 20, localHeight - hpad, &snowflakes_116x39bw_settings, true);
+              catShown = true; 
 
           } else if (env->lastState.extData.temperature > 35) { // overheat
 
@@ -742,11 +774,25 @@ void Screen4in2UI::drawCat(bool land) {
   // if warm and day - default - show happy cat with sun, moon depend on hours
 
   if (!catShown) {
-      hpad = 94;
-      marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 125;
 
-      screen->drawImage(marginX, localHeight - hpad, &cat_happy_80x94bw_settings, true);
-      drawWeaterIcon(screen, (dt.h > 20 && dt.h <= 23) || (dt.h >= 0 && dt.h <= 7) ? true : false, clouds, land);
+      int baseY = -1;
+      int baseX = -1;
+
+      if (env->lastState.extData.temperature < 0) {
+
+        hpad = 99;
+        marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 130;
+        screen->drawImage(marginX, localHeight - hpad, &cat_winter_93x97bw_settings, true);
+        baseY = localHeight - hpad;
+        baseX = marginX + 8; 
+      } else {
+
+        hpad = 94;
+        marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 125;
+        screen->drawImage(marginX, localHeight - hpad, &cat_happy_80x94bw_settings, true);        
+      }
+      
+      drawWeaterIcon(screen, (dt.h > 20 && dt.h <= 23) || (dt.h >= 0 && dt.h <= 7) ? true : false, clouds, land, baseX, baseY);
   } 
 }
 
@@ -760,9 +806,7 @@ int Screen4in2UI::drawWeaterIcon(KellyCanvas * screen, bool night, bool clouds, 
         baseX = land ? calcMarginMiddle(localWidth/2, 100) : localWidth - 120; 
     }
 
-    bool autoBaseY = false;
     if (baseY == -1) {
-        autoBaseY = true;
         baseY = localHeight - 90;
     }
 
@@ -770,7 +814,7 @@ int Screen4in2UI::drawWeaterIcon(KellyCanvas * screen, bool night, bool clouds, 
 
       if (clouds) {
 
-        if (autoBaseY) baseY -= moon_cloudy_78x60bw_settings.height;
+        baseY -= moon_cloudy_78x60bw_settings.height;
 
         // icon offsets
         baseX += 30;
@@ -780,7 +824,7 @@ int Screen4in2UI::drawWeaterIcon(KellyCanvas * screen, bool night, bool clouds, 
 
       } else {
 
-        if (autoBaseY) baseY -= moon_clear_93x63bw_settings.height;
+        baseY -= moon_clear_93x63bw_settings.height;
 
         // icon offsets
         baseX += 10;
@@ -793,7 +837,7 @@ int Screen4in2UI::drawWeaterIcon(KellyCanvas * screen, bool night, bool clouds, 
       
       if (clouds) {
                 
-        if (autoBaseY) baseY -= sun_cloudy_82x56bw_settings.height;
+        baseY -= sun_cloudy_82x56bw_settings.height;
 
         // icon offsets
         baseX += 20;
@@ -803,7 +847,7 @@ int Screen4in2UI::drawWeaterIcon(KellyCanvas * screen, bool night, bool clouds, 
 
       } else {
 
-        if (autoBaseY) baseY -= sun_clear_68x66bw_settings.height;
+        baseY -= sun_clear_68x66bw_settings.height;
 
         // icon offsets
         baseX += 40;
