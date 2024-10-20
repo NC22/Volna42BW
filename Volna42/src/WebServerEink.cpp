@@ -152,10 +152,15 @@ void WebServerEink::apiClockTest() {
 }
 
 void WebServerEink::apiPartialTest() {
+
+    env->defaultTime = time(nullptr);
     env->defaultTime += 60;
+
     env->initDefaultTime();
     env->updateTime();
+
     env->screen->updatePartialClock();
+    
     server->send(200, "application/json", "{\"status\":\"ok\"}"); 
 }
 
