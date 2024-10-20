@@ -73,7 +73,7 @@
 
 // #define SLEEP_SWITCH_PIN -1    // [ESP32] [ESP8266 - not enough pins, if 4.2' display used]
 // #define SLEEP_ALWAYS_IGNORE    // [DEBUG OPTION] Ignore sleep mode. Even if work from battery | Игнорировать режим сна. Не засыпать, даже если работаем от батареи. 
-#define SLEEP_ALWAYS_SLEEP     // [DEBUG OPTION] Always go to sleep mode | Всегда уходить в режим сна 
+// #define SLEEP_ALWAYS_SLEEP     // [DEBUG OPTION] Always go to sleep mode | Всегда уходить в режим сна 
 
 #if defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
 /*
