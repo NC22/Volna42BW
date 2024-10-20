@@ -431,12 +431,11 @@ void Screen4in2UI::drawUIToBuffer() {
 void Screen4in2UI::updatePartialClock() {
 	
     int returnBitPerPixel = -1;
-    bool coldStart = false;
+    bool coldStart = !env->canvas->bufferBW;
     renderWidgetsOnly = false;
 
     // we only wakedUp & CUI was in 2-bit mode
     if (!env->canvas->bufferBW && env->lastState.cuiBitsPerPixel > 1) {
-        coldStart = true;
         renderWidgetsOnly = true;
         env->canvas->setBitsPerPixel(1); // init buffer, since in widgets only mode buffer initialization is ignored
 
@@ -784,7 +783,7 @@ int Screen4in2UI::drawWeaterIcon(KellyCanvas * screen, bool night, bool clouds, 
         if (autoBaseY) baseY -= moon_clear_93x63bw_settings.height;
 
         // icon offsets
-        baseX += 15;
+        baseX += 5;
         baseY += 0;
 
         screen->drawImage(baseX, baseY, &moon_clear_93x63bw_settings, true);
