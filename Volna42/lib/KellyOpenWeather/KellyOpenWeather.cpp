@@ -49,13 +49,15 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
     
     if (https) {
       clientSecure = new WiFiClientSecure;
+      clientSecure->setBufferSizes(512, 512); // wiil get OOM without this reduce - Default require ~ +16kb + 6kb, This only ~7kb https://github.com/esp8266/Arduino/issues/7326
+      clientSecure->setInsecure(); // we cant work with certs, since they always changes and cant be ez stored & updated on ESP
       #if defined(ESP32)
         clientSecure->setTimeout(connectionTimeout / 1000);
       #else 
         clientSecure->setTimeout(connectionTimeout);
       #endif
     } else {
-      client = new WiFiClient;   
+      client = new WiFiClient;
       #if defined(ESP32)
         client->setTimeout(connectionTimeout / 1000);
       #else 
@@ -65,8 +67,8 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
 
     bool connected = false;
     if (https) {
-      clientSecure->setInsecure();  
       connected = clientSecure->connect(host.c_str(), port);
+      Serial.println(F("[OpenWeather] HTTPS mode (+7kb RAM temp USED)"));
     } else {
       connected = client->connect(host.c_str(), port);
     }
@@ -109,13 +111,13 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
         Serial.print(F("[OpenWeather] Empty body "));
       }
 
-
       String collectedData;
       if (KellyOWParserTools::collectJSONFieldData("cod", tmp, collectedData)) {
 
           if (collectedData != "200") {
               KellyOWParserTools::collectJSONFieldData("message", tmp, collectedData);
               error = collectedData;
+              KellyOWParserTools::clientEnd(client, clientSecure);
               return 5;
           } 
 
@@ -141,42 +143,37 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
                   }
 
                   if (temp <= -1000) {                    
-                      error = "Parse Temp fail";
+                      error = "[OpenWeather] Parse Temp fail";
+                      KellyOWParserTools::clientEnd(client, clientSecure);
                       return 4;
                   } else {
                       weatherLoaded = true;
                   }
 
               } else {
-                error = "Temp read fail";
+                error = "[OpenWeather] Temp read fail";
+                KellyOWParserTools::clientEnd(client, clientSecure);
                 return 3;
               }
           } else {
-              error = "Main block not found";
+              error = "[OpenWeather] Main block not found";
+              KellyOWParserTools::clientEnd(client, clientSecure);
               return 2;
           }
 
       } else {
-        error = "Response not contain code number";
+        error = "[OpenWeather] Response not contain code number";
+        KellyOWParserTools::clientEnd(client, clientSecure);
         return 1;
       }
 
-      if (https) {
-        if (clientSecure) {
-          clientSecure->stop();
-          delete clientSecure;
-        }
-      } else {
-        if (client) {
-          client->stop();
-          delete client;
-        }
-      }
-
+      KellyOWParserTools::clientEnd(client, clientSecure);
       return 200;
       
     } else {
+      Serial.print(F("Host : ")); Serial.print(host); Serial.print(F(" Port : ")); Serial.println(port);
       Serial.println(F("[OpenWeather] Connection failed!"));
+      KellyOWParserTools::clientEnd(client, clientSecure);
       return -1;
     }
     

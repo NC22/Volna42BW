@@ -17,7 +17,7 @@ void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLeng
   while ((clientSecure ? clientSecure : client)->connected() || (clientSecure ? clientSecure : client)->available()) {
     
     if (millis() - secondTimerStart >= maxIdleTime) {
-      Serial.println("[clientReadHeaders] Server not responding : Return by Timeout");
+      Serial.println(F("[clientReadHeaders] Server not responding : Return by Timeout"));
       return;
     }
 
@@ -35,7 +35,7 @@ void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLeng
     
     if (c == '\n') { // end line always r n or just n
       
-      Serial.print(line);
+      // Serial.print(line);
 
       if (line.startsWith("Content-Length: ")) {
 
@@ -54,6 +54,19 @@ void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLeng
   }
 }
 
+void KellyOWParserTools::clientEnd(WiFiClient * client, WiFiClientSecure * clientSecure) {
+  
+    if (clientSecure) {
+      clientSecure->stop();
+      delete clientSecure;
+    }
+
+    if (client) {
+      client->stop();
+      delete client;
+    }
+}
+
 /*
   Read data from server with max limit by size
   size - max amount of bytes that can be readed from server
@@ -68,7 +81,7 @@ void KellyOWParserTools::clientReadBody(String &out, uint16_t size, WiFiClient *
   while ((clientSecure ? clientSecure : client)->connected() || (clientSecure ? clientSecure : client)->available()) {
       
     if (millis() - secondTimerStart >= maxIdleTime) {
-      Serial.println("[clientReadHeaders] Server not responding : Return by Timeout");
+      Serial.println(F("[clientReadHeaders] Server not responding : Return by Timeout"));
       return;
     }
 
