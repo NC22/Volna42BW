@@ -84,21 +84,31 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
         client->print(tmp);
       }
 
-      while ((https ? clientSecure : client)->connected()) {
-        tmp = (https ? clientSecure : client)->readStringUntil('\n');
-        if (tmp == "\r") {
-          // Serial.println("Headers received");
-          break;
-        }
+      uint16_t code, contentLength;
+      KellyOWParserTools::clientReadHeaders(code, contentLength, client, clientSecure, connectionTimeout);
+      if (tmp.length() > 0) {
+        Serial.print(F("[OpenWeather] Headers received | HTTP RESPONSE Code : ")); Serial.print(code);
+        Serial.print(F(" | Content-length : ")); Serial.println(contentLength);
+      } else {
+        Serial.print(F("[OpenWeather] Headers empty"));
       }
-      
-      tmp = "";
-      while ((https ? clientSecure : client)->available()) {
-        tmp += (https ? clientSecure : client)->readStringUntil('\n');
-      } 
 
-      // Serial.println("RESPONSE : :: ");
-      // Serial.println(tmp);
+      if (contentLength > 2000 || contentLength == 0) {
+        contentLength = 2000;
+        Serial.print(F("[OpenWeather] Unknown content length -> read max amount or exit by Timeout"));
+      }
+
+      if (contentLength > 0) {
+
+        KellyOWParserTools::clientReadBody(tmp, contentLength, client, clientSecure, connectionTimeout);
+
+        // Serial.println(F("RESPONSE : :: "));
+        // Serial.println(tmp);
+
+      } else {        
+        Serial.print(F("[OpenWeather] Empty body "));
+      }
+
 
       String collectedData;
       if (KellyOWParserTools::collectJSONFieldData("cod", tmp, collectedData)) {

@@ -1,5 +1,87 @@
 #include "KellyOWParserTools.h"
 
+/*
+  Read headers from server
+  Each header line can be max 255 chars long to limit RAM usage
+  maxIdleTime - timeout if server will answer longer then this limit reached
+*/
+void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLength, WiFiClient * client, WiFiClientSecure * clientSecure, unsigned int maxIdleTime) {
+
+  String line = "";
+  unsigned long secondTimerStart = millis();
+  contentLength = 0;
+  code = 0;
+
+  char c;
+  uint8_t nlineCount = 0;
+  while ((clientSecure ? clientSecure : client)->connected() || (clientSecure ? clientSecure : client)->available()) {
+    
+    if (millis() - secondTimerStart >= maxIdleTime) {
+      Serial.println("[clientReadHeaders] Server not responding : Return by Timeout");
+      return;
+    }
+
+    if (!(clientSecure ? clientSecure : client)->available()) continue;
+
+    c = (clientSecure ? clientSecure : client)->read();
+
+    if (c != '\r' && c != '\n') {
+      nlineCount = 0;
+    }
+
+    if (line.length() < 255) {
+      line += c;
+    }
+    
+    if (c == '\n') { // end line always r n or just n
+      
+      Serial.print(line);
+
+      if (line.startsWith("Content-Length: ")) {
+
+        contentLength = line.substring(16).toInt();
+
+      } else if (line.startsWith("HTTP/") && line.length() >= 12) {
+
+        code = line.substring(9, 12).toInt(); 
+      }
+
+      nlineCount++;
+      line = "";
+
+      if (nlineCount >= 2) return;
+    }
+  }
+}
+
+/*
+  Read data from server with max limit by size
+  size - max amount of bytes that can be readed from server
+  maxIdleTime - timeout if server will answer longer then this limit reached
+*/
+void KellyOWParserTools::clientReadBody(String &out, uint16_t size, WiFiClient * client, WiFiClientSecure * clientSecure, unsigned int maxIdleTime) {
+
+  char c;
+  out = "";
+  unsigned long secondTimerStart = millis();
+
+  while ((clientSecure ? clientSecure : client)->connected() || (clientSecure ? clientSecure : client)->available()) {
+      
+    if (millis() - secondTimerStart >= maxIdleTime) {
+      Serial.println("[clientReadHeaders] Server not responding : Return by Timeout");
+      return;
+    }
+
+    if (!(clientSecure ? clientSecure : client)->available()) continue;
+    c = (clientSecure ? clientSecure : client)->read();
+    out += c;
+
+    if (out.length() > size) {
+      return;
+    }
+  }
+}
+
 String KellyOWParserTools::sanitizeResponse(String var) {
   
   int responseLength = var.length();
