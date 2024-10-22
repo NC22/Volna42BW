@@ -19,14 +19,11 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
     }
 
     // Open-Meteo, OpenWeather
-
-    Serial.println(url);
     
     KellyWeatherApi * weatherApi = NULL;
     if (url.indexOf("openweather") != -1) {
        weatherApi = new KellyOpenWeather(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
     } else if (url.indexOf("open-meteo") != -1) {
-      Serial.println("PASS open-meteo");
        weatherApi = new KellyOpenMeteo(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
     }
 
@@ -136,8 +133,11 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
 
         if (httpResponseCode == -11) { // connected, but read timeout
 
+            #if defined(ESP8266)
             // can be memory leak inside HTTPClient itself on ESP8266, test with WiFiClient directly
             client.abort(); // Abort method is required to prevent memory leak on stuck connections
+            #endif
+
             http.end();
 
             Serial.println(F("Client abort connection"));

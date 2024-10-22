@@ -7,12 +7,15 @@
 */
 void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLength, WiFiClient * client, unsigned int maxIdleTime) {
 
+  Serial.println(F("[clientReadHeaders] Connected to server [read response] ... "));
   char line[256]; 
   unsigned int index = 0; 
 
   char c;
   uint8_t nlineCount = 0;
 
+  contentLength = 0;
+  code = 0;
   unsigned long secondTimerStart = millis();
   uint16_t maxSize = 2000;
   uint16_t size = 0;
@@ -64,47 +67,20 @@ void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLeng
 
 }
 
+/*
+  Send simple GET request with basic headers without any addition data, similar to WGET
+*/
+void KellyOWParserTools::clientSendRequestHeaders(String &host, String &path, WiFiClient * client) {
 
-void KellyOWParserTools::clientEnd(WiFiClient * client, WiFiClientSecure * clientSecure) {
-    if (client) clientEnd(client);
-    if (clientSecure) clientEnd(clientSecure);
+  String tmp = "GET " + path + " HTTP/1.1\r\n" + 
+               "Host: " + host + "\r\n" + 
+              // "Accept: text/html\r\n" + 
+              // "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0\r\n" + 
+                "Connection: close\r\n\r\n";
+
+  client->print(tmp);
 }
-
-void KellyOWParserTools::clientEnd(WiFiClient * client) {
-  
-    // Abort method is required
-    // other "gentle" methods give memory leaks on ESP8266 if httpClient wifiClient stuck after connect (connected but no any available until timeout)
-
-    if (client) {
-      client->abort();
-      // while (client->available()) client->read();
-      // client->flush();
-      // client->stop();
-      delete client;
-    }
-
-    Serial.println(F("[clientEnd] WiFiClient")); 
-}
-
-
-void KellyOWParserTools::clientEnd(WiFiClientSecure * clientSecure) {
-  
-    // Abort method is required
-    // other "gentle" methods give memory leaks on ESP8266 if httpClient wifiClient stuck after connect (connected but no any available until timeout)
-
-    if (clientSecure) {
-
-      clientSecure->stop(0);
-      // clientSecure->abort();
-      // while (clientSecure->available()) clientSecure->read();
-      // clientSecure->flush();
-      // clientSecure->stop();
-      delete clientSecure;
-    }
-
-    Serial.println(F("[clientEnd] WiFiClientSecure")); 
-}
-
+ 
 /*
   Read data from server with max limit by size
   size - max amount of bytes that can be readed from server

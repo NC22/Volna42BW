@@ -8,7 +8,12 @@
 class KellyWeatherApi {
     protected :
         int connectionTimeout;
-        
+
+         WiFiClient * client = NULL;
+         WiFiClientSecure * clientSecure = NULL;
+
+         void clientStart(bool https);
+         void clientEnd();
     public:
         
         bool weatherLoaded = false;

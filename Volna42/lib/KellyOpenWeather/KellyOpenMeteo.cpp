@@ -24,102 +24,86 @@ int KellyOpenMeteo::loadCurrent(String & nurl) {
   error = "";
 
   int port;
-  String host, path;
+  String host, path, tmp;
 
-  if (KellyOWParserTools::parseURL(nurl, host, port, path)) {
-    
-    WiFiClient *client = new WiFiClient;
-    
-    #if defined(ESP32)
-        client->setTimeout(connectionTimeout / 1000);
-    #else 
-        client->setTimeout(connectionTimeout);
-    #endif
-
-    bool connected = client->connect(host.c_str(), port);
-
-    if (connected) {
-      Serial.println(F("[OpenMeteo] Connected to server...read response..."));
-
-      String tmp = String("GET ") + path + " HTTP/1.1\r\n" + 
-                   "Host: " + host + "\r\n" + 
-                   "Connection: close\r\n\r\n";
-
-      client->print(tmp);
-      uint16_t code, contentLength; 
-      KellyOWParserTools::clientReadHeaders(code, contentLength, client, connectionTimeout);
-      
-      if (code > 0) {
-
-        Serial.print(F("[OpenMeteo] Headers received | HTTP RESPONSE Code : ")); Serial.print(code);
-        Serial.print(F(" | Content-length : ")); Serial.println(contentLength);
-
-      } else {
-        error = "[OpenMeteo] Headers empty | No HTTP Code detected";
-        KellyOWParserTools::clientEnd(client, nullptr);
-        return 6;
-      }
-
-      if (contentLength > 2000 || contentLength == 0) {
-        contentLength = 2000;
-        Serial.print(F("[OpenMeteo] Unknown content length -> read max amount or exit by Timeout"));
-      }
-
-      KellyOWParserTools::clientReadBody(tmp, contentLength, client, connectionTimeout);
-      KellyOWParserTools::clientEnd(client, nullptr);
-
-      if (tmp.length() <= 0) {
-        error = "[OpenMeteo] Empty body";
-        return 7;
-      }
-
-      String collectedData;
-      if (KellyOWParserTools::collectJSONFieldData("error", tmp, collectedData)) {
-          error = collectedData;
-          return 5;
-      }
-
-      if (KellyOWParserTools::collectJSONFieldData("current", tmp, collectedData)) {
-
-        // Serial.println("KellyOpenMeteo");
-        //  Serial.println(collectedData);
-        
-            tmp = collectedData;
-
-          if (KellyOWParserTools::collectJSONFieldData("temperature_2m", tmp, collectedData)) {
-              temp = KellyOWParserTools::validateFloatVal(collectedData);
-          }
-
-          if (KellyOWParserTools::collectJSONFieldData("relative_humidity_2m", tmp, collectedData)) {
-              hum = KellyOWParserTools::validateFloatVal(collectedData);
-          }
-          
-          if (KellyOWParserTools::collectJSONFieldData("weather_code", tmp, collectedData)) {
-              weatherType = getMeteoIconState(KellyOWParserTools::validateIntVal(collectedData));
-          }
-
-          if (temp <= BAD_SENSOR_DATA) {                    
-              error = "[OpenMeteo] Parse _Temperature_ value - Fail";
-              return 4;
-          } else {
-              weatherLoaded = true;
-          }
-      } else {
-          error = "[OpenMeteo] No _current_ data block found";
-          return 2;
-      }
-
-      return 200;
-      
-    } else {
-      Serial.println(F("[OpenMeteo] Connection failed!"));
-      return -1;
-    }
-    
-  } else {
+  if (!KellyOWParserTools::parseURL(nurl, host, port, path)) {
     Serial.println(F("[OpenMeteo] Failed to parse URL"));
     return -2;
   }
+    
+  clientStart(port == 443);
+ 
+  if (!client->connect(host.c_str(), port)) {
+    clientEnd();
+    Serial.println(F("[OpenMeteo] Connection failed!"));
+    return -1;
+  }
+
+    uint16_t code, contentLength; 
+    KellyOWParserTools::clientSendRequestHeaders(host, path, client);
+    KellyOWParserTools::clientReadHeaders(code, contentLength, client, connectionTimeout);
+    
+    if (code > 0) {
+
+      Serial.print(F("[OpenMeteo] Headers received | HTTP RESPONSE Code : ")); Serial.print(code);
+      Serial.print(F(" | Content-length : ")); Serial.println(contentLength);
+
+    } else {
+      error = "[OpenMeteo] Headers empty | No HTTP Code detected";
+      clientEnd();
+      return 6;
+    }
+
+    if (contentLength > 2000 || contentLength == 0) {
+      contentLength = 2000;
+      Serial.print(F("[OpenMeteo] Unknown content length -> read max amount or exit by Timeout"));
+    }
+
+    KellyOWParserTools::clientReadBody(tmp, contentLength, client, connectionTimeout);
+    clientEnd();
+
+    if (tmp.length() <= 0) {
+      error = "[OpenMeteo] Empty body";
+      return 7;
+    }
+
+    String collectedData;
+    if (KellyOWParserTools::collectJSONFieldData("error", tmp, collectedData)) {
+        error = collectedData;
+        return 5;
+    }
+
+    if (KellyOWParserTools::collectJSONFieldData("current", tmp, collectedData)) {
+
+      // Serial.println("KellyOpenMeteo");
+      //  Serial.println(collectedData);
+      
+          tmp = collectedData;
+
+        if (KellyOWParserTools::collectJSONFieldData("temperature_2m", tmp, collectedData)) {
+            temp = KellyOWParserTools::validateFloatVal(collectedData);
+        }
+
+        if (KellyOWParserTools::collectJSONFieldData("relative_humidity_2m", tmp, collectedData)) {
+            hum = KellyOWParserTools::validateFloatVal(collectedData);
+        }
+        
+        if (KellyOWParserTools::collectJSONFieldData("weather_code", tmp, collectedData)) {
+            weatherType = getMeteoIconState(KellyOWParserTools::validateIntVal(collectedData));
+        }
+
+        if (temp <= BAD_SENSOR_DATA) {                    
+            error = "[OpenMeteo] Parse _Temperature_ value - Fail";
+            return 4;
+        } else {
+            weatherLoaded = true;
+        }
+    } else {
+        error = "[OpenMeteo] No _current_ data block found";
+        return 2;
+    }
+
+    return 200;
 }
 
 KellyOWIconType KellyOpenMeteo::getMeteoIconState(int weatherCode) {
