@@ -1,0 +1,82 @@
+для отладки удобнее использовать сокеты напрямую и контролировать соединение \ переполнение буфера. Но если нужно есть вариант с оберткой через HTTPClient
+
+
+
+  WiFiClient client;
+  HTTPClient http;
+
+  #if defined(ESP32)
+      http.setTimeout(connectionTimeout);
+      client.setTimeout(connectionTimeout / 1000);
+  #else 
+      http.setTimeout(connectionTimeout);
+      client.setTimeout(connectionTimeout);
+  #endif
+
+  http.begin(client, nurl);
+
+  int httpResponseCode = http.GET();
+  if (httpResponseCode < 0) {    
+    error = "[OpenWeather] Cant connect. Headers empty | No HTTP Code detected";
+    return 6;
+  }
+
+    
+  String tmp = http.getString();
+  String collectedData;
+    if (KellyOWParserTools::collectJSONFieldData("cod", tmp, collectedData)) {
+
+        if (collectedData != "200") {
+            KellyOWParserTools::collectJSONFieldData("message", tmp, collectedData);
+            error = collectedData;
+            http.end();
+            return 5;
+        } 
+
+        weatherType = kowUnknown;
+        if (KellyOWParserTools::collectJSONFieldData("weather", tmp, collectedData)) {
+            if (KellyOWParserTools::collectJSONFieldData("icon", tmp, collectedData)) {
+                weatherType = getMeteoIconState(collectedData);
+            }
+        }
+
+        if (KellyOWParserTools::collectJSONFieldData("main", tmp, collectedData)) {
+            if (KellyOWParserTools::collectJSONFieldData("temp", tmp, collectedData)) {
+
+                temp = KellyOWParserTools::validateFloatVal(collectedData);
+                KellyOWParserTools::collectJSONFieldData("humidity", tmp, collectedData);
+                hum = KellyOWParserTools::validateFloatVal(collectedData);
+                KellyOWParserTools::collectJSONFieldData("pressure", tmp, collectedData);
+                pressure = KellyOWParserTools::validateFloatVal(collectedData);
+                if (pressure <= -1000) {
+
+                } else {
+                  pressure = pressure * 100.0f;
+                }
+
+                if (temp <= -1000) {                    
+                    error = "[OpenWeather] Parse Temp fail";
+                    http.end();
+                    return 4;
+                } else {
+                    weatherLoaded = true;
+                    return 200;
+                }
+
+            } else {
+              error = "[OpenWeather] Temp read fail";
+              http.end();
+              return 3;
+            }
+
+        } else {
+            error = "[OpenWeather] Main block not found";
+            http.end();
+            return 2;
+        }
+
+    } else {
+      error = "[OpenWeather] Response not contain code number | HTTP CODE : " + String(httpResponseCode);
+      http.end();
+      return 1;
+    }
