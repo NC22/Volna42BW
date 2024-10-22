@@ -80,8 +80,8 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
 
       String tmp = String("GET ") + path + " HTTP/1.1\r\n" + 
                    "Host: " + host + "\r\n" + 
-                   "Accept: text/html\r\n" + 
-                   "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0\r\n" + 
+                  // "Accept: text/html\r\n" + 
+                  // "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0\r\n" + 
                    "Connection: close\r\n\r\n";
       host = "";
       path = "";
@@ -92,8 +92,9 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
         client->print(tmp);
       }
 
-      uint16_t code, contentLength;
+      uint16_t code, contentLength; 
       KellyOWParserTools::clientReadHeaders(code, contentLength, client, clientSecure, connectionTimeout);
+      
       if (code > 0) {
 
         Serial.print(F("[OpenWeather] Headers received | HTTP RESPONSE Code : ")); Serial.print(code);

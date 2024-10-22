@@ -21,6 +21,7 @@ wl_status_t WiFiManager::connect(String sid, String password) {
     WiFi.softAPdisconnect();
     WiFi.disconnect();
     WiFi.mode(WIFI_STA);   
+    // WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
     WiFi.setAutoReconnect(true);
     WiFi.persistent(true);

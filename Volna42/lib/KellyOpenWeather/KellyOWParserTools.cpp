@@ -7,67 +7,88 @@
 */
 void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLength, WiFiClient * client, WiFiClientSecure * clientSecure, unsigned int maxIdleTime) {
 
-  String line = "";
-  unsigned long secondTimerStart = millis();
-  contentLength = 0;
-  code = 0;
+  char line[256]; 
+  unsigned int index = 0; 
 
   char c;
   uint8_t nlineCount = 0;
+
+  unsigned long secondTimerStart = millis();
+  uint16_t maxSize = 2000;
+  uint16_t size = 0;
+
   while ((clientSecure ? clientSecure : client)->connected() || (clientSecure ? clientSecure : client)->available()) {
-    
-    if (millis() - secondTimerStart >= maxIdleTime) {
-      Serial.println(F("[clientReadHeaders] Server not responding : Return by Timeout"));
-      return;
-    }
-
-    if (!(clientSecure ? clientSecure : client)->available()) {
-      delay(100); // reduce delay if there is problem with buffer
-      continue;
-    }
-
-    c = (clientSecure ? clientSecure : client)->read();
-
-    if (c != '\r' && c != '\n') {
-      nlineCount = 0;
-    }
-
-    if (line.length() < 255) {
-      line += c;
-    }
-    
-    if (c == '\n') { // end line always r n or just n
       
-      // Serial.print(line);
-
-      if (line.startsWith("Content-Length: ")) {
-
-        contentLength = line.substring(16).toInt();
-
-      } else if (line.startsWith("HTTP/") && line.length() >= 12) {
-
-        code = line.substring(9, 12).toInt(); 
+      if (millis() - secondTimerStart >= maxIdleTime) {
+        Serial.println(F("[clientReadHeaders] Native Timer fail. Server not responding : Stop by counter")); 
+        return;
       }
 
-      nlineCount++;
-      line = "";
+      while ((clientSecure ? clientSecure : client)->available()) {      
+          c = (clientSecure ? clientSecure : client)->read();
 
-      if (nlineCount >= 2) return;
-    }
+          size++;
+          if (size > maxSize) {
+            Serial.println(F("[clientReadHeaders] Max headers size reached")); 
+            return;
+          }
+
+          if (c != '\r' && c != '\n') {
+              nlineCount = 0;
+              if (index < sizeof(line) - 1) {  
+                  line[index++] = c;
+              }
+          }
+
+          if (c == '\n') {
+              line[index] = '\0'; // put on last cursor symbol as endpoint [h] [e] [a] ... [\r] \n
+
+              if (contentLength <= 0 && strncmp(line, "Content-Length: ", 16) == 0) {
+                  contentLength = atoi(line + 16);
+              } else if (code <= 0 && strncmp(line, "HTTP/", 5) == 0) {
+                  code = atoi(line + 9);
+              }
+
+              // Serial.println(line);
+
+              nlineCount++;
+              index = 0;  
+              if (nlineCount >= 2) return;
+          }
+      }
   }
+
+  if (size <= 0) {
+      Serial.println(F("[clientReadHeaders] Unexpected end of line -> server close connection")); 
+  }
+
 }
 
 void KellyOWParserTools::clientEnd(WiFiClient * client, WiFiClientSecure * clientSecure) {
   
+    // Abort method is required
+    // other "gentle" methods give memory leaks on esp8266 if httpClient wifiClient stuck after connect (connected but no any available until timeout)
+
     if (clientSecure) {
-      clientSecure->stop();
+
+      clientSecure->stop(0);
+      // clientSecure->abort();
+      // while (clientSecure->available()) clientSecure->read();
+      // clientSecure->flush();
+      // clientSecure->stop();
       delete clientSecure;
     }
 
     if (client) {
-      client->stop();
+      client->abort();
+      // while (client->available()) client->read();
+      // client->flush();
+      // client->stop();
       delete client;
     }
+
+    Serial.println(F("[clientEnd]")); 
+    Serial.println(String(ESP.getFreeHeap()));
 }
 
 /*
@@ -89,7 +110,7 @@ void KellyOWParserTools::clientReadBody(String &out, uint16_t size, WiFiClient *
     }
 
     if (!(clientSecure ? clientSecure : client)->available()) {
-      delay(100);
+      // delay(100);
       continue;
     }
     

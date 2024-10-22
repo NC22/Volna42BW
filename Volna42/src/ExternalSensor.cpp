@@ -54,7 +54,7 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
         Serial.println(openWeatherLoader.error);
         openWeatherLoader.end();
 
-        if (resultCode == -1 || (resultCode >= 1 && resultCode <= 20)) {
+        if (resultCode == -1) {
 
           Serial.println(F("Fail to connect OpenWeather server - no response or unavailable..."));
           Serial.println(F("Retry to connect OpenWeather..."));
@@ -119,8 +119,21 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
 
         Serial.print(F("Fail to connect ext sensor... Code "));
         Serial.println(httpResponseCode);
-        Serial.println(F("Retry to connect ext sensor..."));
-        return requestData(url, login, pass, resultData, error, attempt);
+
+        client.abort(); // Abort method is required to prevent memory leak on stuck connections
+        http.end();
+
+        if (httpResponseCode == -11) { // connected, but read timeout
+
+            Serial.println(F("Client abort connection"));
+            return false;
+
+        } else {
+
+          Serial.println(F("Retry to connect ext sensor..."));
+          return requestData(url, login, pass, resultData, error, attempt);
+        }
+
       }
 
       if (httpResponseCode > 0) {
@@ -209,6 +222,7 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
         // logReport("cant get ext sensor data " + String(httpResponseCode))
       }
 
+      
       http.end();
       
       if (newData.isDataValid) {
