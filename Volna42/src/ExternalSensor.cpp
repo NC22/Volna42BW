@@ -11,10 +11,7 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
 
       Serial.println(F("Max attempts reached"));
       return false;
-
-    } else if (attempt > 1) {        
-        delay(100);
-    }
+    } 
 
     if (url.length() <= 0 || url.equals(F("off"))) {
       Serial.print(F("updateExtSensorData - external sensor not configured or disabled. INPUT : ")); Serial.println(url);
@@ -24,6 +21,10 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
     // OpenWeather
 
     if (url.indexOf("openweather") != -1) {
+
+      if (attempt > 1) {        
+          delay(400);
+      }
 
       KellyOpenWeather openWeatherLoader = KellyOpenWeather(EXTERNAL_SENSOR_CONNECT_TIMEOUT);  
       
@@ -53,7 +54,7 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
         Serial.println(openWeatherLoader.error);
         openWeatherLoader.end();
 
-        if (resultCode == -1) {
+        if (resultCode == -1 || (resultCode >= 1 && resultCode <= 20)) {
 
           Serial.println(F("Fail to connect OpenWeather server - no response or unavailable..."));
           Serial.println(F("Retry to connect OpenWeather..."));
@@ -67,6 +68,10 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
     // Domoticz & HomeAssistant
 
     } else {
+
+      if (attempt > 1) {
+          delay(200);
+      }
 
       WiFiClient client;
       HTTPClient http;

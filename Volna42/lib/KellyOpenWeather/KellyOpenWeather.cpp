@@ -24,6 +24,8 @@ void KellyOpenWeather::end() {
   -2 - fail to parse url
   1-4 - response parsing errors
   5 - response "cod" value != 200
+  6 - fail to read response headers
+  7 - empty body
 */
 int KellyOpenWeather::loadCurrent(String & nurl) {
   
@@ -76,7 +78,11 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
     if (connected) {
       Serial.println(F("[OpenWeather] Connected to server...read response..."));
 
-      String tmp = String("GET ") + path + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n";
+      String tmp = String("GET ") + path + " HTTP/1.1\r\n" + 
+                   "Host: " + host + "\r\n" + 
+                  // "Accept: text/html\r\n" + 
+                  // "User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0\r\n" + 
+                   "Connection: close\r\n\r\n";
       host = "";
       path = "";
 
@@ -88,11 +94,16 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
 
       uint16_t code, contentLength;
       KellyOWParserTools::clientReadHeaders(code, contentLength, client, clientSecure, connectionTimeout);
-      if (tmp.length() > 0) {
+      if (code > 0) {
+
         Serial.print(F("[OpenWeather] Headers received | HTTP RESPONSE Code : ")); Serial.print(code);
         Serial.print(F(" | Content-length : ")); Serial.println(contentLength);
+
       } else {
-        Serial.print(F("[OpenWeather] Headers empty"));
+
+        error = "[OpenWeather] Headers empty | No HTTP Code detected";
+        KellyOWParserTools::clientEnd(client, clientSecure);
+        return 6;
       }
 
       if (contentLength > 2000 || contentLength == 0) {
@@ -100,15 +111,15 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
         Serial.print(F("[OpenWeather] Unknown content length -> read max amount or exit by Timeout"));
       }
 
-      if (contentLength > 0) {
+      KellyOWParserTools::clientReadBody(tmp, contentLength, client, clientSecure, connectionTimeout);
 
-        KellyOWParserTools::clientReadBody(tmp, contentLength, client, clientSecure, connectionTimeout);
+      // Serial.println(F("RESPONSE : :: "));
+      // Serial.println(tmp);
 
-        // Serial.println(F("RESPONSE : :: "));
-        // Serial.println(tmp);
-
-      } else {        
-        Serial.print(F("[OpenWeather] Empty body "));
+      if (tmp.length() <= 0) {
+        error = "[OpenWeather] Empty body";
+        KellyOWParserTools::clientEnd(client, clientSecure);
+        return 7;
       }
 
       String collectedData;
@@ -162,7 +173,7 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
           }
 
       } else {
-        error = "[OpenWeather] Response not contain code number";
+        error = "[OpenWeather] Response not contain code number | HTTP CODE : " + String(code);
         KellyOWParserTools::clientEnd(client, clientSecure);
         return 1;
       }
