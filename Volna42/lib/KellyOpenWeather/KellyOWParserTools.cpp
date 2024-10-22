@@ -21,7 +21,10 @@ void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLeng
       return;
     }
 
-    if (!(clientSecure ? clientSecure : client)->available()) continue;
+    if (!(clientSecure ? clientSecure : client)->available()) {
+      delay(100); // reduce delay if there is problem with buffer
+      continue;
+    }
 
     c = (clientSecure ? clientSecure : client)->read();
 
@@ -85,7 +88,11 @@ void KellyOWParserTools::clientReadBody(String &out, uint16_t size, WiFiClient *
       return;
     }
 
-    if (!(clientSecure ? clientSecure : client)->available()) continue;
+    if (!(clientSecure ? clientSecure : client)->available()) {
+      delay(100);
+      continue;
+    }
+    
     c = (clientSecure ? clientSecure : client)->read();
     out += c;
 
