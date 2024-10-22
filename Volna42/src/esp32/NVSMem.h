@@ -11,7 +11,7 @@
 #include <UserDefines.h>
 #include <SystemDefines.h>
 
-// My replacement methods to ESP8266 RTC read functions, with similar input vars
+// My replacement methods to ESP8266 RTC read functions, with similar input vars for ESP32
 
 // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_SLOW_MEM, ESP_PD_OPTION_ON);
 // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_FAST_MEM, ESP_PD_OPTION_ON);

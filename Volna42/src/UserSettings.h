@@ -17,19 +17,19 @@
 
 #if defined(LOCALE_RU)
 // [Russian]
-#include <LocaleRu.h>
+#include <locale/LocaleRu.h>
 #include <ui/out/locale_ru/locale.h>
 #elif defined(LOCALE_EN)
 // [English]
-#include <LocaleEn.h>
+#include <locale/LocaleEn.h>
 #include <ui/out/locale_en/locale.h>
 #elif defined(LOCALE_JA)
 // [Japan]
-#include <LocaleJa.h>
+#include <locale/LocaleJa.h>
 #include <ui/out/locale_en/locale.h>
 #elif defined(LOCALE_DE)
 // [German]
-#include <LocaleDe.h>
+#include <locale/LocaleDe.h>
 #include <ui/out/locale_en/locale.h>
 #endif
 

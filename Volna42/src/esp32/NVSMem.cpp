@@ -1,5 +1,5 @@
 
-#include <NVSMem.h>
+#include <esp32/NVSMem.h>
 #if defined(ESP32)
 
 RTC_DATA_ATTR uint8_t RTCLastStateRaw[sizeof(rtcData)];

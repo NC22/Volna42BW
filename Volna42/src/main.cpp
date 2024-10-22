@@ -13,7 +13,7 @@
 #include <WifiManager.h>
 
 #if defined(ESP32)
-    #include <NVSMem.h>
+    #include <esp32/NVSMem.h>
 #else
 #endif
 

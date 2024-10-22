@@ -56,7 +56,7 @@ int KellyOpenMeteo::loadCurrent(String & nurl) {
 
     if (contentLength > 2000 || contentLength == 0) {
       contentLength = 2000;
-      Serial.print(F("[OpenMeteo] Unknown content length -> read max amount or exit by Timeout"));
+      Serial.println(F("[OpenMeteo] Unknown content length -> read max amount or exit by Timeout"));
     }
 
     KellyOWParserTools::clientReadBody(tmp, contentLength, client, connectionTimeout);
