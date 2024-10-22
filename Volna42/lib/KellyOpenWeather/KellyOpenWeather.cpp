@@ -42,7 +42,7 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
   String host;
   String path;
 
-  if (parseURL(nurl, host, port, path)) {
+  if (KellyOWParserTools::parseURL(nurl, host, port, path)) {
 
     if (port == 443) https = true;
     
@@ -245,26 +245,4 @@ KellyOWIconType KellyOpenWeather::getMeteoIconState(String icon)
 
   Serial.println(F("kowUnknown"));
   return kowUnknown;
-}
-
-bool KellyOpenWeather::parseURL(String &url, String &host, int &port, String &path) {
-
-  int protocolEnd = url.indexOf("://");
-  if (protocolEnd == -1) {
-    return false;
-  }
-
-  String proto = url.substring(0, protocolEnd);
-
-  int hostStart = protocolEnd + 3;
-  int pathStart = url.indexOf("/", hostStart);
-  if (pathStart == -1) {
-    pathStart = url.length();
-  }
-  host = url.substring(hostStart, pathStart);
-  path = url.substring(pathStart);
-
-  port = (proto == "https") ? 443 : 80;
-
-  return true;
 }

@@ -19,6 +19,7 @@ public:
     static void clientReadHeaders(uint16_t &code, uint16_t &contentLength, WiFiClient * client, WiFiClientSecure * clientSecure, unsigned int maxIdleTime) ;
     static void clientReadBody(String &out, uint16_t size, WiFiClient * client, WiFiClientSecure * clientSecure, unsigned int maxIdleTime) ;
     static void clientEnd(WiFiClient * client, WiFiClientSecure * clientSecure);
+    static bool parseURL(String &url, String &host, int &port, String &path);
     static String sanitizeResponse(String var);
 };
 

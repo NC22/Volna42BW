@@ -122,6 +122,28 @@ void KellyOWParserTools::clientReadBody(String &out, uint16_t size, WiFiClient *
   }
 }
 
+bool KellyOWParserTools::parseURL(String &url, String &host, int &port, String &path) {
+
+  int protocolEnd = url.indexOf("://");
+  if (protocolEnd == -1) {
+    return false;
+  }
+
+  String proto = url.substring(0, protocolEnd);
+
+  int hostStart = protocolEnd + 3;
+  int pathStart = url.indexOf("/", hostStart);
+  if (pathStart == -1) {
+    pathStart = url.length();
+  }
+  host = url.substring(hostStart, pathStart);
+  path = url.substring(pathStart);
+
+  port = (proto == "https") ? 443 : 80;
+
+  return true;
+}
+
 String KellyOWParserTools::sanitizeResponse(String var) {
   
   int responseLength = var.length();

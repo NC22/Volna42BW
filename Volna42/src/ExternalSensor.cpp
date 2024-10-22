@@ -75,6 +75,7 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
 
       WiFiClient client;
       HTTPClient http;
+      http.setReuse(false);
       
       externalSensorData newData;
       newData.isDataValid = false;
@@ -120,15 +121,18 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
         Serial.print(F("Fail to connect ext sensor... Code "));
         Serial.println(httpResponseCode);
 
-        client.abort(); // Abort method is required to prevent memory leak on stuck connections
-        http.end();
-
         if (httpResponseCode == -11) { // connected, but read timeout
+
+            // can be memory leak inside HTTPClient itself on ESP8266
+            client.abort(); // Abort method is required to prevent memory leak on stuck connections
+            http.end();
 
             Serial.println(F("Client abort connection"));
             return false;
 
         } else {
+
+          http.end();
 
           Serial.println(F("Retry to connect ext sensor..."));
           return requestData(url, login, pass, resultData, error, attempt);
@@ -181,7 +185,7 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
             } else {
               
               newData.temperature = KellyOWParserTools::validateFloatVal(collectedData);
-              if (newData.temperature <= -1000) {   
+              if (newData.temperature <= BAD_SENSOR_DATA) {   
 
                 Serial.print(F("Bad data : no temperature")); Serial.println(payload.substring(0, 255));
                 error = "External sensor error : no temperature data";
@@ -196,7 +200,7 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
                 KellyOWParserTools::collectJSONFieldData(homeAssistant ? "pressure" : "Barometer", payload, collectedData, maxLength);                
                 newData.pressure = KellyOWParserTools::validateFloatVal(collectedData);
 
-                if (newData.pressure > -1000) {
+                if (newData.pressure > BAD_SENSOR_DATA) {
                     newData.pressure = newData.pressure * 100.0f;
                 }
 
@@ -204,7 +208,7 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
                 newData.bat = KellyOWParserTools::validateFloatVal(collectedData);
 
                      if (newData.bat > 100) newData.bat = 100;
-                else if (newData.bat < 0) newData.bat = -1000;
+                else if (newData.bat < 0) newData.bat = BAD_SENSOR_DATA;
               }
               
               Serial.println(F("Collect data - OK, Result :")); 

@@ -17,7 +17,6 @@ class KellyOpenWeather {
     private :
         // JsonStreamingParser * parser;
         // KellyOWParserListener * listener;
-        bool parseURL(String &inputUrl, String &host, int &port, String &path);
         bool collectJSONFieldDataRaw(int paramStart, int len, String & data, String & storage);
         bool collectJSONFieldData(String fieldName, String & payload, String & storage);
 
