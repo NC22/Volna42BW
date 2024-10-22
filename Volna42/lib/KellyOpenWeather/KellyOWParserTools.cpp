@@ -64,6 +64,7 @@ void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLeng
 
 }
 
+
 void KellyOWParserTools::clientEnd(WiFiClient * client, WiFiClientSecure * clientSecure) {
     if (client) clientEnd(client);
     if (clientSecure) clientEnd(clientSecure);
@@ -84,6 +85,7 @@ void KellyOWParserTools::clientEnd(WiFiClient * client) {
 
     Serial.println(F("[clientEnd] WiFiClient")); 
 }
+
 
 void KellyOWParserTools::clientEnd(WiFiClientSecure * clientSecure) {
   
@@ -198,13 +200,27 @@ String KellyOWParserTools::sanitizeResponse(String var) {
   return sanitized;
 }
 
+/*
+void KellyOWParserTools::validateHum(float & hum) {
+   if (hum <= BAD_SENSOR_DATA) {
+      hum = 0;
+    } else {
+      if (hum > 100) {
+          hum = 100;
+      } else if (hum < 0) {
+          hum = 0;
+      }
+    }
+}
+*/
+
 int KellyOWParserTools::validateIntVal(String v) {
 
-    if (v.length() <= 0) return -1000;
+    if (v.length() <= 0) return BAD_SENSOR_DATA;
 
-    int nv = -1000;
+    int nv = BAD_SENSOR_DATA;
     if(sscanf(v.c_str(), "%d", &nv) != 1) {
-        return -1000; 
+        return BAD_SENSOR_DATA; 
     }
 
     return nv;
@@ -212,11 +228,11 @@ int KellyOWParserTools::validateIntVal(String v) {
 
 float KellyOWParserTools::validateFloatVal(String v) {
 
-    if (v.length() <= 0) return -1000;
+    if (v.length() <= 0) return BAD_SENSOR_DATA;
 
-    float nv = -1000;
+    float nv = BAD_SENSOR_DATA;
     if(sscanf(v.c_str(), "%f", &nv) != 1) {
-        return -1000; 
+        return BAD_SENSOR_DATA; 
     }
 
     return nv;

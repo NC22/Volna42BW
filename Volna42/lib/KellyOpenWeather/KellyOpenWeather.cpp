@@ -1,18 +1,7 @@
 #include "KellyOpenWeather.h"
 
-KellyOpenWeather::KellyOpenWeather(int timeout) {
-  
-    connectionTimeout = timeout;
-    // parser = new JsonStreamingParser();
-    // KellyOWParserListener parseListener = KellyOWParserListener();
+KellyOpenWeather::KellyOpenWeather(int timeout): KellyWeatherApi(timeout) {
 
-    //listener = &parseListener;
-   //   listener->controller = this;
-   // parser->setListener(&parseListener);
-}
-
-void KellyOpenWeather::end() {
-  // free resources
 }
 
 /*
@@ -29,6 +18,8 @@ void KellyOpenWeather::end() {
 */
 int KellyOpenWeather::loadCurrent(String & nurl) {
   
+  Serial.println(F("[Weather API] - OpenWeather parser"));
+
   weatherLoaded = false;
   error = "";
   // #if defined(ESP8266)
@@ -148,13 +139,13 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
                   hum = KellyOWParserTools::validateFloatVal(collectedData);
                   KellyOWParserTools::collectJSONFieldData("pressure", tmp, collectedData);
                   pressure = KellyOWParserTools::validateFloatVal(collectedData);
-                  if (pressure <= -1000) {
+                  if (pressure <= BAD_SENSOR_DATA) {
 
                   } else {
                     pressure = pressure * 100.0f;
                   }
 
-                  if (temp <= -1000) {                    
+                  if (temp <= BAD_SENSOR_DATA) {                    
                       error = "[OpenWeather] Parse Temp fail";
                       KellyOWParserTools::clientEnd(client, clientSecure);
                       return 4;

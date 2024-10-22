@@ -6,7 +6,17 @@
 #include <WiFiClient.h>
 #include <WiFiClientSecure.h>
 
-enum KellyOWStringType { kJSONString, kJSONMix, kJSONArray, kJSONObject };
+#if !defined(BAD_SENSOR_DATA)
+    #define BAD_SENSOR_DATA -1000.0
+#endif
+
+enum KellyOWIconType { 
+    kowClearSky, kowFewClouds, kowScatterClouds, kowBrokenClouds, kowShowerRain, kowRain, kowThunderstorm, kowSnow, kowFog, kowUnknown 
+};
+
+enum KellyOWStringType { 
+    kJSONString, kJSONMix, kJSONArray, kJSONObject 
+};
 
 // HTTP Response \ String parser tools
 

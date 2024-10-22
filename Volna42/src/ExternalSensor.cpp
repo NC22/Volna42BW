@@ -18,46 +18,59 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
       return false;
     }
 
-    // OpenWeather
+    // Open-Meteo, OpenWeather
 
+    Serial.println(url);
+    
+    KellyWeatherApi * weatherApi = NULL;
     if (url.indexOf("openweather") != -1) {
+       weatherApi = new KellyOpenWeather(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
+    } else if (url.indexOf("open-meteo") != -1) {
+      Serial.println("PASS open-meteo");
+       weatherApi = new KellyOpenMeteo(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
+    }
+
+    if (weatherApi) {
 
       if (attempt > 1) {        
           delay(400);
       }
 
-      KellyOpenWeather openWeatherLoader = KellyOpenWeather(EXTERNAL_SENSOR_CONNECT_TIMEOUT);  
-      
-      Serial.println(F("OpenWeather parser"));
-      int resultCode = openWeatherLoader.loadCurrent(url);      
+      int resultCode = weatherApi->loadCurrent(url);      
       if (resultCode == 200) {
 
-        Serial.println(F("OpenWeather parser - success"));
-        // Serial.println(openWeatherLoader.temp);
-        // Serial.println(openWeatherLoader.hum);
-        // Serial.println(openWeatherLoader.pressure);
+        Serial.println(F("[Weather API] Success"));
+        
+        Serial.println(F("--------"));
+        Serial.println(weatherApi->temp);
+        Serial.println(weatherApi->hum);
+        Serial.println(weatherApi->pressure);
+        Serial.println(F("--------"));
 
         resultData.isDataValid = true;
-        resultData.temperature = openWeatherLoader.temp;
-        resultData.pressure = openWeatherLoader.pressure;
-        resultData.humidity = openWeatherLoader.hum;
+        resultData.temperature = weatherApi->temp;
+        resultData.pressure = weatherApi->pressure;
+        resultData.humidity = weatherApi->hum;
         resultData.t = time(nullptr);
-        resultData.icon = openWeatherLoader.weatherType;
+        resultData.icon = weatherApi->weatherType;
         
-        openWeatherLoader.end();
+        weatherApi->end();
+        delete weatherApi;
         return true;
         
       } else {
         
-        Serial.print(F("OpenWeather parser - error. Code : ")); Serial.println(resultCode);
-        error = openWeatherLoader.error;        
-        Serial.println(openWeatherLoader.error);
-        openWeatherLoader.end();
+        Serial.print(F("[Weather API] Parser error | Result Code : ")); Serial.println(resultCode);
+        error = weatherApi->error;        
+        Serial.println(weatherApi->error);
+        
+        weatherApi->end();
+        delete weatherApi;
 
         if (resultCode == -1) {
 
-          Serial.println(F("Fail to connect OpenWeather server - no response or unavailable..."));
-          Serial.println(F("Retry to connect OpenWeather..."));
+          Serial.println(F("[Weather API] Fail to connect web-server - no response or unavailable..."));
+          Serial.println(F("[Weather API] Retry to connect..."));
           return requestData(url, login, pass, resultData, error, attempt);
         }
 
@@ -65,7 +78,7 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
 
       return false;
     
-    // Domoticz & HomeAssistant
+    // Domoticz & HomeAssistant, todo - move to common WeatherApi
 
     } else {
 

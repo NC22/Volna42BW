@@ -7,6 +7,7 @@
 #include <SystemDefines.h>
 #include <EnvStructs.h>
 #include <KellyOpenWeather.h>
+#include <KellyOpenMeteo.h>
 
 #if defined(ESP32)
     #include <HTTPClient.h>
