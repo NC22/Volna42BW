@@ -1,11 +1,11 @@
 #include "KellyOWParserTools.h"
 
 /*
-  Read headers from server
-  Each header line can be max 255 chars long to limit RAM usage
+  Simple RAM friendly method for read headers from web-server
+  Each header line can be max 255 chars long to limit RAM usage, headers limited with max 2kb
   maxIdleTime - timeout if server will answer longer then this limit reached
 */
-void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLength, WiFiClient * client, WiFiClientSecure * clientSecure, unsigned int maxIdleTime) {
+void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLength, WiFiClient * client, unsigned int maxIdleTime) {
 
   char line[256]; 
   unsigned int index = 0; 
@@ -17,15 +17,15 @@ void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLeng
   uint16_t maxSize = 2000;
   uint16_t size = 0;
 
-  while ((clientSecure ? clientSecure : client)->connected() || (clientSecure ? clientSecure : client)->available()) {
+  while (client->connected() || client->available()) {
       
       if (millis() - secondTimerStart >= maxIdleTime) {
         Serial.println(F("[clientReadHeaders] Native Timer fail. Server not responding : Stop by counter")); 
         return;
       }
 
-      while ((clientSecure ? clientSecure : client)->available()) {      
-          c = (clientSecure ? clientSecure : client)->read();
+      while (client->available()) {      
+          c = client->read();
 
           size++;
           if (size > maxSize) {
@@ -65,9 +65,30 @@ void KellyOWParserTools::clientReadHeaders(uint16_t &code, uint16_t &contentLeng
 }
 
 void KellyOWParserTools::clientEnd(WiFiClient * client, WiFiClientSecure * clientSecure) {
+    if (client) clientEnd(client);
+    if (clientSecure) clientEnd(clientSecure);
+}
+
+void KellyOWParserTools::clientEnd(WiFiClient * client) {
   
     // Abort method is required
-    // other "gentle" methods give memory leaks on esp8266 if httpClient wifiClient stuck after connect (connected but no any available until timeout)
+    // other "gentle" methods give memory leaks on ESP8266 if httpClient wifiClient stuck after connect (connected but no any available until timeout)
+
+    if (client) {
+      client->abort();
+      // while (client->available()) client->read();
+      // client->flush();
+      // client->stop();
+      delete client;
+    }
+
+    Serial.println(F("[clientEnd] WiFiClient")); 
+}
+
+void KellyOWParserTools::clientEnd(WiFiClientSecure * clientSecure) {
+  
+    // Abort method is required
+    // other "gentle" methods give memory leaks on ESP8266 if httpClient wifiClient stuck after connect (connected but no any available until timeout)
 
     if (clientSecure) {
 
@@ -79,15 +100,7 @@ void KellyOWParserTools::clientEnd(WiFiClient * client, WiFiClientSecure * clien
       delete clientSecure;
     }
 
-    if (client) {
-      client->abort();
-      // while (client->available()) client->read();
-      // client->flush();
-      // client->stop();
-      delete client;
-    }
-
-    Serial.println(F("[clientEnd]")); 
+    Serial.println(F("[clientEnd] WiFiClientSecure")); 
 }
 
 /*
@@ -95,25 +108,25 @@ void KellyOWParserTools::clientEnd(WiFiClient * client, WiFiClientSecure * clien
   size - max amount of bytes that can be readed from server
   maxIdleTime - timeout if server will answer longer then this limit reached
 */
-void KellyOWParserTools::clientReadBody(String &out, uint16_t size, WiFiClient * client, WiFiClientSecure * clientSecure, unsigned int maxIdleTime) {
+void KellyOWParserTools::clientReadBody(String &out, uint16_t size, WiFiClient * client, unsigned int maxIdleTime) {
 
   char c;
   out = "";
   unsigned long secondTimerStart = millis();
 
-  while ((clientSecure ? clientSecure : client)->connected() || (clientSecure ? clientSecure : client)->available()) {
+  while (client->connected() || client->available()) {
       
     if (millis() - secondTimerStart >= maxIdleTime) {
       Serial.println(F("[clientReadHeaders] Server not responding : Return by Timeout"));
       return;
     }
 
-    if (!(clientSecure ? clientSecure : client)->available()) {
+    if (!client->available()) {
       // delay(100);
       continue;
     }
     
-    c = (clientSecure ? clientSecure : client)->read();
+    c = client->read();
     out += c;
 
     if (out.length() > size) {

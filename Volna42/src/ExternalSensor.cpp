@@ -75,7 +75,7 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
 
       WiFiClient client;
       HTTPClient http;
-      http.setReuse(false);
+      // http.setReuse(false);
       
       externalSensorData newData;
       newData.isDataValid = false;
@@ -123,7 +123,7 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
 
         if (httpResponseCode == -11) { // connected, but read timeout
 
-            // can be memory leak inside HTTPClient itself on ESP8266
+            // can be memory leak inside HTTPClient itself on ESP8266, test with WiFiClient directly
             client.abort(); // Abort method is required to prevent memory leak on stuck connections
             http.end();
 

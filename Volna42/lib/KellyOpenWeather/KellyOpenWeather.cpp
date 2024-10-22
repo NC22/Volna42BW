@@ -93,7 +93,7 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
       }
 
       uint16_t code, contentLength; 
-      KellyOWParserTools::clientReadHeaders(code, contentLength, client, clientSecure, connectionTimeout);
+      KellyOWParserTools::clientReadHeaders(code, contentLength, clientSecure ? clientSecure : client, connectionTimeout);
       
       if (code > 0) {
 
@@ -112,7 +112,7 @@ int KellyOpenWeather::loadCurrent(String & nurl) {
         Serial.print(F("[OpenWeather] Unknown content length -> read max amount or exit by Timeout"));
       }
 
-      KellyOWParserTools::clientReadBody(tmp, contentLength, client, clientSecure, connectionTimeout);
+      KellyOWParserTools::clientReadBody(tmp, contentLength, clientSecure ? clientSecure : client, connectionTimeout);
 
       // Serial.println(F("RESPONSE : :: "));
       // Serial.println(tmp);
