@@ -88,7 +88,6 @@ void KellyOWParserTools::clientEnd(WiFiClient * client, WiFiClientSecure * clien
     }
 
     Serial.println(F("[clientEnd]")); 
-    Serial.println(String(ESP.getFreeHeap()));
 }
 
 /*

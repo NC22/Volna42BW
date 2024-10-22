@@ -149,17 +149,17 @@
 // закомментить если не нужно, если данные с OpenWeather, то тоже не используется
 #define ICON_RAIN_DETECT  
 
-// облачно t >= 0 + [давление <= 1030hPa (~772 мм.рт.ст) + влажность >= 66%]		
+// облачно t >= 0 + [давление <= 1030hPa (~772 мм.рт.ст) + влажность >= 60%]		
 #define ICON_RAIN_DETECT_CLOUDY_HPA 1030
-#define ICON_RAIN_DETECT_CLOUDY_HUM 66
+#define ICON_RAIN_DETECT_CLOUDY_HUM 60
 
 // идет дождь t >= 0 + [давление <= 1009hPa (~757 мм.рт.ст) + влажность >= 74%]		
 #define ICON_RAIN_DETECT_RAINY_HPA 1009  	   
 #define ICON_RAIN_DETECT_RAINY_HUM 74 
 
-// облачно t < 0 + [давление <= 1030hPa (~772 мм.рт.ст) + влажность >= 69%]		
+// облачно t < 0 + [давление <= 1030hPa (~772 мм.рт.ст) + влажность >= 65%]		
 #define ICON_SNOW_DETECT_CLOUDY_HPA 1030  	   
-#define ICON_SNOW_DETECT_CLOUDY_HUM 69
+#define ICON_SNOW_DETECT_CLOUDY_HUM 65
 
 // идет снег t < 0 + [давление <= 1030hPa (~772 мм.рт.ст) + влажность >= 75%]		
 #define ICON_SNOW_DETECT_SNOW_HPA 1030  	   
