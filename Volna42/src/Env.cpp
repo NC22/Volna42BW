@@ -2426,14 +2426,30 @@ bool Env::cuiReadStorageFile(bool widgetsOnly) {
                   lastState.cuiBitsPerPixel = bitsPerPixel;
 
                   #if defined(DISPLAY_2BIT) && defined(COLORMODE_2BIT_SUPPORT_RAM_FRIENDLY)
-                  Serial.println(F("[COLORMODE_2BIT_SUPPORT_RAM_FRIENDLY] Skip 2-Bit render & display mode activation"));
-                  // image will be rendered by step read from FLASH during update screen
-                  getCanvas()->setBitsPerPixel(1);
-                  if (bitsPerPixel > 1) {
-                    widgetsOnly = true;
-                  }
-                  #else 
-                  getCanvas()->setBitsPerPixel(bitsPerPixel);
+
+                    Serial.println(F("[cuiReadStorageFile] [RAM Friendly mode] Skip 2-Bit render & display mode activation"));
+                    // image will be rendered by step read from FLASH during update screen
+                    getCanvas()->setBitsPerPixel(1);
+
+                    if (bitsPerPixel > 1) {
+                      widgetsOnly = true;
+                    }
+
+                  #else
+
+                    if (screen->is4ColorsSupported() && bitsPerPixel == 2) {
+
+                      getCanvas()->setBitsPerPixel(2);
+
+                    } else {
+
+                      if (bitsPerPixel != 1) {                        
+                        Serial.print(F("Default color mode used. Unsupported color mode - ")); Serial.println(bitsPerPixel);
+                      }
+
+                      getCanvas()->setBitsPerPixel(1);
+                    }
+
                   #endif
 
                   getCanvas()->setRotate(0);

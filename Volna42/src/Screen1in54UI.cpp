@@ -17,12 +17,7 @@ Screen1in54UI::Screen1in54UI(Env * nenv) {
 }
 
 bool Screen1in54UI::is4ColorsSupported() {
-  
-  #if defined(COLORMODE_2BIT_SUPPORT)
-      return displayDriver->colorMode2bitSupport;
-  #endif
-
-  return false;  
+   return displayDriver->colorMode2bitSupport;
 }
 
 int Screen1in54UI::drawTemp(int theight, bool indoor, float temperature, float humidity, float pressure, imageDrawModificators & mods) {

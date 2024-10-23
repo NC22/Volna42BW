@@ -60,7 +60,6 @@
 */
 	// #define DOUBLE_BUFFER_MODE   // часть элементов может быть окрашена в доп. цвет дисплея (Желтый или Красный), требовательно к оперативке [если поддерживается дисплеем]
 	#define PARTIAL_UPDATE_SUPPORT  
-	#define COLORMODE_2BIT_SUPPORT  // Allow change image mode (1bit - 2-colors \ 2-bit 4-colors) from web panel if display supports 2-bit output 
 
   // ESP8266
 
@@ -90,7 +89,6 @@
 	// #define PARTIAL_UPDATE_METHOD_INVERT      // только для SSD1683 4.2 - частичное обновление экрана через инвертирование области, а не через зачистку (может оставатся больше визуальных артифактов)
 	#define PARTIAL_UPDATE_SUPPORT               // Partial update is configurable in web UI. Default value - cfgUpdateMinutes in UserSettings.h. Used for update clock widget each minute
 	// #define RESET_MINUTE_TIMER_ON_WEB_REQUEST // Display updates could stuck web UI during screen refresh, so this can be usefull if you enter web interface frequently,
-	#define COLORMODE_2BIT_SUPPORT               // Allow change image mode (1bit - 2-colors \ 2-bit 4-colors) from web panel if display supports 2-bit output 
 
 	#if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_RY_BW_42_UC8176_B)
 		// #define DOUBLE_BUFFER_MODE      // часть элементов может быть окрашена в доп. цвет дисплея (Желтый или Красный), требовательно к оперативке 
@@ -112,7 +110,7 @@
 	#else
 		
 		// режим экономии оперативки при отрисовке 2-бит картинок, освобождается 15кб (нет возможности очищать пространство под виджетами - необходимо заранее подготовить картинку-фон)
-		#define COLORMODE_2BIT_SUPPORT_RAM_FRIENDLY 
+		// #define COLORMODE_2BIT_SUPPORT_RAM_FRIENDLY 
 
 		// [https://42volna.com/scheme/] Основная распиновка, с освобождением ножки CS
 	

@@ -24,12 +24,7 @@ Screen4in2UI::Screen4in2UI(Env * nenv) {
 }
 
 bool Screen4in2UI::is4ColorsSupported() {
-  
-  #if defined(COLORMODE_2BIT_SUPPORT)
-      return displayDriver->colorMode2bitSupport;
-  #endif
-
-  return false;  
+  return displayDriver->colorMode2bitSupport;
 }
 
 bool Screen4in2UI::tick() {
@@ -469,22 +464,24 @@ void Screen4in2UI::updatePartialClock() {
       // always work in 1-bit mode
       renderWidgetsOnly = true;
 
-    #elif defined(DISPLAY_2BIT)
-    
-      // 2-bit mode exceptions -> currently we always render partial data in 1-bit, so check if we work in 2-bit before and buffer mismatched
+    #else
 
-      // we only wakedUp & last output was in 2-bit mode
-      if (coldStart && env->lastState.cuiBitsPerPixel > 1) {
-          renderWidgetsOnly = true;
-          env->canvas->setBitsPerPixel(1); // init buffer, since in widgets only mode buffer initialization is ignored
+      if (is4ColorsSupported()) {
+          // 2-bit mode exceptions -> currently we always render partial data in 1-bit, so check if we work in 2-bit before and buffer mismatched
 
-      // current canvas in 2-bit mode      
-      } else if (env->canvas->bitPerPixel > 1) { 
+          // we only wakedUp & last output was in 2-bit mode
+          if (coldStart && env->lastState.cuiBitsPerPixel > 1) {
+              renderWidgetsOnly = true;
+              env->canvas->setBitsPerPixel(1); // init buffer, since in widgets only mode buffer initialization is ignored
 
-          returnBitPerPixel = env->canvas->bitPerPixel;
-          env->canvas->setBitsPerPixel(1, true); // set bits per pixel without init memory, since we already alloccated enough
-          renderWidgetsOnly = true;
-      }
+          // current canvas in 2-bit mode      
+          } else if (env->canvas->bitPerPixel > 1) { 
+
+              returnBitPerPixel = env->canvas->bitPerPixel;
+              env->canvas->setBitsPerPixel(1, true); // set bits per pixel without init memory, since we already alloccated enough
+              renderWidgetsOnly = true;
+          }
+      }    
 
     #endif
 
@@ -659,7 +656,7 @@ void Screen4in2UI::updateTestPartial(bool afterWakeup) {
    // screen->drawStringUtext(40, 80, testText, true);
 
     displayDriver->display(screen->bufferBW, screen->bufferRY);
-
+    
     displayDriver->displayInit(1, true);  
 
     Serial.println("[drawTestPartial] EPD_4IN2B_V2_Display_BW end");  
@@ -901,32 +898,33 @@ void Screen4in2UI::clearScreen() {
 
 void Screen4in2UI::updateScreen() {
 
-  if (displayBeasy) return;
-  displayBeasy = true;
+  if (displayBeasy) return;  
   initPins(); 
   
   KellyCanvas * screen = env->getCanvas();
   
-  if (screen->bitPerPixel == 1 && env->lastState.cuiBitsPerPixel == 2) {
+  #if defined(COLORMODE_2BIT_SUPPORT_RAM_FRIENDLY) && defined(DISPLAY_2BIT)    
+    if (screen->bitPerPixel == 1 && env->lastState.cuiBitsPerPixel == 2) {
+      Serial.println(F("2-bit [4 Color mode] RAM SAVING mode"));
 
-    Serial.println(F("2-bit [4 Color mode] RAM SAVING mode"));
+      if (!displayDriver->fsRead) {
+        displayDriver->fsRead = std::bind(&Env::cuiStepRead, env);
+        displayDriver->fsStart = std::bind(&Env::cuiStepReadStart, env, std::placeholders::_1);
+      }
 
-    if (!displayDriver->fsRead) {
-     displayDriver->fsRead = std::bind(&Env::cuiStepRead, env);
-     displayDriver->fsStart = std::bind(&Env::cuiStepReadStart, env, std::placeholders::_1);
-    }
-    //env->cuiStepReadStart(false);
-    //env->cuiStepRead();
-    displayDriver->displayInit(2);
+      displayDriver->displayInit(2);
+      displayBeasy = true;
+    } 
+  #endif
 
-  } else {
+  if (!displayBeasy) {
 
     if (screen->bitPerPixel == 2) Serial.println(F("2-bit [4 Color mode]"));
     else Serial.println(F("1-bit [2 Color mode]"));
 
     displayDriver->displayInit(screen->bitPerPixel);
+    displayBeasy = true;
   }
-
 
   delay(400);
   Serial.println(F("Show image for array..."));
@@ -937,8 +935,6 @@ void Screen4in2UI::updateScreen() {
 
   displayDriver->display(screen->bufferBW, screen->bufferRY);
 
-  //printf("Clear...\r\n");
-  //EPD_4IN2B_V2_Clear();
   Serial.println(F("Sleep..."));
   displayDriver->displaySleep();
 
