@@ -71,6 +71,10 @@ class KellyEInk {
 		virtual bool initPins();
 		virtual void endPins();	
 
+		/*
+			send init command and setup display according to color mode
+			bitMode affects on calculation of framebuffer size (Image) and addition options
+		*/
 		virtual void displayInit(unsigned int bitMode = 1, bool partial = false) = 0;
 		virtual void displayClear() {
 			display(NULL, NULL);

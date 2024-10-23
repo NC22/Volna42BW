@@ -312,8 +312,6 @@ bool Screen4in2UI::drawUIToBufferCustom() {
 
     }
 
-
-
     for(unsigned int i=0; i < env->cuiWidgets.size(); i++) {
         
         if (partial && env->cuiWidgets[i].type != uiClock) continue;
@@ -461,8 +459,9 @@ void Screen4in2UI::updatePartialClock() {
 
     #if defined(DISPLAY_2BIT) && defined(COLORMODE_2BIT_SUPPORT_RAM_FRIENDLY)
         
-      // always work in 1-bit mode
+      // always work in 1-bit mode, updating only widgets
       renderWidgetsOnly = true;
+      if (coldStart) env->canvas->setBitsPerPixel(1); // init buffer, since in widgets only mode buffer initialization is ignored
 
     #else
 
@@ -514,7 +513,7 @@ void Screen4in2UI::updatePartialClock() {
         #endif
 
         // исключение при переходе из 2-bit в 1-bit режим (частичное обновление на контроллере возможно только в режиме 1-bit) на контроллере SSD1683
-        // при переходе с 2-bit режима в 1-bit, нужно перезаполнять буфер для корректного вызова partialUpdate, для этого нужно восстановить RAM 
+        // при переходе с 2-bit режима в 1-bit (и в любом случае при выходе из сна), нужно перезаполнять буфер для корректного вызова partialUpdate, для этого нужно восстановить RAM 
         // SW \ HW RESET не помогает и не влияет на RAM, реализован метод displayInitWithCleanUpBuffer - других способов сброса мной не найдено
 
         // if (returnBitPerPixel > 0 || coldStart) {      
@@ -524,7 +523,7 @@ void Screen4in2UI::updatePartialClock() {
         } else {
           displayDriver->displayInit(1, true);
         }
-
+        
     #else 
         // типовой вариант инициализации работающий на любых других экранах
         displayDriver->displayInit(1, true);

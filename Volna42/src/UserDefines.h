@@ -19,7 +19,7 @@
 #endif
 
 #define PRESSURE_HPA false                    // pressure in hPa (default - mmHg - мм.рт.ст)
-#define PARTIAL_UPDATE_INTERVAL 120           // Интервал частичного обновления экрана по умолчанию (если поддерживается) в секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
+#define PARTIAL_UPDATE_INTERVAL 60           // Интервал частичного обновления экрана по умолчанию (если поддерживается) в секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
 
 // [Main temperature sensor] | [Внутренний сенсор температуры]
 
@@ -105,7 +105,7 @@
 		#define EPD_DC_PIN   6   
 		#define EPD_CS_PIN   -1    // GND (-1)  
 		#define EPD_CLK_PIN   15    
-		#define EPD_DIN_PIN   7   
+		#define EPD_DIN_PIN   7    
 
 	#else
 		
@@ -113,24 +113,24 @@
 		#define COLORMODE_2BIT_SUPPORT_RAM_FRIENDLY 
 
 		// [https://42volna.com/scheme/] Основная распиновка, с освобождением ножки CS
-	
+	/*
 		#define EPD_BUSY_PIN 12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_RST_PIN  15  // D8 - GPIO - 15 (CS)
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0
 		#define EPD_CS_PIN   -1  // GND (-1)    
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-	
+	*/
 		// [Optional, my old setup] | НЕ Основная
 		// моя старая алт. распиновка, через резистор
-	/*
+	
 		#define EPD_BUSY_PIN 2   // D4 - GPIO - 2 (+20кОм резистор на VCC)
 		#define EPD_RST_PIN  12  // D6 - GPIO - 12 (MISO) 
 		#define EPD_DC_PIN   0   // D3 - GPIO - 0
 		#define EPD_CS_PIN   15  // D8 - GPIO - 15 (CS) или опционально GND (-1)
 		#define EPD_CLK_PIN  -1  // Всегда D5 - GPIO 14 (SCLK) - SPI  
 		#define EPD_DIN_PIN  -1  // Всегда D7 - GPIO 13 (MOSI) - SPI
-	*/
+	
 	
 	#endif
 
@@ -171,8 +171,6 @@
 #define CUI_MAX_WIDGETS 20                    // Максимально возможное кол-во выводимых виджетов для кастомного интерфейса
 #define CUI_LOOP_INTERVAL 14400               // Интервал смены оформления в режиме -loop - смена кастомных оформлений по порядку из того что загружено раз в 4 часа (тестовый функционал) 
 
-#define SAFE_MODE false                       // [DEBUG] игнорировать настройки сохраненные в EEPROM при запуске - на случай если по каким-то причинам конфиг вызывает зависания при запуске или иные проблемы
-
 #define EXTERNAL_SENSOR_CONNECT_ATTEMPTS 3    // Reconnect attempts on HTTP GET external data fail | Кол-во попыток подключения (HA & Domoticz & Openweather)
 #define EXTERNAL_SENSOR_CONNECT_TIMEOUT 15000 // Connection timeout in milliseconds | Максимальное время ожидания ответа сервера (HA & Domoticz & Openweather) 
 #define ENV_INDOOR_EXTERNAL_SUPPORT			  // Поддержка функции загрузки данных для внутреннего датчика из внешнего источника (опция для совместимости со старыми конфигами)
@@ -186,7 +184,9 @@
 // Если установлен SLEEP_SWITCH_PIN, переход в режим сна осуществляется только если SLEEP_SWITCH_PIN в состоянии digitalRead = LOW
 
 // #define SLEEP_SWITCH_PIN -1    // [ESP32] [ESP8266 - not enough pins, if 4.2' display used]
+
 // #define SLEEP_ALWAYS_IGNORE    // [DEBUG OPTION] Ignore sleep mode. Even if work from battery | Игнорировать режим сна. Не засыпать, даже если работаем от батареи. 
 // #define SLEEP_ALWAYS_SLEEP     // [DEBUG OPTION] Always go to sleep mode | Всегда уходить в режим сна 
+#define SAFE_MODE false           // [DEBUG OPTION] игнорировать настройки сохраненные в EEPROM при запуске - на случай если по каким-то причинам конфиг вызывает зависания при запуске или иные проблемы
 
 #endif	
