@@ -180,11 +180,14 @@ void KellyEInk_42_SSD1683_BW_2BIT::initDisplay4Gray() {
     readBusy();
 }			
 
+/*
+	Image - 4-gray color image buffer or 1-bit mask if direct read from file system is enabled
+*/
 void KellyEInk_42_SSD1683_BW_2BIT::display4Gray(const unsigned char *Image, int x, int y, int w, int l) {
 
     int i,j,k,m;
-	int z=0;
-    unsigned char temp1,temp2,temp3;
+	int z = 0;
+    unsigned char temp1,temp2,temp3, mask;
 
 	/****Color display description****
 		 white  gray1  gray2  black
@@ -193,46 +196,77 @@ void KellyEInk_42_SSD1683_BW_2BIT::display4Gray(const unsigned char *Image, int 
 	*********************************/
 	
 	sendCommand(0x24);
-	z=0;
-	x= x/8*8;
+	z = 0; // cursor
+	x = x/8*8;
+	mask = 0;
+	
+	bool fsReadEnabled = false;
+	if (fsStart) {
+		fsReadEnabled = fsStart(false);
+	}
+
 	for(m = 0; m < (int) displayHeight;m++)
-		for(i=0; i < (int) displayWidth/8; i++)
+
+		for(i=0; i < (int) displayWidth/8; i++) // 8 bit step by x (4 pixels per byte)
 		{
 			if(i >= x/8 && i <(x+w)/8 && m >= y && m < y+l){
 				
 				temp3=0;
-				for(j=0;j<2;j++)	
-				{
-					temp1 = pgm_read_byte(&Image[z*2+j]);
+				for(j=0;j<2;j++) // read 8 pixels data contained in 2 bytes - first byte, second byte and fit them to temp3 according to special rules relative to part buffer
+				{	
+					if (fsReadEnabled) {
+						temp1 = fsRead();
+					} else {
+						temp1 = pgm_read_byte(&Image[z*2+j]);
+					}
+
 					for(k=0;k<2;k++)	
 					{
 						temp2 = temp1&0xC0 ;
+
 						if(temp2 == 0xC0)
 							temp3 |= 0x01;//white
 						else if(temp2 == 0x00)
 							temp3 |= 0x00;  //black
 						else if(temp2 == 0x80) 
-							temp3 |= 0x01;  //gray1
+							temp3 |= 0x01;  //gray1 -- this will differ from buffer
 						else //0x40
-							temp3 |= 0x00; //gray2
+							temp3 |= 0x00; //gray2  -- this will differ from buffer
+
 						temp3 <<= 1;	
 						
 						temp1 <<= 2;
 						temp2 = temp1&0xC0 ;
+
 						if(temp2 == 0xC0)  //white
 							temp3 |= 0x01;
 						else if(temp2 == 0x00) //black
 							temp3 |= 0x00;
 						else if(temp2 == 0x80)
-							temp3 |= 0x01; //gray1
+							temp3 |= 0x01; //gray1  -- this will differ from buffer
 						else    //0x40
-								temp3 |= 0x00;	//gray2	
+								temp3 |= 0x00;	//gray2	  -- this will differ from buffer
+
+
 						if(j!=1 || k!=1)				
 							temp3 <<= 1;
 						
 						temp1 <<= 2;
 					}
 				}
+
+				if (fsReadEnabled) {
+
+					mask = pgm_read_byte(&Image[z]);
+
+					// накладываем 1-битное изображение на 2-битное
+					for (unsigned int pixel = 0; pixel < 8; pixel++) {
+						if ((mask & (1 << (7 - pixel))) == 0) {
+							temp3 &= ~(1 << (7 - pixel)); // Устанавливаем бит temp3 в 0, если в mask бит = 0
+						}
+					}
+				}
+
 				z++;
 				sendData(temp3);
 				
@@ -240,6 +274,11 @@ void KellyEInk_42_SSD1683_BW_2BIT::display4Gray(const unsigned char *Image, int 
 				sendData(0xff);
 			}				
 		}
+
+	if (fsReadEnabled) {
+		fsStart(false);
+	}
+
     // new  data
     sendCommand(0x26);
 	z=0;
@@ -251,10 +290,17 @@ void KellyEInk_42_SSD1683_BW_2BIT::display4Gray(const unsigned char *Image, int 
 				temp3=0;
 				for(j=0;j<2;j++)	
 				{
-					temp1 = pgm_read_byte(&Image[z*2+j]);
+					if (fsRead) {
+						temp1 = fsRead();
+						mask = pgm_read_byte(&Image[z]);
+					} else {
+						temp1 = pgm_read_byte(&Image[z*2+j]);
+						mask = FILL_BACKGROUND;
+					}
 					for(k=0;k<2;k++)	
 					{
-						temp2 = temp1&0xC0 ;
+						
+						temp2 = temp1&0xC0;
 						if(temp2 == 0xC0)
 							temp3 |= 0x01;//white
 						else if(temp2 == 0x00)
@@ -263,10 +309,13 @@ void KellyEInk_42_SSD1683_BW_2BIT::display4Gray(const unsigned char *Image, int 
 							temp3 |= 0x00;  //gray1
 						else //0x40
 							temp3 |= 0x01; //gray2
+
+
 						temp3 <<= 1;	
 						
 						temp1 <<= 2;
-						temp2 = temp1&0xC0 ;
+						temp2 = temp1&0xC0;
+						
 						if(temp2 == 0xC0)  //white
 							temp3 |= 0x01;
 						else if(temp2 == 0x00) //black
@@ -274,11 +323,25 @@ void KellyEInk_42_SSD1683_BW_2BIT::display4Gray(const unsigned char *Image, int 
 						else if(temp2 == 0x80)
 							temp3 |= 0x00; //gray1
 						else    //0x40
-								temp3 |= 0x01;	//gray2
+							temp3 |= 0x01;	//gray2
+
+
 						if(j!=1 || k!=1)					
 							temp3 <<= 1;
 						
 						temp1 <<= 2;
+					}
+				}
+				
+				if (fsReadEnabled) {
+
+					mask = pgm_read_byte(&Image[z]);
+
+					// накладываем 1-битное изображение на 2-битное
+					for (unsigned int pixel = 0; pixel < 8; pixel++) {
+						if ((mask & (1 << (7 - pixel))) == 0) { 
+							temp3 &= ~(1 << (7 - pixel));
+						}
 					}
 				}
 				z++;
@@ -287,6 +350,10 @@ void KellyEInk_42_SSD1683_BW_2BIT::display4Gray(const unsigned char *Image, int 
 				sendData(0xff);	
 			}
 		}
+
+	if (fsReadEnabled) {
+		fsStart(true);
+	}
 
 	// Turn on Display
     sendCommand(0x22);

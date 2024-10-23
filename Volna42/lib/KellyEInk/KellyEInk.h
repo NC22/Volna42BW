@@ -66,6 +66,9 @@ class KellyEInk {
 		int16_t ENK_PIN_CLK = SCK;		
 		int16_t ENK_PIN_DIN = MOSI;
 		
+		std::function<bool(bool)> fsStart = NULL;
+		std::function<unsigned char()> fsRead = NULL;
+		
 		KellyEInk(int16_t busy, int16_t rst, int16_t dc, int16_t cs, int16_t clk, int16_t din, unsigned int swidth, unsigned int sheight, unsigned long limitBusy = 10000);
 		
 		virtual void spiBegin();

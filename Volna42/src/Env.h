@@ -9,6 +9,7 @@
 
 #include <UserDefines.h>
 #include <SystemDefines.h>
+
 #include <WidgetTypes.h>
 #include "Config.h"
 
@@ -150,6 +151,7 @@ class Env {
         
         bool cuiEnabled;
         bool cuiFSinited = false;
+        File * cuiStepFile = NULL;
                     
         GyverBME280 tempSensor;    
         
@@ -298,6 +300,8 @@ class Env {
         bool cuiReadStorageFile(bool widgetsOnly = false);
         bool cuiDeleteStorageFile(String name);
         bool cuiWriteStorageFile(bool append = false, int dataSize = 0);
+        bool cuiStepReadStart(bool close);
+        unsigned char cuiStepRead();
 
         uiWidgetType cuiGetTypeById(int key);
         int cuiGetIdByType(uiWidgetType type);

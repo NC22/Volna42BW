@@ -464,19 +464,30 @@ void Screen4in2UI::updatePartialClock() {
     bool coldStart = !env->canvas->bufferBW;
     renderWidgetsOnly = false;
 
-    // we only wakedUp & CUI was in 2-bit mode
-    if (!env->canvas->bufferBW && env->lastState.cuiBitsPerPixel > 1) {
-        renderWidgetsOnly = true;
-        env->canvas->setBitsPerPixel(1); // init buffer, since in widgets only mode buffer initialization is ignored
+    #if defined(DISPLAY_2BIT) && defined(COLORMODE_2BIT_SUPPORT_RAM_FRIENDLY)
+        
+      // always work in 1-bit mode
+      renderWidgetsOnly = true;
 
-    // temporary set 1-bit mode & remember original state, since we cant output in 2-bit mode partial data
-    } else if (env->canvas->bitPerPixel > 1) { 
-
-        returnBitPerPixel = env->canvas->bitPerPixel;
-        env->canvas->setBitsPerPixel(1, true); // seb bits per pixel without init memory, since we already alloccated enough
-        renderWidgetsOnly = true;
-    }
+    #elif defined(DISPLAY_2BIT)
     
+      // 2-bit mode exceptions -> currently we always render partial data in 1-bit, so check if we work in 2-bit before and buffer mismatched
+
+      // we only wakedUp & last output was in 2-bit mode
+      if (coldStart && env->lastState.cuiBitsPerPixel > 1) {
+          renderWidgetsOnly = true;
+          env->canvas->setBitsPerPixel(1); // init buffer, since in widgets only mode buffer initialization is ignored
+
+      // current canvas in 2-bit mode      
+      } else if (env->canvas->bitPerPixel > 1) { 
+
+          returnBitPerPixel = env->canvas->bitPerPixel;
+          env->canvas->setBitsPerPixel(1, true); // set bits per pixel without init memory, since we already alloccated enough
+          renderWidgetsOnly = true;
+      }
+
+    #endif
+
     partial = true;
     drawUIToBuffer();
     partial = false;
@@ -492,7 +503,7 @@ void Screen4in2UI::updatePartialClock() {
     KellyCanvas * screen = env->getCanvas();
     Serial.println(F("[drawPartial] redraw part CLOCK")); 
 
-    // исключаем ситуацию когда прошлая область может быть больше новой - чтобы не осталось старого не перересованного участка
+    // исключаем ситуацию когда прошлая область может быть больше новой - чтобы не осталось старого не перерисованного участка
     // если не выщитывать, тогда просто нужно брать с запасом в несколько пикселей
     widgetController->partialDataApplyMaxBounds();
 
@@ -507,7 +518,8 @@ void Screen4in2UI::updatePartialClock() {
         // при переходе с 2-bit режима в 1-bit, нужно перезаполнять буфер для корректного вызова partialUpdate, для этого нужно восстановить RAM 
         // SW \ HW RESET не помогает и не влияет на RAM, реализован метод displayInitWithCleanUpBuffer - других способов сброса мной не найдено
 
-        if (returnBitPerPixel > 0 || coldStart) {      
+        // if (returnBitPerPixel > 0 || coldStart) {      
+        if (env->lastState.cuiBitsPerPixel > 1 || coldStart) {
           // Разное заполнение начального буфера дает разное визуальное отображение процесса частичного обновления и влияет на проверку контроллером какие пиксели были изменены
           displayDriver->displayInitWithCleanUpBuffer(methodInvert ? screen->bufferBW : NULL);
         } else {
@@ -894,10 +906,27 @@ void Screen4in2UI::updateScreen() {
   initPins(); 
   
   KellyCanvas * screen = env->getCanvas();
-  if (screen->bitPerPixel == 2) Serial.println(F("2-bit [4 Color mode]"));
-  else Serial.println(F("1-bit [2 Color mode]"));
+  
+  if (screen->bitPerPixel == 1 && env->lastState.cuiBitsPerPixel == 2) {
 
-  displayDriver->displayInit(screen->bitPerPixel);
+    Serial.println(F("2-bit [4 Color mode] RAM SAVING mode"));
+
+    if (!displayDriver->fsRead) {
+     displayDriver->fsRead = std::bind(&Env::cuiStepRead, env);
+     displayDriver->fsStart = std::bind(&Env::cuiStepReadStart, env, std::placeholders::_1);
+    }
+    //env->cuiStepReadStart(false);
+    //env->cuiStepRead();
+    displayDriver->displayInit(2);
+
+  } else {
+
+    if (screen->bitPerPixel == 2) Serial.println(F("2-bit [4 Color mode]"));
+    else Serial.println(F("1-bit [2 Color mode]"));
+
+    displayDriver->displayInit(screen->bitPerPixel);
+  }
+
 
   delay(400);
   Serial.println(F("Show image for array..."));

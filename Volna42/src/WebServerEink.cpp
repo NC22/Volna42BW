@@ -5,12 +5,12 @@
 #include <LittleFS.h>
 
 WebServerEink::WebServerEink(Env * env, int port) : WebServerBase(env, port) {
-   
-        #if defined(ESP32)
-            ramFriendlyMode = false;
-        #else 
-            ramFriendlyMode = true;
-        #endif
+
+    #if defined(ESP32)
+        ramFriendlyMode = false;
+    #else 
+        ramFriendlyMode = true;
+    #endif
 }
 
 
@@ -145,7 +145,7 @@ void WebServerEink::router() {
 }
 
 void WebServerEink::apiClockTest() {
-    #if defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
+    #if defined(DISPLAY_TYPE_154)
         env->screen->enableClockMode(true);
         server->send(200, "application/json", "{\"status\":\"ok\"}"); 
     #endif
@@ -1041,7 +1041,7 @@ void WebServerEink::apiTestData() {
 
             } else if (server->arg(i) == "partial_update" ) {               
                 
-                #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
+                #if defined(DISPLAY_TYPE_42)
                 
                     // Serial.println("[Deep sleep INIT 4 sec]");  
                     // env->lastState.t = time(nullptr);
@@ -1059,7 +1059,7 @@ void WebServerEink::apiTestData() {
             } else if (server->arg(i) == "partial_update2") {   
                 
                 result = server->arg(i);
-                #if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
+                #if defined(DISPLAY_TYPE_42)
                 
                     if (server->method() == HTTP_POST) env->screen->updateTestPartial2();
                     

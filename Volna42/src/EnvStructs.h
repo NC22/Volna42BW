@@ -67,7 +67,7 @@ typedef struct {
     int connectTimes;              // number of succesfull connections with external sensor
     bool onBattery;                // on battery check - setted once on first setup
 
-    int8_t cuiBitsPerPixel;      // last CUI bits per pixel mode
+    int8_t cuiBitsPerPixel;        // last CUI bits per pixel mode (last output mode)
 
     u_int8_t lowBatTick;           // times battery sensor detected low battery state, will show sad hangry cat if count enough
     int16_t cuiFileIndex;          // temporary file index - if we need to load once on reboot some specified custom user interface without save to permanent memory    

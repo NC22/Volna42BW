@@ -27,11 +27,11 @@
 
 Env env = Env();
 
-#if defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_RY_BW_42_UC8176_B)
+#if defined(DISPLAY_TYPE_42)
 KellyCanvas canvas = KellyCanvas(400, 300);
 Screen4in2UI screenController = Screen4in2UI(&env);
 
-#elif defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
+#else
 
 KellyCanvas canvas = KellyCanvas(200, 200);
 Screen1in54UI screenController = Screen1in54UI(&env);

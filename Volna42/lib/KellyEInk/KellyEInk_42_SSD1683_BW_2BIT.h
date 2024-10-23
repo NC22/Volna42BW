@@ -28,7 +28,6 @@ class KellyEInk_42_SSD1683_BW_2BIT : public KellyEInk {
 		void displayPartial(const unsigned char *Image, unsigned int  Xstart, unsigned int  Ystart, unsigned int  Xend, unsigned int  Yend, bool update = true, bool inverse = false);
 		void display(const unsigned char *blackimage, const unsigned char *ryimage = NULL, bool update = true);
 		
-
 		void displaySleep();
 		void displayUpdate();
 

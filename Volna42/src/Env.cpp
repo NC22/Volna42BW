@@ -1951,6 +1951,10 @@ bool Env::cuiPrepareRebootIfNeeded() {
 
 #else
 
+    #if defined(DISPLAY_2BIT) && defined(COLORMODE_2BIT_SUPPORT_RAM_FRIENDLY)
+        return false;
+    #endif
+
     if (!cuiIsEnabled()) return false;
     if (!canvas->bufferBW) return false;
 
@@ -2284,6 +2288,54 @@ int16_t Env::cuiGetNameByIndex(int16_t searchIndex, String &name) {
     return index;
 }
 
+bool Env::cuiStepReadStart(bool close) {
+
+  if (close && cuiStepFile) {
+    Serial.println(F("[cuiStepReadStart] END"));
+    cuiStepFile->close();
+    delete cuiStepFile;
+    cuiStepFile = NULL;
+    return false;
+  }
+
+  if (cuiName.length() <= 0) {
+    return false;
+  }
+
+  cuiInitFS();
+  if (!cuiStepFile) {
+    Serial.println(F("[cuiStepReadStart] START"));
+    #if defined(ESP32)
+      cuiStepFile = new File(SPIFFS.open("/cui/" + cuiName + ".bit", FILE_READ));
+    #else
+      cuiStepFile = new File(LittleFS.open("/cui/" + cuiName + ".bit", "r"));
+    #endif  
+
+    if (!cuiStepFile) {
+      Serial.println(F("[cuiStepReadStart] Steper Enabled - FAIL"));
+      return false;
+    }
+
+  } else {
+    cuiStepFile->seek(0);
+    Serial.println(F("[cuiStepReadStart] RESET"));
+  }
+
+  Serial.println(F("[cuiStepReadStart] Steper Enabled - OK"));
+  return true;
+}
+
+unsigned char Env::cuiStepRead() {
+
+  if (!cuiStepFile) {
+    return 0;
+  }
+
+  if (!cuiStepFile->available()) {
+    return 0;
+  }
+  return (unsigned char) cuiStepFile->read();
+}
 
 /*
   на ESP8266 нужна плановая перезагрузка при смене битности - см cuiPrepareRebootIfNeeded - проверка и подготовка к перезагрузке,
@@ -2373,7 +2425,17 @@ bool Env::cuiReadStorageFile(bool widgetsOnly) {
 
                   lastState.cuiBitsPerPixel = bitsPerPixel;
 
+                  #if defined(DISPLAY_2BIT) && defined(COLORMODE_2BIT_SUPPORT_RAM_FRIENDLY)
+                  Serial.println(F("[COLORMODE_2BIT_SUPPORT_RAM_FRIENDLY] Skip 2-Bit render & display mode activation"));
+                  // image will be rendered by step read from FLASH during update screen
+                  getCanvas()->setBitsPerPixel(1);
+                  if (bitsPerPixel > 1) {
+                    widgetsOnly = true;
+                  }
+                  #else 
                   getCanvas()->setBitsPerPixel(bitsPerPixel);
+                  #endif
+
                   getCanvas()->setRotate(0);
                   getCanvas()->clear();
               }
