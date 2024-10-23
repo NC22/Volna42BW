@@ -17,9 +17,13 @@
 #include <KellyOpenWeather.h>
 
 #if defined(ESP32)
+
     #include <HTTPClient.h>
     #include "esp_sntp.h"
-    // #include <thirdparty/TZ.h>
+
+    #include <FS.h>
+    #include <SPIFFS.h>
+
 #else 
     #include <ESP8266HTTPClient.h>
     #include "sntp.h"
@@ -27,6 +31,9 @@
     #if defined(FIX_DEEPSLEEP) && FIX_DEEPSLEEP > 0
         #include "esp8266/deepsleepFix.h"
     #endif
+
+    #include <FS.h>
+    #include <LittleFS.h>
 #endif
 
 #include <WiFiClient.h>
@@ -79,15 +86,13 @@ extern const uint8_t textDateFormat PROGMEM;
 extern const char longDateFormat[] PROGMEM;
 extern const char shortDateFormat[] PROGMEM;
 
-// todo - replace -1000 by define BAD_SENSOR_DATA
-
 #include <EnvStructs.h>
 // todo - поддержка переворота экрана на 180 - нужно поменять порядок вывода полного буфера и делать правки для частичного обновления
 
-#if defined(WAVESHARE_RY_BW_42_UC8176) || defined(WAVESHARE_BW_42_UC8176) || defined(WAVESHARE_BW_42_SSD1683) || defined(WAVESHARE_RY_BW_42_UC8176_B)
+#if defined(DISPLAY_TYPE_42)
 #include <Screen4in2UI.h>
 class Screen4in2UI;
-#elif defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
+#elif defined(DISPLAY_TYPE_154)
 #include <Screen1in54UI.h>
 class Screen1in54UI;
 #endif

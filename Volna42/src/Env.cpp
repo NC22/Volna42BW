@@ -1,13 +1,6 @@
 #include "Env.h"
 
 
-#if defined(ESP32)
-  #include <FS.h>
-  #include <SPIFFS.h>
-#else 
-  #include <FS.h>
-  #include <LittleFS.h>
-#endif
 
 Env::Env() {
 
@@ -2122,8 +2115,8 @@ bool Env::cuiWriteStorageFile(bool append, int dataSize) {
 #endif
 
   file.print(String(cuiBits) + ";");
-  file.print(getConfig()->getString(cScreenRotate) + ";");
-  file.print(getConfig()->getString(cScreenLandscape) + ";");
+  file.print(rotate ? "1;" : "0;");
+  file.print(land ? "1;" : "0;");
   // file.print(String(webSize) + ";"); 
   file.print('\n');
 
@@ -2175,7 +2168,7 @@ int16_t Env::cuiGetIndexByName(String searchName) {
   String tmpName;
   #if defined(ESP32)
       
-    File root = SPIFFS.open("/cui/");
+    File root = SPIFFS.open("/cui");
     if (!root) {
         Serial.println(F("Failed to open directory"));
         return index;
@@ -2461,16 +2454,11 @@ bool Env::cuiReadStorageFile(bool widgetsOnly) {
 
             } else if (paramN == 1) {
 
-                getConfig()->set(cScreenRotate, widgetParam);
-                rotate = cfg.getBool(cScreenRotate);
-                if (cfg.sanitizeError) rotate = false;
+              rotate = KellyOWParserTools::validateIntVal(widgetParam) > 0 ? true : false;
 
             } else if (paramN == 2) {
 
-              getConfig()->set(cScreenLandscape, widgetParam);
-              land = cfg.getBool(cScreenLandscape);
-              if (cfg.sanitizeError) land = false;
-                      
+              land = KellyOWParserTools::validateIntVal(widgetParam) > 0 ? true : false;
             } 
 
         } else {

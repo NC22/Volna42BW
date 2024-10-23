@@ -79,10 +79,10 @@ const char cfgExtSensor[] PROGMEM = "";                // API ссылка на 
 const char cfgExtSensorL[] PROGMEM = "";               // Логин (Domoticz) - требуется в зависимости от настроек Domoticz
 const char cfgExtSensorP[] PROGMEM = "";               // Пароль (Domoticz) или Токен авторизации (Home Assistant)
 
-const uint8_t cfgExtLocal PROGMEM = 0;                 // Использовать внешние данные для домашнего датчика (тестовый \ эксперементальный метод)  
-const char cfgExtSensorLocal[] PROGMEM = "";
-const char cfgExtSensorLocalL[] PROGMEM = "";
-const char cfgExtSensorLocalP[] PROGMEM = "";
+const uint8_t cfgExtLocal PROGMEM = 0;                 // [Удаленные данные вместо встроенного датчика BME280] - Использовать внешние данные для домашнего датчика (тестовый \ эксперементальный метод)  
+const char cfgExtSensorLocal[] PROGMEM = "";           // [Домашний датчик - опционально] API ссылка на внешний датчик
+const char cfgExtSensorLocalL[] PROGMEM = "";          // [Домашний датчик - опционально] Логин - требуется в зависимости от настроек
+const char cfgExtSensorLocalP[] PROGMEM = "";          // [Домашний датчик - опционально] Пароль или Токен авторизации
 
 // [MQTT server]
 const char cfgMqttHost[] PROGMEM = "";

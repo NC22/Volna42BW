@@ -519,12 +519,15 @@ void WebServerEink::apiDirectWidgets() {
 
         env->cuiResetWidgets();
 
-        if (screenFlip.length() > 0) {            
-            env->getConfig()->set(cScreenRotate, screenFlip);
+        cuiLandBack = env->land;
+        cuiRotateBack = env->rotate;
+
+        if (screenFlip.length() > 0) {         
+            env->rotate = KellyOWParserTools::validateIntVal(screenFlip) > 0 ? true : false; 
         }
 
         if (screenLandscape.length() > 0) {
-            env->getConfig()->set(cScreenLandscape, screenLandscape);
+            env->land = KellyOWParserTools::validateIntVal(screenLandscape) > 0 ? true : false; 
         }
 
         if (widgets.size() > 0) {
@@ -576,7 +579,7 @@ void WebServerEink::apiCuiSelect() {
             if (newIndex == -1) {
 
                 Serial.print(F("[apiCuiSelect] CUI File not found : ")); 
-                Serial.print(server->arg(i));
+                Serial.println(server->arg(i));
                 
                 server->send(200, "application/json", "{\"status\":\"fail\",\"error\":\"CUI File not found\"}"); 
                 return; 
@@ -677,6 +680,10 @@ void WebServerEink::apiDirectImage() {
 
                 env->cuiDeleteStorageFile(env->cuiName);
                 env->cuiResetStateByConfig();
+                
+                env->land = cuiLandBack;
+                env->rotate = cuiRotateBack;
+
                 cuiUploadMode = false;
 
                 server->send(200, "application/json", "{\"status\":\"fail\"}");  
@@ -713,6 +720,9 @@ void WebServerEink::apiDirectImage() {
                 } else {
 
                     env->cuiResetStateByConfig();
+                    env->land = cuiLandBack;
+                    env->rotate = cuiRotateBack;
+                    
                     server->send(200, "application/json", "{\"status\":\"ok\",\"full\":true}");
                 }
 

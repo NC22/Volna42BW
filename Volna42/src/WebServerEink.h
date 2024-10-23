@@ -31,6 +31,9 @@ class WebServerEink:public WebServerBase {
         unsigned int bufferTotalWrite = 0;
         bool cuiUploadMode = false;
         bool cuiUploadDisplayAfter = false;
+        // vars restored after CUI uploads - if will be more needed to restore - better move to temporary structure
+        bool cuiLandBack = false;
+        bool cuiRotateBack = false;
 
         #if defined(ESP32)
             HTTPUpdateServer httpUpdater;

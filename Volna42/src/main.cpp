@@ -47,12 +47,11 @@ void setup()
 
   #if defined(DEBUG_ESP_WIFI)
 
-  Serial.setDebugOutput(true);
-  WiFi.printDiag(Serial);
-
+    Serial.setDebugOutput(true);
+    WiFi.printDiag(Serial);
+    delay(5000);
+    
   #endif
-
-  // delay(5000);
 
   env.canvas = &canvas;
   env.screen = &screenController;

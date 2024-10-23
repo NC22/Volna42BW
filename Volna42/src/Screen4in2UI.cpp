@@ -467,6 +467,8 @@ void Screen4in2UI::updatePartialClock() {
     #else
 
       if (is4ColorsSupported()) {
+          // ToDo - test partial update examples from manufacturer and use them for 2-bit mode instead 1 bit
+
           // 2-bit mode exceptions -> currently we always render partial data in 1-bit, so check if we work in 2-bit before and buffer mismatched
 
           // we only wakedUp & last output was in 2-bit mode
@@ -656,7 +658,6 @@ void Screen4in2UI::updateTestPartial(bool afterWakeup) {
    // screen->drawStringUtext(40, 80, testText, true);
 
     displayDriver->display(screen->bufferBW, screen->bufferRY);
-    
     displayDriver->displayInit(1, true);  
 
     Serial.println("[drawTestPartial] EPD_4IN2B_V2_Display_BW end");  
