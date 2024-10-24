@@ -390,6 +390,7 @@ void Screen4in2UI::drawUIToBuffer() {
   }
 
   KellyCanvas * screen = env->getCanvas();
+  
   screen->setBitsPerPixel(1);
 
   #if defined(DOUBLE_BUFFER_MODE) // optional for displays with double buffer

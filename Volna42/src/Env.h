@@ -264,7 +264,7 @@ class Env {
         
         float readBatteryV();
         float readBatteryVtest();
-        float getBatteryLvlfromV(float v) ;
+        float getBatteryLvlfromV(float v);
         
         // externalSensorData readExternalData();
         

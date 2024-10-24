@@ -879,6 +879,7 @@ void Env::cuiSetState(bool state, String sname) {
 
   cuiName = sname;
   cuiEnabled = state;
+
   resetTimers();
 }
 
@@ -2024,11 +2025,18 @@ void Env::cuiResetStateByConfig() {
 }
 
 /* 
-  loads cui by current loop cursor if enabled. if index is not exist, resets index to begin 
-  disables custom ui mode if nothing found
+  Loads custom UI name by current loop cursor if enabled. If index is not exist, resets index to begin 
+  Disables custom ui mode if nothing found
+  
+  Needs to be called during draw process to init current custom UI loop name if enabled
+  Also resets cuiBitsPerPixel to be reinited during draw \ cuiRead process
 */
 void Env::cuiApplyLoop() {
-  if (lastState.cuiLoop) {
+
+  // reset cui info before next output to keep actual info, if cui still enabled, cuiBitsPerPixel will updated in current row during drawUIToBufferCustom 
+  lastState.cuiBitsPerPixel = -1; 
+
+  if (lastState.cuiLoop) {    
     
     Serial.print(F("[LOOP] ")); Serial.println(String(lastState.cuiFileIndex)); 
 
@@ -2407,16 +2415,16 @@ bool Env::cuiReadStorageFile(bool widgetsOnly) {
             if (!widgetParam) widgetParam = "0";
             if (paramN == 0) {
 
-              if (!widgetsOnly) {
-
+              bitsPerPixel = 1;
+              if(sscanf(widgetParam.c_str(), "%d", &bitsPerPixel) != 1) {
                   bitsPerPixel = 1;
-                  if(sscanf(widgetParam.c_str(), "%d", &bitsPerPixel) != 1) {
-                      bitsPerPixel = 1;
-                  }
+              }
 
-                  if (bitsPerPixel <= 0 || bitsPerPixel > 2) bitsPerPixel = 1;
+              if (bitsPerPixel <= 0 || bitsPerPixel > 2) bitsPerPixel = 1;
 
-                  lastState.cuiBitsPerPixel = bitsPerPixel;
+              lastState.cuiBitsPerPixel = bitsPerPixel;
+
+              if (!widgetsOnly) {
 
                   #if defined(DISPLAY_2BIT) && defined(COLORMODE_2BIT_SUPPORT_RAM_FRIENDLY)
 
@@ -2605,7 +2613,6 @@ void Env::applyConfigToRTC(bool configUpdate) {
     }
 
     lastState.sleepTimeCurrent = lastState.sleepTime;
-
     lastState.updateMinutes = false;
 
     #if defined(PARTIAL_UPDATE_SUPPORT)

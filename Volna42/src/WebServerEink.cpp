@@ -586,6 +586,7 @@ void WebServerEink::apiCuiSelect() {
             }
 
             String comm = "";
+            env->lastState.cuiBitsPerPixel = -1;
 
             if (env->lastState.cuiLoop) {
                 env->lastState.cuiFileIndex = newIndex;
@@ -722,7 +723,7 @@ void WebServerEink::apiDirectImage() {
                     env->cuiResetStateByConfig();
                     env->land = cuiLandBack;
                     env->rotate = cuiRotateBack;
-                    
+
                     server->send(200, "application/json", "{\"status\":\"ok\",\"full\":true}");
                 }
 
