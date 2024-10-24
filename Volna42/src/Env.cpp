@@ -249,8 +249,14 @@ void Env::setDefaultLastStateData() {
     lastState.lastPartialPos.xEnd = -1;
 }
 
-// used time stored in RTC or default timestamp assigned in Env class for defaultTime
+/*
+    Init default time
 
+    Priority 
+
+    1. defaultTime variable if RTC memory restored
+    2. timestamp from user config
+*/
 void Env::initDefaultTime() {
 
     String defaultTimestamp = getConfig()->cfgValues[cTimestamp];
@@ -382,6 +388,10 @@ bool Env::setupNTP(unsigned int attempt) {
     if (ntpServer.equals(F("off"))) {
 
       Serial.println(F("No NTP servers specified, setting time by default timestamp"));
+    
+      setenv("TZ", "GMT0", 1);
+      tzset();
+
       initDefaultTime();
       return false;
     }
@@ -2808,6 +2818,10 @@ void Env::validateConfig(unsigned int version, std::vector<cfgOptionKeys> * upda
                 
                 Serial.println(F("Force manual timestamp set. NTP connection stopped."));    
                 lastState.timeConfigured = false;
+
+                setenv("TZ", "GMT0", 1);
+                tzset();
+
                 initDefaultTime();
 
                 lastState.timeConfigured = true;

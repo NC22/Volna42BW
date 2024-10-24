@@ -68,7 +68,7 @@ const uint8_t cfg12HourFormat PROGMEM = 0;             // 0-1 | Use 12 hour PM /
 const uint8_t cfgUpdateMinutes PROGMEM = 0;            // 0-1 or number of seconds | Update clock widget interval (if = 1, PARTIAL_UPDATE_INTERVAL will be used as defaul update interval time)
 
 const char cdTimezone[] PROGMEM = "MSK-3";             // timezone - list https://github.com/esp8266/Arduino/blob/master/cores/esp8266/TZ.h
-const char cdNtpHosts[] PROGMEM = "pool.ntp.org";      // ntp server - если не используется, задать - off и очистить поле timezone, в таком случае время можно определить вручную через панель управления
+const char cdNtpHosts[] PROGMEM = "pool.ntp.org";      // NTP сервер - старайтесь не отправлять слишком много запросов, в случае если есть проблемы с доступом к серверу, найдите другой или задайте значение - off, очистить поле timezone, в таком случае время можно определить вручную через панель управления
 const char cfgWifiSSID[] PROGMEM = "";                 // Default WiFi network name to connect to (you can setup it from web interface by connecting to default AP)
 const char cfgWifiP[] PROGMEM = "";                    // Default Wifi password
 

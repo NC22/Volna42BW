@@ -166,8 +166,8 @@ int Screen4in2UI::drawTemp(int theight, bool indoor, float temperature, float hu
   twidth += 39;
 
   // prevent overlap with text title
-  if (twidth < textMarginX) {
-    twidth = textMarginX + 2;
+  if (twidth-7 < textMarginX) {
+    twidth = textMarginX + 14;
   }
 
   float tempMax = 42.0; float tempMin = -20.0; 
