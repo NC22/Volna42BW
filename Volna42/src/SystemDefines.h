@@ -13,3 +13,9 @@
 #else
     #define DISPLAY_TYPE_154
 #endif
+
+#if defined(ESP32)
+  #define CONFIG_TIME_FUNCTION configTzTime
+#else
+  #define CONFIG_TIME_FUNCTION configTime
+#endif

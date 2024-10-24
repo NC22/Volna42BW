@@ -79,7 +79,7 @@ typedef struct {
     externalSensorData extData; 
 
     bool updateMinutes;
-    bool timeConfigured;           // if true - defaultTime & .t represents actual time (restored from RTC memory or recieved from NTP server)
+    bool timeConfigured;           // if true - defaultTime & .t was already initialized (First init NTP server | Manualy | correct Time var found in RTC)
     partialUpdateData lastPartialPos;
 
     int sleepTime;                 // wake-up every n seconds  --- check validateConfig for defaults

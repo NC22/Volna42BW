@@ -138,11 +138,12 @@ void Env::begin() {
       if ( reason == REASON_SOFT_RESTART ) {
 
         Serial.println(F("[Boot] Software reboot -> reset stats & check cui index"));
+        bool rtcMemPass = restoreRTCmem();
 
         // ToDo move to separate method - load next cui item by index from deepsleep (loop mode)
         // show something after reboot (for web ui actions without permanent save to flash)
-        if (restoreRTCmem() && lastState.cuiFileIndex > -1) {
-          
+        if (rtcMemPass && lastState.cuiFileIndex > -1) {
+
           String restoredName = "";
           cuiGetNameByIndex(lastState.cuiFileIndex, restoredName);
           
@@ -165,13 +166,24 @@ void Env::begin() {
           }
         }
 
+        
+        if (rtcMemPass) {       
+          
+          // reset stats, except default time
+
+          defaultTime = lastState.t;
+          setDefaultLastStateData();  
+           
+          lastState.timeConfigured = true;
+        }
+
       // чистый запуск
       } else {
-
+        
+        setDefaultLastStateData();
         Serial.println(F("[Boot] Device reseted -> reset stats"));
       }
       
-      setDefaultLastStateData();
     }
 
 }
@@ -207,7 +219,7 @@ bool Env::restoreRTCmem() {
 
     if (lastState.t < 100000 || lastState.cfgVersion != cdConfigVersion) {
 
-      Serial.println(F("[restoreRTCmem] memory version mismatch -> reset")); 
+      Serial.println(F("[restoreRTCmem] Bad time or Memory Version mismatch -> reset")); 
 
       setDefaultLastStateData();
       applyConfigToRTC();
@@ -382,10 +394,9 @@ void Env::restartNTP(bool resetOnly) {
 }
 
 bool Env::setupNTP(unsigned int attempt) {
-    if (ntp) return true;
 
-    String ntpServer = getConfig()->cfgValues[cNtpHosts];
-    if (ntpServer.equals(F("off"))) {
+    if (ntp) return true;
+    if (getConfig()->cfgValues[cNtpHosts].equals(F("off")) || getConfig()->cfgValues[cNtpHosts].length() <= 0) {
 
       Serial.println(F("No NTP servers specified, setting time by default timestamp"));
     
@@ -398,35 +409,79 @@ bool Env::setupNTP(unsigned int attempt) {
 
     ntp = true;
 
-    #if defined(ESP32)
-      configTzTime(cfg.cfgValues[cTimezone].c_str(), ntpServer.c_str());
-    #else 
-      configTime(cfg.cfgValues[cTimezone].c_str(), ntpServer);
-    #endif
+    String &ntpHosts = getConfig()->cfgValues[cNtpHosts];
+    if (ntpHosts.indexOf(',') != -1) {
+      
+      Serial.print(F("NTP list parsing..."));
+      char ntpServers[3][64]; 
+      unsigned int nSize = ntpHosts.length();
+      uint8_t serverCount = 0; 
+      int16_t ntpServersCursor = 0; 
+
+      for (unsigned int i = 0; i < nSize; i++) { 
+          if (ntpHosts[i] == ',' || i == nSize-1) {
+            ntpServers[serverCount][ntpServersCursor] = '\0'; 
+            serverCount++;
+            ntpServersCursor = 0;
+            if (serverCount >= 3) break;
+          } else {            
+            if (ntpServersCursor < 63 && ntpHosts[i] != ' ') {
+              ntpServers[serverCount][ntpServersCursor] = ntpHosts[i];
+              ntpServersCursor++;
+            }
+          } 
+      }
+
+      if (serverCount == 1) {
+          CONFIG_TIME_FUNCTION(cfg.cfgValues[cTimezone].c_str(), ntpServers[0]);  
+          Serial.println(ntpServers[0]);
+          Serial.println(F("[1] server added"));
+      } else if (serverCount == 2) {
+          CONFIG_TIME_FUNCTION(cfg.cfgValues[cTimezone].c_str(), ntpServers[0], ntpServers[1]); 
+          Serial.println(ntpServers[0]);Serial.println(ntpServers[1]);
+          Serial.println(F("[2] servers added"));
+      } else if (serverCount == 3) {
+          CONFIG_TIME_FUNCTION(cfg.cfgValues[cTimezone].c_str(), ntpServers[0], ntpServers[1], ntpServers[2]);      
+          Serial.println(ntpServers[0]);Serial.println(ntpServers[1]);Serial.println(ntpServers[2]);     
+          Serial.println(F("[3] servers added"));
+      }
+
+    } else {
+      CONFIG_TIME_FUNCTION(cfg.cfgValues[cTimezone].c_str(), ntpHosts.c_str());  
+    }
 
     yield();
-    Serial.print(F("Waiting for NTP time sync: "));
+
+    if (lastState.timeConfigured) {
+      Serial.print(F("Waiting for NTP time sync: [RTC time already exist -> reduce wait time, no retry]"));
+    } else {
+      Serial.print(F("Waiting for NTP time sync: "));
+    }
 
     int i = 0;
     time_t now = time(nullptr);
     
-    // timeout = 30sec
+    // timeout = 25sec, second try 10sec
     
     while (now < 1000000000) {
         
       now = time(nullptr);
       i++;
       
-      if (i > 60) {
+      if (((attempt > 1 || lastState.timeConfigured) && i > 20) || i > 50) {
 
         Serial.println(F("Time sync failed!"));
-
+        
         #if defined(NTP_CONNECT_ATTEMPTS)
 
-          if (attempt < NTP_CONNECT_ATTEMPTS) {
-              restartNTP(true);
-              Serial.println(F("Time sync - reattempt!"));
-              return setupNTP(attempt + 1);
+          if (!lastState.timeConfigured) {
+
+            if (attempt < NTP_CONNECT_ATTEMPTS) {
+                restartNTP(true);
+                Serial.println(F("Time sync - reattempt!"));
+                return setupNTP(attempt + 1);
+            }
+
           }
 
         #endif

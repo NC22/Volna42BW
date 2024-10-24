@@ -235,6 +235,7 @@ class Env {
 
         bool initSensors();
 
+        void bootScreen();
         void updateTelemetry();
         void updateScreen();
         bool updateExtSensorData();

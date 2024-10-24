@@ -79,6 +79,7 @@ class Screen4in2UI {
         void updateTestPartial(bool afterWakeup = false);
         void updatePartialClock();
         bool is4ColorsSupported();
+        // todo - implement bootScreen \ logo on cold start - use progmem only \ no init canvas \ any buffers
         // void drawUISysNotice(String text, int x, int y, int id);
 };
 
