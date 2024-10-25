@@ -59,6 +59,7 @@
     /api/clocktest - демо отображение полноэкранных часов с секундами
 */
 	// #define DOUBLE_BUFFER_MODE   // часть элементов может быть окрашена в доп. цвет дисплея (Желтый или Красный), требовательно к оперативке [если поддерживается дисплеем]
+	// #define PARTIAL_UPDATE_METHOD_INVERT 
 	#define PARTIAL_UPDATE_SUPPORT  
 
   // ESP8266
@@ -150,21 +151,21 @@
 // закомментить если не нужно, если данные с OpenWeather, то тоже не используется
 #define ICON_RAIN_DETECT  
 
-// облачно t >= 0 + [давление <= 1030hPa (~772 мм.рт.ст) + влажность >= 60%]		
+// облачно t >= 0 + [давление <= 1030hPa (~772 мм.рт.ст) + влажность >= 62%]		
 #define ICON_RAIN_DETECT_CLOUDY_HPA 1030
-#define ICON_RAIN_DETECT_CLOUDY_HUM 60
+#define ICON_RAIN_DETECT_CLOUDY_HUM 62
 
-// идет дождь t >= 0 + [давление <= 1009hPa (~757 мм.рт.ст) + влажность >= 74%]		
+// идет дождь t >= 0 + [давление <= 1009hPa (~757 мм.рт.ст) + влажность >= 70%]		
 #define ICON_RAIN_DETECT_RAINY_HPA 1009  	   
-#define ICON_RAIN_DETECT_RAINY_HUM 74 
+#define ICON_RAIN_DETECT_RAINY_HUM 70 
 
-// облачно t < 0 + [давление <= 1030hPa (~772 мм.рт.ст) + влажность >= 65%]		
+// облачно t < 0 + [давление <= 1030hPa (~772 мм.рт.ст) + влажность >= 64%]		
 #define ICON_SNOW_DETECT_CLOUDY_HPA 1030  	   
-#define ICON_SNOW_DETECT_CLOUDY_HUM 65
+#define ICON_SNOW_DETECT_CLOUDY_HUM 64
 
-// идет снег t < 0 + [давление <= 1030hPa (~772 мм.рт.ст) + влажность >= 75%]		
+// идет снег t < 0 + [давление <= 1030hPa (~772 мм.рт.ст) + влажность >= 68%]		
 #define ICON_SNOW_DETECT_SNOW_HPA 1030  	   
-#define ICON_SNOW_DETECT_SNOW_HUM 75
+#define ICON_SNOW_DETECT_SNOW_HUM 68
 
 // [Other, system vars] [Разное, системное]
 
