@@ -1042,6 +1042,7 @@ void Env::updateExtIconState() {
             
             if (lastState.extData.temperature > 0) {
 
+              #if defined(ICON_RAIN_DETECT_RAINY_HPA)   
               if ((priorityPressure / 100.0f) <= ICON_RAIN_DETECT_RAINY_HPA ) {
 
                   if (lastState.extData.humidity >= ICON_RAIN_DETECT_RAINY_HUM) {
@@ -1050,7 +1051,9 @@ void Env::updateExtIconState() {
                   }
 
               }
+              #endif
               
+              #if defined(ICON_RAIN_DETECT_CLOUDY_HPA)   
               if ((priorityPressure / 100.0f) <= ICON_RAIN_DETECT_CLOUDY_HPA ) {
 
                   if (lastState.extData.humidity >= ICON_RAIN_DETECT_CLOUDY_HUM) {
@@ -1058,11 +1061,11 @@ void Env::updateExtIconState() {
                     return;
                   }
               }
+              #endif
               
             } else {
 
-              #if defined(ICON_SNOW_DETECT_CLOUDY_HPA)       
-              
+              #if defined(ICON_SNOW_DETECT_SNOW_HPA)              
               if ((priorityPressure / 100.0f) <= ICON_SNOW_DETECT_SNOW_HPA ) {
 
                   if (lastState.extData.humidity >= ICON_SNOW_DETECT_SNOW_HUM) {
@@ -1071,7 +1074,9 @@ void Env::updateExtIconState() {
                   }
 
               }
-                           
+              #endif
+                
+              #if defined(ICON_SNOW_DETECT_CLOUDY_HPA)
               if ((priorityPressure / 100.0f) <= ICON_SNOW_DETECT_CLOUDY_HPA ) {
 
                   if (lastState.extData.humidity >= ICON_SNOW_DETECT_CLOUDY_HUM) {
