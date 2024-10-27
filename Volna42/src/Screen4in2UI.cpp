@@ -730,7 +730,7 @@ void Screen4in2UI::drawCat(bool land) {
   // Sleep time
   // cat at home after 12pm - no check cold, show sleepy cat & moon icon
     
-  if (dt.h >= 0 && dt.h <=  7) {
+  if (dt.h >= 0 && dt.h <=  6) {
 
     hpad = 72 + 8;
 

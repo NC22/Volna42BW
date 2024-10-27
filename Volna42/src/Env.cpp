@@ -396,6 +396,7 @@ void Env::restartNTP(bool resetOnly) {
 bool Env::setupNTP(unsigned int attempt) {
 
     if (ntp) return true;
+
     if (getConfig()->cfgValues[cNtpHosts].equals(F("off")) || getConfig()->cfgValues[cNtpHosts].length() <= 0) {
 
       Serial.println(F("No NTP servers specified, setting time by default timestamp"));
@@ -406,6 +407,49 @@ bool Env::setupNTP(unsigned int attempt) {
       initDefaultTime();
       return false;
     }
+
+    bool skipWait = false;
+
+    #if defined(DEFAULT_TIME_BY_EXTERAL)
+
+    if (getConfig()->cfgValues[cExtSensorLink].length() > 0 && getConfig()->cfgValues[cExtSensorLink].indexOf(F("/api/states")) != -1) {
+  
+      Serial.println(F("[HA] Get default time"));
+      WiFiClient client;
+      HTTPClient http;
+
+      String url = getConfig()->cfgValues[cExtSensorLink].substring(0, getConfig()->cfgValues[cExtSensorLink].indexOf(F("/api/states")));
+             url += "/api/template";
+
+      http.begin(client, url);
+
+      if (getConfig()->cfgValues[cExtSensorPassword].length() > 0) {
+          
+        http.setAuthorization("");
+        String token = "Bearer " + getConfig()->cfgValues[cExtSensorPassword];
+        http.addHeader("Authorization", token.c_str());
+      }
+
+      http.addHeader("Content-Type", "application/json");  
+
+      if (http.POST(F("{\"template\": \"{{ now().strftime('%Y-%m-%d %H:%M:%S') }}\"}")) == 200) {
+
+        lastState.timeConfigured = false;
+        getConfig()->cfgValues[cTimestamp] = http.getString();
+        setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
+        tzset();
+        initDefaultTime();
+
+        skipWait = true;
+        
+      } else {
+        lastError = "HA default time - bad response";
+      }
+
+      http.end();
+    }
+
+    #endif
 
     ntp = true;
 
@@ -463,39 +507,45 @@ bool Env::setupNTP(unsigned int attempt) {
     
     // timeout = 25sec, second try 10sec
     
-    while (now < 1000000000) {
-        
-      now = time(nullptr);
-      i++;
+    if (!skipWait) {
       
-      if (((attempt > 1 || lastState.timeConfigured) && i > 20) || i > 50) {
-
-        Serial.println(F("Time sync failed!"));
+      while (now < 1000000000) {
+          
+        now = time(nullptr);
+        i++;
         
-        #if defined(NTP_CONNECT_ATTEMPTS)
+        if (((attempt > 1 || lastState.timeConfigured) && i > 20) || i > 50) {
 
-          if (!lastState.timeConfigured) {
+          Serial.println(F("Time sync failed!"));
+          
+          #if defined(NTP_CONNECT_ATTEMPTS)
 
-            if (attempt < NTP_CONNECT_ATTEMPTS) {
-                restartNTP(true);
-                Serial.println(F("Time sync - reattempt!"));
-                return setupNTP(attempt + 1);
+            if (!lastState.timeConfigured) {
+
+              if (attempt < NTP_CONNECT_ATTEMPTS) {
+                  restartNTP(true);
+                  Serial.println(F("Time sync - reattempt!"));
+                  return setupNTP(attempt + 1);
+              }
+
             }
 
-          }
+          #endif
 
-        #endif
+          lastError = "NTP server is not accessable. Default time setted (by config or firmware variable)";
 
-        lastError = "NTP server is not accessable. Default time setted (by config or firmware variable)";
-        initDefaultTime();
 
-        return false;
-      };
-      
-      Serial.print(".");
-      delay(500);
+          initDefaultTime();
+
+          return false;
+        };
+        
+        Serial.print(".");
+        delay(500);
+      }
+
     }
-
+    
     Serial.println(F("NTP ready!"));
     defaultTime = time(nullptr);
     

@@ -90,6 +90,7 @@ var ENVLOCALE = {
     "getinfo_sensor_hum" : "Влажность",
     "getinfo_sensor_co2" : "Углекислый газ (CO2)",
     "getinfo_sensor_loc" : "Орг. вещества TVOC (ЛОС)",
+    "getinfo_sensor_weather_state" : "Статус погоды",
     "getinfo_wifi_lvl" : "Уровень сигнала",
     "getinfo_wifi_fail" : "Точка не доступна",
     "getinfo_wifis1" : "Сбой подключения",

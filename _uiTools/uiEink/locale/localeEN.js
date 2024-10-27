@@ -92,6 +92,7 @@ var ENVLOCALE = {
     "getinfo_sensor_hum" : "Humidity",
     "getinfo_sensor_co2" : "Carbon dioxide (CO2)",
     "getinfo_sensor_loc" : "VOC (volatile organic compounds)",
+    "getinfo_sensor_weather_state" : "Weather icon",
     "getinfo_wifi_lvl" : "Signal level",
     "getinfo_wifi_fail" : "Access point not found",
     "getinfo_wifis1" : "WiFi connection fail",

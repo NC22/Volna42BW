@@ -222,6 +222,78 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
 
                      if (newData.bat > 100) newData.bat = 100;
                 else if (newData.bat < 0) newData.bat = BAD_SENSOR_DATA;
+
+                if (homeAssistant) {
+                    
+                  KellyOWParserTools::collectJSONFieldData("state", payload, collectedData, 16);
+                  /*
+                    "clear-night": "Clear, night",
+                    "cloudy": "Cloudy",
+                    "exceptional": "Exceptional",
+                    "fog": "Fog",
+                    "hail": "Hail",
+                    "lightning": "Lightning",
+                    "lightning-rainy": "Lightning, rainy",
+                    "partlycloudy": "Partly cloudy",
+                    "pouring": "Pouring",
+                    "rainy": "Rainy",
+                    "snowy": "Snowy",
+                    "snowy-rainy": "Snowy, rainy",
+                    "sunny": "Sunny",
+                    "windy": "Windy",
+                    "windy-variant": "Windy"
+                  */
+
+                  if (collectedData == "clear-night") { 
+                      Serial.println(F("kowClearSky"));
+                      newData.icon = kowClearSky;
+                  } else if (collectedData == "cloudy") { 
+                      Serial.println(F("kowBrokenClouds"));
+                      newData.icon = kowBrokenClouds;
+                  } else if (collectedData == "exceptional") { 
+                      Serial.println(F("kowUnknown"));
+                      newData.icon = kowUnknown;
+                  } else if (collectedData == "fog") { 
+                      Serial.println(F("kowFog"));
+                      newData.icon = kowFog;
+                  } else if (collectedData == "hail") { 
+                      Serial.println(F("kowRain - Hail")); 
+                      newData.icon = kowRain;
+                  } else if (collectedData == "lightning") { 
+                      Serial.println(F("kowThunderstorm"));
+                      newData.icon = kowRain;
+                  } else if (collectedData == "lightning-rainy") { 
+                      Serial.println(F("kowThunderstorm"));
+                      newData.icon = kowRain;
+                  } else if (collectedData == "partlycloudy") {
+                      Serial.println(F("kowFewClouds"));
+                      newData.icon = kowFewClouds;
+                  } else if (collectedData == "pouring") { // Heavy rain
+                      Serial.println(F("kowShowerRain"));
+                      newData.icon = kowShowerRain;
+                  } else if (collectedData == "rainy") {
+                      Serial.println(F("kowRain"));
+                      newData.icon = kowRain;
+                  } else if (collectedData == "snowy") {
+                      Serial.println(F("kowSnow"));
+                      newData.icon = kowSnow;
+                  } else if (collectedData == "snowy-rainy") { // Mixed snow and rain
+                      Serial.println(F("kowSnow"));
+                      newData.icon = kowSnow; 
+                  } else if (collectedData == "sunny") { // Clear, sunny day
+                      Serial.println(F("kowClearSky"));
+                      newData.icon = kowClearSky;
+                  } else if (collectedData == "windy") { // Windy
+                      Serial.println(F("kowUnknown")); 
+                      newData.icon = kowUnknown;
+                  } else if (collectedData == "windy-variant") { // Windy variant
+                      Serial.println(F("kowUnknown")); 
+                      newData.icon = kowUnknown;
+                  } else {
+                      Serial.println(F("kowUnknown")); 
+                      newData.icon = kowUnknown;
+                  }
+                }
               }
               
               Serial.println(F("Collect data - OK, Result :")); 

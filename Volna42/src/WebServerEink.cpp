@@ -936,6 +936,30 @@ String WebServerEink::getInfo() {
                 if (lastState.extData.pressure > BAD_SENSOR_DATA) {
                     json += "\"pressure__external\":" + String(lastState.extData.pressure) + ",";
                 }
+
+                json += "\"weather_icon__external\":\"";
+                if (lastState.extData.icon == kowFewClouds) {                    
+                    json += F("kowFewClouds");
+                } else if (lastState.extData.icon == kowFog) {                    
+                    json += F("kowFog");
+                } else if (lastState.extData.icon == kowClearSky) {                    
+                    json += F("kowClearSky");
+                } else if (lastState.extData.icon == kowScatterClouds) {                    
+                    json += F("kowScatterClouds");
+                } else if (lastState.extData.icon == kowThunderstorm) {                    
+                    json += F("kowThunderstorm");
+                } else if (lastState.extData.icon == kowBrokenClouds) {                    
+                    json += F("kowBrokenClouds");
+                } else if (lastState.extData.icon == kowRain) {                    
+                    json += F("kowRain");
+                } else if (lastState.extData.icon == kowShowerRain) {                    
+                    json += F("kowShowerRain");
+                } else if (lastState.extData.icon == kowSnow) {                    
+                    json += F("kowSnow");
+                } else {                    
+                    json += F("kowUnknown");
+                } 
+                json += "\",";
             }
 
             #if defined(CO2_SCD41)

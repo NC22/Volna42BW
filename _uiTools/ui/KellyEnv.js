@@ -498,6 +498,10 @@ function KellyEnv(env) {
                         
                         fstr = lloc('getinfo_sensor_pres') + ' ' + cStr + ' : <b>' + hpa.toFixed(2) + '</b> hPa <b>' + rt.toFixed(2) + '</b> мм рт.ст.';
                         
+                    } else if (key.indexOf('weather_icon') != -1) {
+                        
+                        fstr = lloc('getinfo_sensor_weather_state') + ' ' + cStr + ' : <b>' + response.sensors[key] + '</b>';
+                        
                     } else {
                         fstr = key + cStr +' : ' + response.sensors[key];
                     }
