@@ -8,6 +8,8 @@
     #include "fonts/KellyFontC18x18.h"
 #endif
 
+#include "fonts/Clock64x64.h"
+#include "fonts/Clock54x54.h"
 // #include "tiles/cat115x125snowflakes.h" // old format
 
 #include "tiles/cat_feed.h"

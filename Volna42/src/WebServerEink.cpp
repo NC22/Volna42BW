@@ -116,6 +116,8 @@ void WebServerEink::router() {
         server->send(200, "application/json", "{\"status\":\"ok\"}"); 
     } else if (server->uri().indexOf("/api/buffer") != -1) {
         apiGetBuffer();
+    } else if (server->uri().indexOf("/api/clock/font") != -1) {
+        apiClockFontChange();
     } else if (server->uri().indexOf("/api/testloop") != -1) {
         env->cuiLoopNext();
         env->updateScreen();
@@ -364,6 +366,31 @@ void WebServerEink::apiCuiList() {
 void WebServerEink::apiDefaultOk() {
     
     server->send(200, "application/json", "{\"status\":\"ok\"}"); 
+}
+
+void WebServerEink::apiClockFontChange() {
+    
+    for (int i = 0; i < server->args(); i++)  {
+        if (server->argName(i) == "font-type") {
+               
+            int intState = 1;
+            if(sscanf(server->arg(i).c_str(), "%d", &intState) != 1) {
+                intState = 1;
+            }
+
+            if (intState < 1 || intState > 3) {
+                intState = 1;
+            }
+
+            env->screen->clockFontType = intState;
+            env->resetPartialData();
+            env->updateScreen();
+            server->send(200, "application/json", "{\"status\":\"ok\"}"); 
+            return; 
+        }
+    }
+
+    server->send(200, "application/json", "{\"status\":\"fail\"}"); 
 }
 
 void WebServerEink::apiDirectWidgets() {
@@ -710,7 +737,6 @@ void WebServerEink::apiDirectImage() {
                     // if (env->cuiBits > 1 && screen->bitPerPixel != env->cuiBits) {
                     if (env->cuiPrepareRebootIfNeeded()) {
                         
-                        env->lastState.cuiResetOnReboot = true;
                         server->send(200, "application/json", "{\"status\":\"ok\",\"full\":true,\"reboot_required\":true}");  
 
                     } else {

@@ -423,19 +423,21 @@ void WebServerBase::apiReboot() {
     }
     
     bool rebootConfirm = false;
+    bool skipValidate = true;
 
     for (int i = 0; i < server->args(); i++)  {
 
         if (server->argName(i) == "reboot" && server->arg(i) == "1") {
             rebootConfirm = true;
-            break;
+        } else if (server->argName(i) == "skip-validate" && server->arg(i) == "1") {
+            skipValidate = true;
         }
     } 
 
     if (rebootConfirm) {
         
         server->send(200, "application/json", "{\"status\":\"ok\"}");  
-        env->restart();
+        env->restart("Reset-webAPI", skipValidate);
                
     } else server->send(200, "application/json", "{\"status\":\"no\"}"); 
 

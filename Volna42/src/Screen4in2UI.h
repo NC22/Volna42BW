@@ -65,6 +65,11 @@ class Screen4in2UI {
     public:
         
         bool displayBeasy = false;
+        #if defined(DUI_CLOCK_FONT) 
+        uint8_t clockFontType = DUI_CLOCK_FONT;
+        #else
+        uint8_t clockFontType = 1;
+        #endif
         Screen4in2UI(Env * nenv);
         bool tick();
         bool drawUIToBufferCustom();

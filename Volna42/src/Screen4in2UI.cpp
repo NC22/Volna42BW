@@ -374,10 +374,16 @@ void Screen4in2UI::drawUIToBufferLand() {
 
   theight = 56; // localHeight - drawCat(true) - 80;
 
+  if (clockFontType == 2) {
+    theight = 48;
+  } else if (clockFontType == 3) {
+    theight = 52;
+  }
+
   uText dateText = screen->getUText(dt.monthText + ", " + dt.dayText);
   int baseX = ceil((float) (((localWidth / 2) - dateText.pixelWidth)  / 2));
   int rwidth = -1; int rheight = -1;
-  widgetController->drawClockWidget(baseX, theight, false, false, false, rwidth, rheight);
+  widgetController->drawClockWidget(baseX, theight, false, false, false, rwidth, rheight, clockFontType);
 }
 
 void Screen4in2UI::drawUIToBuffer() {
@@ -440,7 +446,7 @@ void Screen4in2UI::drawUIToBuffer() {
 
   theight = localHeight - 100;       
   int rwidth = -1; int rheight = -1;
-  widgetController->drawClockWidget(10, theight, false, false, false, rwidth, rheight);
+  widgetController->drawClockWidget(10, theight, false, false, false, rwidth, rheight, clockFontType);
 
   // env->lastState.lastTelemetry[lkey].pressure
   // hPa -> мм. рт. ст. parseFloat(hpa) * 0.750062

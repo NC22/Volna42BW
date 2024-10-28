@@ -284,8 +284,8 @@ class Env {
         bool isBattery();
 
         bool commitConfig();
-        void validateConfig(unsigned int version = -1, std::vector<cfgOptionKeys> * updatedKeys = NULL);
-        void restart(String reason = "");
+        void validateConfig(unsigned int version = 0, std::vector<cfgOptionKeys> * updatedKeys = NULL);
+        void restart(String reason = "", bool skipRTCSanitize = false);
         bool resetConfig(bool resetWifi = false);
         void restartNTP(bool resetOnly = false);
         

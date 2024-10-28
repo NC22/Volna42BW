@@ -149,14 +149,17 @@ void Env::begin() {
           
           if (restoredName.length() > 0) {
 
-              Serial.print(F("[Direct input] Restore CUI file by index - fileindex : ")); Serial.println(lastState.cuiFileIndex);
+              Serial.print(F("[Direct input] Restore CUI file by index - fileindex : ")); 
+              Serial.println(lastState.cuiFileIndex);
               Serial.println(restoredName);
 
               cuiSetState(true, restoredName);
 
           } else {
             
-            Serial.print(F("[Direct input] Restore CUI file by index - file NOT found by index : ")); Serial.println(lastState.cuiFileIndex);
+            Serial.print(F("[Direct input] Restore CUI file by index - file NOT found by index : ")); 
+            Serial.println(lastState.cuiFileIndex);
+
             cuiSetState(false);
           }
 
@@ -1856,11 +1859,24 @@ Config * Env::getConfig() {
     return &cfg;
 }
 
-void Env::restart(String reason) {
+void Env::restart(String reason, bool skipRTCSanitize) {
 
     Serial.println("[RESTART] Reason : " + reason);
-    saveCurrentState();
+
+    resetTimers();
+    resetPartialData();
+
+    if (!skipRTCSanitize) {
+      defaultTime = time(nullptr);
+      setDefaultLastStateData();
+      validateConfig();
+      lastState.t = defaultTime;
+      saveCurrentState();
+    }
+
+    lastState.cuiResetOnReboot = true;
     delay(500);
+
     ESP.restart();
 }
 
@@ -2718,6 +2734,7 @@ int Env::getPartialSleepTime() {
 }
 
 // sync config sensetive variables stored in RTC
+// Calls on init validate config, or if RTC mempry read fail
 
 void Env::applyConfigToRTC(bool configUpdate) {
 

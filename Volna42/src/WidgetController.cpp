@@ -86,7 +86,7 @@ void WidgetController::partialDataApplyMaxBounds() {
     env->lastState.lastPartialPos.yEnd = max(clockPartial.yEnd, env->lastState.lastPartialPos.yEnd);
 }
 
-void WidgetController::drawClockWidget(int baseX, int baseY, bool border, bool fill, bool invert, int & resultWidth, int resultHeight) {
+void WidgetController::drawClockWidget(int baseX, int baseY, bool border, bool fill, bool invert, int & resultWidth, int & resultHeight, uint8_t fontType) {
 	
   KellyCanvas * screen = env->getCanvas();
 	bool colorBg = false;
@@ -114,20 +114,35 @@ void WidgetController::drawClockWidget(int baseX, int baseY, bool border, bool f
 	uText dateShortText = screen->getUText(dt.date);
 
 	resultWidth = dateText.pixelWidth + 20;
-  if (resultWidth < 114) resultWidth = 114;
+  if (resultWidth < 114) {
+    resultWidth = 114;
+  }
 
-	resultHeight = 92;
+  resultHeight = 92;
 
-	if (fill) screen->drawRoundedSquare(baseX, baseY, resultWidth, resultHeight, 4, colorBg, borderWidth);
-	
-	screen->color = tBLACK;      
+  if (fontType == 1) {
+	  screen->setFont(&font44x44Config);    
+  } else if (fontType == 2) {
+    screen->setFont(&clock54x54Config);
+    resultHeight+=10;
+  } else if (fontType == 3) {
+    screen->setFont(&clock64x64Config);
+    // baseX += -6;
+    resultHeight+=15;
+  }
 
-	screen->setFont(&font44x44Config);
+	if (fill) {
+    screen->drawRoundedSquare(baseX, baseY, resultWidth, resultHeight, 4, colorBg, borderWidth);
+    baseX = baseX + 8; // + ceil((float) (((resultWidth / 2) - dateText.pixelWidth)  / 2));   
+    baseY = baseY + 2;
+  }
+
+	screen->color = tBLACK;
 	uText timeText = screen->getUText(dt.timeText);
-	if (env->hour12) timeText.pixelWidth += 10;
 
-	baseX = baseX + 8;// + ceil((float) (((resultWidth / 2) - dateText.pixelWidth)  / 2));   
-	baseY = baseY + 2;
+	if (env->hour12) {
+      timeText.pixelWidth += 10;
+  }
 
 	unsigned int partialX = baseX + ceil((float) ((dateText.pixelWidth - timeText.pixelWidth) / 2));
 	unsigned int partialY = baseY;
@@ -136,14 +151,28 @@ void WidgetController::drawClockWidget(int baseX, int baseY, bool border, bool f
 	int timePoseX = screen->drawStringUtext(partialX, partialY, timeText, colorText);	
 	screen->setFont(&font18x18Config);
 
-	if (env->hour12) timePoseX = screen->drawString(timePoseX + 4, baseY + 44 - 18, dt.pm ? "pm" : "am", true);
-	unsigned int partialWidth = timePoseX - partialX + 4;
+	if (env->hour12) {
+    timePoseX = screen->drawString(timePoseX + 4, baseY + 44 - 18, dt.pm ? "pm" : "am", true);
+  }
+  
+  unsigned int partialWidth = timePoseX - partialX + 4;
 	
-	if (env->lastState.updateMinutes) partialDataSet(partialX, partialY, partialWidth, partialHeight);
-	baseY += 44;
+	if (env->lastState.updateMinutes) {
+    partialDataSet(partialX, partialY, partialWidth, partialHeight);
+  }
+
+  if (fontType == 1) {
+	  baseY += 44;
+  } else if (fontType == 2) {
+    baseY += 54;
+  } else if (fontType == 3) {
+    baseY += 64;
+  }
 	
-	screen->drawStringUtext(baseX + ceil((float) ((dateText.pixelWidth - dateShortText.pixelWidth) / 2)), baseY, dateShortText, colorText);
-	baseY += 17;
+  if (fontType != 3) {
+    screen->drawStringUtext(baseX + ceil((float) ((dateText.pixelWidth - dateShortText.pixelWidth) / 2)), baseY, dateShortText, colorText);
+    baseY += 17;
+  }
 	
 	screen->drawStringUtext(baseX, baseY, dateText, colorText);  
 	screen->setFont(&font18x18Config);
@@ -307,7 +336,12 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
     }  
 
     if (widget.type == uiClock) {
-		
+      
+      uint8_t fontType = 1;
+
+           if (widget.params.indexOf("-f2")) fontType = 2;
+      else if (widget.params.indexOf("-f3")) fontType = 3;
+
       drawClockWidget(
         baseX, 
         baseY, 
@@ -315,7 +349,8 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
         fill, 
         invert, 
         widgetWidth, 
-        widgetHeight
+        widgetHeight,
+        fontType
       );
 		
     } else if (

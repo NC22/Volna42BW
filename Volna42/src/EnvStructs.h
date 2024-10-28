@@ -73,7 +73,7 @@ typedef struct {
     int16_t cuiFileIndex;          // temporary file index - if we need to load once on reboot some specified custom user interface without save to permanent memory    
     int cuiTimeCurrent;            // cui timer for loop mode (change custom ui every N seconds, use cuiFileIndex as cursor)
     bool cuiLoop;                  // todo - exclude from loop [default] cui ?
-    bool cuiResetOnReboot;         // needed when we reboot from web ui, but not when move cui loop cursor and need to reboot for realloc memory by switch form 1-bit to 2-bit mode       
+    bool cuiResetOnReboot;         // needed when we reboot manually for some reason, but not when move cui loop cursor and need to reboot for realloc memory by switch form 1-bit to 2-bit mode       
 
     telemetry lastTelemetry[ENV_TELEMETRY_MAX];   
     externalSensorData extData; 

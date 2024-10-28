@@ -260,10 +260,10 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
                       Serial.println(F("kowRain - Hail")); 
                       newData.icon = kowRain;
                   } else if (collectedData == "lightning") { 
-                      Serial.println(F("kowThunderstorm"));
+                      Serial.println(F("Lightning"));
                       newData.icon = kowRain;
                   } else if (collectedData == "lightning-rainy") { 
-                      Serial.println(F("kowThunderstorm"));
+                      Serial.println(F("kowRain - Lightning"));
                       newData.icon = kowRain;
                   } else if (collectedData == "partlycloudy") {
                       Serial.println(F("kowFewClouds"));

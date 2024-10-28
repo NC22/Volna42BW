@@ -59,6 +59,7 @@ class WebServerEink:public WebServerBase {
         void apiClockTest(); 
         void apiDirectImage(); 
         void apiDirectWidgets(); 
+        void apiClockFontChange();
 
         void apiDefaultOk();
         void apiUpdate(); // insta update  
