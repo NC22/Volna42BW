@@ -247,7 +247,7 @@ void Screen4in2UI::drawUIInit(int w, int h, imageDrawModificators & mods) {
 
   screen->color = tBLACK;
 
-  if (!partial) {
+  if (!partial && clockFontType < 2) {
       // ui borders & frames
 
       screen->drawRect(2, 2, screen->width - 4, screen->height - 4, true); // black top block in portrait mode (right black half in land)

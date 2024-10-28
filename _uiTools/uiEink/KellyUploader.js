@@ -629,7 +629,7 @@ function KellyImgUpl(env) {
                             
                             var formData = new FormData();
                                 formData.append('reboot', '1');  
-                                formData.append('rtc-skip', '1');  
+                                formData.append('skip-validate', '1');  
                                 
                             KellyTools.cfetch("/api/reboot", {method : 'POST', body : formData, responseType : 'json'}, function(response, error) {}); 
                             KellyTools.showNotice(lloc('cui_restart_required'));
