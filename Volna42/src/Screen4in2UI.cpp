@@ -799,7 +799,7 @@ void Screen4in2UI::drawCat(bool land) {
       int baseY = -1;
       int baseX = -1;
 
-      if (env->lastState.extData.temperature < 0) {
+      if (env->lastState.extData.temperature < 5) {
 
         hpad = 99;
         marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 130;
