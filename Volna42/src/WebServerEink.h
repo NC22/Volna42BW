@@ -12,13 +12,6 @@
 extern const unsigned int webdataSize_locale_js PROGMEM;
 extern const char webdata_locale_js[] PROGMEM;
 
-#include <ui/out/initUpload.h>
-#include <ui/out/client_uploader.h>
-#include <ui/out/style_uploader.h>
-#include <ui/out/KellyUploader_tools.h>
-#include <ui/out/KellyUploader.h>
-#include <ui/out/KellyUIFileManager.h>
-
 // todo - сжать оформление веб версии в блок max-width 1256px
 
 class WebServerEink:public WebServerBase {

@@ -185,6 +185,9 @@ int main(int argc, char *argv[])
         // result << "     " + resultStr + "," << endl;
         // result << "     " + std::to_string(resultStr.length()) << endl;
         // result << "};" << endl;
+        
+        
+        // result << "const char webdata_" + fileName + "_" + ext + "[" + std::to_string(resultString.length()+1) + "] PROGMEM = " + resultStr + ";"  + "\r\n";
 
         result << "const char webdata_" + fileName + "_" + ext + "[] PROGMEM = " + resultStr + ";"  + "\r\n";
         result << "const unsigned int webdataSize_" + fileName + "_" + ext + " PROGMEM = " + std::to_string(resultString.length()) + ";";

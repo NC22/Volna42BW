@@ -1,5 +1,9 @@
 #include "WifiManager.h"
 
+#if defined(ESP32)
+#include "esp_wifi.h"
+#include "esp_log.h"
+#endif
 
 WiFiManager::WiFiManager() {
     
@@ -21,6 +25,10 @@ wl_status_t WiFiManager::connect(String sid, String password) {
     WiFi.softAPdisconnect();
     WiFi.disconnect();
     WiFi.mode(WIFI_STA);   
+
+    #if defined(ESP32_C3_SUPERMINI)
+    esp_wifi_set_max_tx_power(40); 
+    #endif
     // WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
     WiFi.setAutoReconnect(true);
@@ -91,6 +99,10 @@ void WiFiManager::runAsAccesspoint(String ssid, String pass) {
     WiFi.softAPdisconnect();
     WiFi.disconnect();
     //WiFi.mode(WIFI_AP);
+
+    #if defined(ESP32_C3_SUPERMINI)
+    esp_wifi_set_max_tx_power(40); 
+    #endif
 
     IPAddress local_ip(192, 168, 1, 1);
     IPAddress gateway(192, 168, 1, 1);
