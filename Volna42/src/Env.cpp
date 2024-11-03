@@ -276,6 +276,9 @@ void Env::initDefaultTime() {
 
     String defaultTimestamp = getConfig()->cfgValues[cTimestamp];
 
+    setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
+    tzset();
+
     if (!lastState.timeConfigured && defaultTimestamp.length() > 0) {
 
       struct tm tm;
@@ -293,10 +296,7 @@ void Env::initDefaultTime() {
         Serial.println(F("Default time reassigned by user config"));
         // Serial.println(defaultTime);
       }
-    } 
-    
-    setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
-    tzset();
+    }     
     
     Serial.println(F("Restore time by defaults (RTC or default setting)"));
     timeval tv = { defaultTime, 0 };
