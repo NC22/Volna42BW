@@ -449,9 +449,9 @@ void Screen4in2UI::drawUIToBuffer() {
 
   int baseX = 10;
   if (clockFontType == 2) {
-    baseX = 16;
+    baseX = 25;
   } else if (clockFontType == 3) {
-    baseX = 16;
+    baseX = 25;
   }
 
   widgetController->drawClockWidget(baseX, theight, false, false, false, rwidth, rheight, clockFontType);
