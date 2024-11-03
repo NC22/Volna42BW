@@ -3,8 +3,8 @@
 
 #if defined(ESP32)
 
-#define DEFAULT_I2C_SCL 41 // I2C SCL [ESP32] Can be assigned any unused pin
-#define DEFAULT_I2C_SDA 42 // I2C SDA [ESP32] Can be assigned any unused pin
+#define DEFAULT_I2C_SCL SCL // I2C SCL [ESP32] Can be assigned any unused pin
+#define DEFAULT_I2C_SDA SDA // I2C SDA [ESP32] Can be assigned any unused pin
 
 #define DEEPSLEEP_MEMORY 1  // 1 - Использовать RTC (энергозависимая память) при уходе в режим глубокого сна, 2 - Использовать NVS память (постоянная память - рекомендуется использовать если есть проблемы с RTC)
 
@@ -49,9 +49,9 @@
 
 // [Battery sensor mode] | [Режим чтения показаний заряда батареи]
 
-// #define BAT_NO                // Disable battery sensor - always ON | Выключить чтение показаний батареи - не засыпать
+#define BAT_NO                // Disable battery sensor - always ON | Выключить чтение показаний батареи - не засыпать
 // #define BAT_ADS1115           // Read V by ADS1115 module | Чтение V батареи через I2C модуль ADS1115 [Input = A1, R1V=50.7kOm, R2GND=99.26kOm, Env::readBatteryV()]
-#define BAT_A0 0                 // Read V by analog pin A0 (or by PIN N in ESP32) | Чтение V через аналоговый вход A0 (или через заданый пин в ESP32) [ESP8266, R1V=180kOm], [ESP32, R1V=50.7kOm, R2GND=99.26kOm, Env::readBatteryV()]
+// #define BAT_A0 0                 // Read V by analog pin A0 (or by PIN N in ESP32) | Чтение V через аналоговый вход A0 (или через заданый пин в ESP32) [ESP8266, R1V=180kOm], [ESP32, R1V=50.7kOm, R2GND=99.26kOm, Env::readBatteryV()]
 
 #if defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
 /*
