@@ -293,13 +293,10 @@ void Env::initDefaultTime() {
         Serial.println(F("Default time reassigned by user config"));
         // Serial.println(defaultTime);
       }
-
-    } else {
-
-      setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
-      tzset();
-    }
-
+    } 
+    
+    setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
+    tzset();
     
     Serial.println(F("Restore time by defaults (RTC or default setting)"));
     timeval tv = { defaultTime, 0 };
@@ -404,8 +401,8 @@ bool Env::setupNTP(unsigned int attempt) {
 
       Serial.println(F("No NTP servers specified, setting time by default timestamp"));
     
-      setenv("TZ", "GMT0", 1);
-      tzset();
+      // setenv("TZ", "GMT0", 1);
+      // tzset();
 
       initDefaultTime();
       return false;
@@ -643,7 +640,7 @@ bool Env::isSleepRequired() {
         
     #if defined(SLEEP_ALWAYS_SLEEP)
       return true;
-    #elif defined(BAT_NO) || defined(SLEEP_ALWAYS_IGNORE)
+    #elif defined(BAT_NO) || defined(SLEEP_ALWAYS_IGNORE) || (defined(BAT_A0) && BAT_A0 < 0)
       return false;
     #endif
 
@@ -1382,7 +1379,7 @@ bool Env::isOnBattery() {
       // if used without ground wire on constant power
       // if (bv <= 3.0f) lastState.onBattery = false; // grounded
 
-    #elif defined(BAT_A0)  
+    #elif defined(BAT_A0) && BAT_A0 >= 0
 
       #if defined(ESP32)
 
@@ -1465,7 +1462,7 @@ float Env::readBatteryV() {
       float rV2 = (float(adc0) * 0.1875 / 1000.0) * ((R1V + R2GND) / R2GND); // back devider val
       return rV2;
 
-    #elif defined(BAT_A0)
+    #elif defined(BAT_A0) && BAT_A0 >= 0
 
       #if defined(ESP32)
           // todo - check method 
@@ -2953,9 +2950,8 @@ void Env::validateConfig(unsigned int version, std::vector<cfgOptionKeys> * upda
                 Serial.println(F("Force manual timestamp set. NTP connection stopped."));    
                 lastState.timeConfigured = false;
 
-                setenv("TZ", "GMT0", 1);
-                tzset();
-
+                // setenv("TZ", "GMT0", 1);
+                // tzset();
                 initDefaultTime();
 
                 lastState.timeConfigured = true;
