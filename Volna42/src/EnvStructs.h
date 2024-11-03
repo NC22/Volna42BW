@@ -60,32 +60,33 @@ typedef struct {
 
 typedef struct {
     
-    time_t t = 0;                      // timestamp - initialized on ntp setup, refreshed before sleep & on wakeup (+adds number of sleep minutes)
+    time_t t = 0;                  // timestamp - initialized on ntp setup, refreshed before sleep & on wakeup (+adds number of sleep minutes)
 
-    int wakeUps; 
-    int lastTelemetrySize;         // size of actually filled elements in lastTelemetry array
-    int connectTimes;              // number of succesfull connections with external sensor
-    bool onBattery;                // on battery check - setted once on first setup
+    int wakeUps = 0; 
+    int lastTelemetrySize = 0;     // size of actually filled elements in lastTelemetry array
+    int connectTimes = 0;          // number of succesfull connections with external sensor
+    bool onBattery = false;        // on battery check - setted once on first setup
 
     int8_t cuiBitsPerPixel;        // last CUI bits per pixel mode (last output mode)
 
-    u_int8_t lowBatTick;           // times battery sensor detected low battery state, will show sad hangry cat if count enough
-    int16_t cuiFileIndex;          // temporary file index - if we need to load once on reboot some specified custom user interface without save to permanent memory    
-    int cuiTimeCurrent;            // cui timer for loop mode (change custom ui every N seconds, use cuiFileIndex as cursor)
-    bool cuiLoop;                  // todo - exclude from loop [default] cui ?
-    bool cuiResetOnReboot;         // needed when we reboot manually for some reason, but not when move cui loop cursor and need to reboot for realloc memory by switch form 1-bit to 2-bit mode       
+    u_int8_t lowBatTick = 0;       // times battery sensor detected low battery state, will show sad hangry cat if count enough
+    int16_t cuiFileIndex = -1;     // temporary file index - if we need to load once on reboot some specified custom user interface without save to permanent memory    
+    int cuiTimeCurrent = 0;        // cui timer for loop mode (change custom ui every N seconds, use cuiFileIndex as cursor)
+    bool cuiLoop = false;          // todo - exclude from loop [default] cui ?
+    bool cuiResetOnReboot = false; // needed when we reboot manually for some reason, but not when move cui loop cursor and need to reboot for realloc memory by switch form 1-bit to 2-bit mode       
 
     telemetry lastTelemetry[ENV_TELEMETRY_MAX];   
     externalSensorData extData; 
 
-    bool updateMinutes;
-    bool timeConfigured;           // if true - defaultTime & .t was already initialized (First init NTP server | Manualy | correct Time var found in RTC)
+    bool updateMinutes = false;
+    bool timeConfigured = false;   // if true - defaultTime & .t was already initialized (First init NTP server | Manualy | correct Time var found in RTC)
     partialUpdateData lastPartialPos;
 
-    int sleepTime;                 // wake-up every n seconds  --- check validateConfig for defaults
-    int sleepTimeCurrent;          // [Used only in constant mode & if partial update is active] seconds timer for non-deep sleep mode or for update minutes mode
+    int sleepTime = 60;            // wake-up every n seconds  --- check validateConfig for defaults
+    int sleepTimeCurrent = 1000;   // [Used only in constant mode & if partial update is active] seconds timer for non-deep sleep mode or for update minutes mode
     
     unsigned int cfgVersion = 0;
+    
 } rtcData; 
 
 #endif

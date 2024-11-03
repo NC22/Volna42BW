@@ -354,21 +354,18 @@ void Screen4in2UI::drawUIToBufferLand() {
           screen->drawRect(localWidth / 2, localHeight / 2, localWidth / 2, 2, false);  // split line
           theight = (localHeight / 2) + 26;
 
-          drawTemp(theight, false, env->lastState.extData.temperature, env->lastState.extData.humidity, env->lastState.extData.pressure, mods, true);
-          
-          //uText timeText = screen->getUText(dt.timeText); pixelWidth
-          
+          drawTemp(theight, false, env->lastState.extData.temperature, env->lastState.extData.humidity, env->lastState.extData.pressure, mods, true);          
+          //uText timeText = screen->getUText(dt.timeText); pixelWidth          
         }
-
-        int batPosX = (localWidth / 2) - 50;
-        widgetController->drawBatWidget(batPosX, 0, false, false, false);
-        widgetController->drawSystemInfoWidget(10, 5, true);
 
     } else {
 
       drawTemp(theight, true, BAD_SENSOR_DATA, 0, 0, mods, true);
     }
 
+    int batPosX = (localWidth / 2) - 50;
+    widgetController->drawBatWidget(batPosX, 0, false, false, false);
+    widgetController->drawSystemInfoWidget(10, 5, true);
   }
   // time & date & cat icon
 
@@ -428,18 +425,9 @@ void Screen4in2UI::drawUIToBuffer() {
         // sensors 
         theight += drawTemp(theight, true, env->lastState.lastTelemetry[lkey].temperature, env->lastState.lastTelemetry[lkey].humidity, env->lastState.lastTelemetry[lkey].pressure, mods);
                   
-        if (env->lastState.extData.isDataValid) {
-          
+        if (env->lastState.extData.isDataValid) {          
           screen->drawRect(0, theight, 2, localWidth, false);  // split line
           drawTemp(theight + 34, false, env->lastState.extData.temperature, env->lastState.extData.humidity, env->lastState.extData.pressure, mods);
-        }
-
-        theight = localHeight / 2 + 2;
-        int batPosX = localWidth - 17 - 40;
-        widgetController->drawBatWidget(batPosX, theight - 7, false, false, false);
-
-        if (DUI_TECH_INFO) {
-          widgetController->drawSystemInfoWidget(10, theight);
         }
 
     } else {
@@ -447,11 +435,26 @@ void Screen4in2UI::drawUIToBuffer() {
         drawTemp(theight, true, BAD_SENSOR_DATA, 0, 0, mods);
     }
 
+    theight = localHeight / 2 + 2;
+    int batPosX = localWidth - 17 - 40;
+    widgetController->drawBatWidget(batPosX, theight - 7, false, false, false);
+
+    if (DUI_TECH_INFO) {
+      widgetController->drawSystemInfoWidget(10, theight);
+    }
   }
 
   theight = localHeight - 100;       
   int rwidth = -1; int rheight = -1;
-  widgetController->drawClockWidget(10, theight, false, false, false, rwidth, rheight, clockFontType);
+
+  int baseX = 10;
+  if (clockFontType == 2) {
+    baseX = 16;
+  } else if (clockFontType == 3) {
+    baseX = 16;
+  }
+
+  widgetController->drawClockWidget(baseX, theight, false, false, false, rwidth, rheight, clockFontType);
 
   // env->lastState.lastTelemetry[lkey].pressure
   // hPa -> мм. рт. ст. parseFloat(hpa) * 0.750062

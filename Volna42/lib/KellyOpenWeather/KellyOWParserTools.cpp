@@ -302,10 +302,25 @@ bool KellyOWParserTools::collectJSONFieldData(String fieldName, String & payload
     int dataPos = payload.indexOf("\"" + fieldName + "\"");
 
     if (dataPos != -1) {
-        dataPos += fieldName.length();
-        for (int i = dataPos; i < dataPos + 255; i++) {
-            if (i < len-1 && payload[i] == ':') {  
+
+        dataPos += fieldName.length() + 2; // skip field name length + two quotes
+
+        // search field value start - skip white space and search ":" character        
+        for (int i = dataPos; i < dataPos + 16; i++) {
+
+            if (i < len-1) {                
+
+              if (payload[i] != ' ' && payload[i] != ':') {
+                  return false;
+              }
+
+              if (payload[i] == ':') {
                 return collectJSONFieldDataRaw(i, len, payload, storage, maxLength);
+              }
+
+            } else {
+
+              return false;
             }
         }
     }

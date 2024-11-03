@@ -190,7 +190,17 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
             */
             
             int maxLength = 12;
-            if (!KellyOWParserTools::collectJSONFieldData(homeAssistant ? "temperature" : "Temp", payload, collectedData, maxLength)) {
+            
+            // todo - переписать контроллер HA - должен быть опционально список url - запросы последовательны - данные читать из state т.к. не всегда возвращаются все данные сразу
+            // запросы выполняются по /api/states/entity_id
+
+            bool tempFound = KellyOWParserTools::collectJSONFieldData(homeAssistant ? "temperature" : "Temp", payload, collectedData, maxLength);
+            if (!tempFound && homeAssistant) {
+                tempFound = KellyOWParserTools::collectJSONFieldData("state", payload, collectedData, maxLength);
+               
+            }
+             Serial.println(collectedData);
+            if (!tempFound) {
 
                 Serial.print(F("Bad data : ")); Serial.println(payload.substring(0, 255));
                 error = "External sensor error : " + KellyOWParserTools::sanitizeResponse(payload);
@@ -200,7 +210,7 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
               newData.temperature = KellyOWParserTools::validateFloatVal(collectedData);
               if (newData.temperature <= BAD_SENSOR_DATA) {   
 
-                Serial.print(F("Bad data : no temperature")); Serial.println(payload.substring(0, 255));
+                Serial.print(F("Bad data : no temperature | ")); Serial.println(payload.substring(0, 255));
                 error = "External sensor error : no temperature data";
 
               } else {

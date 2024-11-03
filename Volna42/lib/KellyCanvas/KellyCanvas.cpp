@@ -528,7 +528,7 @@ void KellyCanvas::setRotate(int nrotation) {
         rotation = 90;        
     }
 
-    if (rotation) {
+    if (!rotation) {
         Serial.println(F("Screen : [NOT rotated]"));
     } else {
         Serial.print(F("Screen : [rotated] : Deg : ")); Serial.println(rotation); 

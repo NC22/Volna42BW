@@ -19,3 +19,5 @@
 #else
   #define CONFIG_TIME_FUNCTION configTime
 #endif
+
+// #define DISABLE_WEB_UPLOADER // reduce firmware size by 65kb (exclude webUI uploader packed files)

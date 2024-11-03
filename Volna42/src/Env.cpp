@@ -1160,7 +1160,11 @@ bool Env::updateExtSensorData() {
       String login = FPSTR(cfgExtSensorLocalL);
       String pass = FPSTR(cfgExtSensorLocalP);
 
+      lastState.lastTelemetrySize = 1;
+      int index = 0;
+      updateBattery(index);      
       externalSensorData newData;
+
       if (ExternalSensor::requestData(
         url, 
         login, 
@@ -1169,13 +1173,16 @@ bool Env::updateExtSensorData() {
         lastError
       )) {
 
-        lastState.lastTelemetrySize = 1;
-        int index = 0;
-        updateBattery(index);
         lastState.lastTelemetry[index].t = defaultTime;
         lastState.lastTelemetry[index].humidity = newData.humidity;        
         lastState.lastTelemetry[index].pressure = newData.pressure;        
         lastState.lastTelemetry[index].temperature = newData.temperature;
+      } else if (lastState.lastTelemetrySize <= 0) {
+        
+        lastState.lastTelemetry[index].t = defaultTime;
+        lastState.lastTelemetry[index].humidity = BAD_SENSOR_DATA;        
+        lastState.lastTelemetry[index].pressure = BAD_SENSOR_DATA;        
+        lastState.lastTelemetry[index].temperature = BAD_SENSOR_DATA;
       }
     }
   #endif

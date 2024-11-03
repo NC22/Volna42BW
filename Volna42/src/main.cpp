@@ -106,8 +106,9 @@ void setup()
       // Not on battery & WiFi connection fail -> Run as Access Point
 
       Serial.print(F("FAIL to connect Wifi - ")); 
-      if (!fallBackWifi) Serial.println(env.getConfig()->getString(cWifiNetwork)); 
-      else {
+      if (!fallBackWifi) {
+        Serial.println(env.getConfig()->getString(cWifiNetwork)); 
+      } else {
         Serial.print(F("Fallback - ")); 
         Serial.println(env.getConfig()->getString(cWifiNetworkFallback)); 
       }

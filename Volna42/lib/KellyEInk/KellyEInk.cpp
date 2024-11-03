@@ -120,6 +120,8 @@ bool KellyEInk::initPins() {
 	
 	if (pinsInit) return true;
 
+	Serial.println(F("[KellyEInk] Init pins attempt ..."));
+
     if (ENK_PIN_BUSY >= 0) pinMode(ENK_PIN_BUSY, INPUT);
     if (ENK_PIN_RST >= 0) pinMode(ENK_PIN_RST, INPUT);
     if (ENK_PIN_DC >= 0) pinMode(ENK_PIN_DC, OUTPUT);

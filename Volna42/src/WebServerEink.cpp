@@ -4,25 +4,13 @@
 #include <FS.h>
 #include <LittleFS.h>
 
+#if !defined(DISABLE_WEB_UPLOADER)
 #include <ui/out/initUpload.h>
 #include <ui/out/client_uploader.h>
 #include <ui/out/style_uploader.h>
 #include <ui/out/KellyUploader_tools.h>
-
-#if !defined(ESP32_C3_SUPERMINI)
-
 #include <ui/out/KellyUploader.h>
 #include <ui/out/KellyUIFileManager.h>
-
-#else
-
-// not enought FLASH, todo - make custom table or read what can be excluded
-
-const char webdata_KellyUIFileManager_js[] = "   ";
-const unsigned int webdataSize_KellyUIFileManager_js = 3;
-const char webdata_KellyUploader_js[] = "   ";
-const unsigned int webdataSize_KellyUploader_js = 3;
-
 #endif
 
 WebServerEink::WebServerEink(Env * env, int port) : WebServerBase(env, port) {
@@ -791,8 +779,10 @@ void WebServerEink::apiDirectImage() {
 
 }
 
-void WebServerEink::getUploaderFMJs() {    
-    
+void WebServerEink::getUploaderFMJs() {  
+
+    #if !defined(DISABLE_WEB_UPLOADER)
+
      if (ramFriendlyMode) {
     
         server->sendHeader("Cache-Control", "max-age=31536000");
@@ -811,6 +801,7 @@ void WebServerEink::getUploaderFMJs() {
         server->send(200, "text/javascript; charset=utf-8", FPSTR(webdata_KellyUIFileManager_js)); 
     }
 
+    #endif
 }
 
 void WebServerEink::getLanguageJs() {    
@@ -835,15 +826,21 @@ void WebServerEink::getLanguageJs() {
 }
 
 void WebServerEink::getUploaderCss() {    
-    
+
+    #if !defined(DISABLE_WEB_UPLOADER)
+
     server->sendHeader("Cache-Control", "max-age=31536000");
     server->setContentLength(webdataSize_style_uploader_css);
     server->send(200, "text/css; charset=utf-8", FPSTR(webdata_style_uploader_css)); 
+
+    #endif
 }
 
 
 void WebServerEink::getUploaderToolsJs() {    
     
+    #if !defined(DISABLE_WEB_UPLOADER)
+
     if (ramFriendlyMode) {
     
         server->sendHeader("Cache-Control", "max-age=31536000");
@@ -861,10 +858,14 @@ void WebServerEink::getUploaderToolsJs() {
         server->setContentLength(webdataSize_KellyUploader_tools_js);
         server->send(200, "text/javascript; charset=utf-8", FPSTR(webdata_KellyUploader_tools_js)); 
     }
+
+    #endif
 }
 
 void WebServerEink::getUploaderJs() {    
-        
+    
+    #if !defined(DISABLE_WEB_UPLOADER)
+
     if (ramFriendlyMode) {
     
         server->sendHeader("Cache-Control", "max-age=31536000");
@@ -881,12 +882,17 @@ void WebServerEink::getUploaderJs() {
         server->sendHeader("Cache-Control", "max-age=31536000");
         server->setContentLength(webdataSize_KellyUploader_js);
         server->send(200, "text/javascript; charset=utf-8", FPSTR(webdata_KellyUploader_js)); 
-    }        
+    } 
+
+    #endif       
 
 }
 
 void WebServerEink::showUploadImagePage() {
     
+    
+    #if !defined(DISABLE_WEB_UPLOADER)
+
     String currentCfg = env->getConfig()->getOptionsJSON();
 
     currentCfg += "var ENVSCREEN = {";
@@ -944,6 +950,8 @@ void WebServerEink::showUploadImagePage() {
 
         server->send(200, "text/html", response); 
     }
+
+    #endif
 }
 
 String WebServerEink::getInfo() {
