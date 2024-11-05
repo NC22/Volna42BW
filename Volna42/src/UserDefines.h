@@ -109,7 +109,7 @@
 		#define EPD_DC_PIN   6   
 		#define EPD_CS_PIN   -1    // GND (-1)  
 		#define EPD_CLK_PIN   15    
-		#define EPD_DIN_PIN   17    
+		#define EPD_DIN_PIN   7    
 
 	#else
 		

@@ -21,6 +21,8 @@ class KellyWeatherApi {
         float temp = BAD_SENSOR_DATA;
         float hum = BAD_SENSOR_DATA;
         float pressure = BAD_SENSOR_DATA;
+        int bat = BAD_SENSOR_DATA;
+
         KellyOWIconType weatherType;
         
         KellyWeatherApi(int timeout = 5000);
