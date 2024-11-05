@@ -204,9 +204,8 @@ class Env {
         bool celsius;  // Celsius or Fahrenheit
         bool hour12;   // 12-hour format
         bool land;     // landscape screen orientation mode
-        bool rotate;     // flip screen by 180deg
+        bool rotate;   // flip screen by 180deg
 		
-        bool noScreenTest = false;
         bool workEnabled = true; // redraw screen in constant mode - false - pause until webapi signal (/api/update)
 
         String wifiInfo = "";
@@ -243,6 +242,8 @@ class Env {
         void resetTimers(bool minuteTimerOnly = false);
         void resetPartialData();
         void updateExtIconState();
+
+        void forceRefreshAll();
 
         void sleep();
         void begin();

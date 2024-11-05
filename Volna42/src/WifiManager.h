@@ -5,11 +5,13 @@
     #include <WiFi.h>
 #else 
     #include <ESP8266WiFi.h>
+    #define WIFI_MODE_NULL WIFI_OFF
 #endif
 
-// ToDo check connection lost event?
 /*
-    currently used
+    ToDo - check connection lost event? no any issues with current setup detected for now
+
+    currently used :
     
     WiFi.setAutoReconnect(true);
     WiFi.persistent(true);
@@ -17,9 +19,16 @@
 
 class WiFiManager {
     private :
-        bool enabled = false;
     public:
-        bool isEnabled();
+        unsigned long apReconnectTimer; // initialized on AP mode enabled (runAsAccesspoint)
+        bool stReconnectTick();
+
+        #if defined(ESP32)
+            wifi_mode_t enabledStatus = WIFI_MODE_NULL;
+        #else 
+            WiFiMode_t enabledStatus = WIFI_MODE_NULL;
+        #endif
+
         WiFiManager();
         wl_status_t connect(String sid, String password);
         String getWiFiSelectorHtml();

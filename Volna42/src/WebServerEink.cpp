@@ -1402,22 +1402,8 @@ void WebServerEink::apiTestLowPower() {
 void WebServerEink::apiUpdate() {
 
     server->send(200, "application/json", "{\"status\":\"ok\"}");
-
     
-    Serial.println(F("[apiUpdate] : refresh telemetry "));
-
-    env->resetPartialData();
-    env->updateTelemetry();
-    
-    Serial.println(F("[apiUpdate] : update external sensor "));
-
-    env->updateExtSensorData();
-    env->updateExtIconState();
-
-    // mqttSendCurrentData, keep less operations to prevent soft-wdt-reset
-    Serial.println(F("[apiUpdate] : update screen"));
-
-    env->resetTimers();
+    env->forceRefreshAll();
     env->updateScreen();
 
     env->workEnabled = true;    

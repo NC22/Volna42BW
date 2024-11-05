@@ -9,19 +9,31 @@ WiFiManager::WiFiManager() {
     
 }
 
-bool WiFiManager::isEnabled() {
-    return enabled;
-}
-
-
 IPAddress WiFiManager::getIP() {
     return isAPmode() ? WiFi.softAPIP() : WiFi.localIP();
 }
 
+bool WiFiManager::stReconnectTick() {
+
+  #if !defined(WIFI_AP_MODE_RECONNECT_TIMER) || WIFI_AP_MODE_RECONNECT_TIMER <= 0
+    return false;
+  #endif
+
+  if (isAPmode() && millis() >= apReconnectTimer) {
+    apReconnectTimer = millis() + (WIFI_AP_MODE_RECONNECT_TIMER * 1000);
+    return true;
+  }
+
+  return false;
+}
+
 wl_status_t WiFiManager::connect(String sid, String password) {
 
-    if (sid.length() <= 0) return WL_NO_SSID_AVAIL;
-    
+    if (sid.length() <= 0) {
+      return WL_NO_SSID_AVAIL;
+    }
+
+    enabledStatus = WIFI_MODE_NULL;
     WiFi.softAPdisconnect();
     WiFi.disconnect();
     WiFi.mode(WIFI_STA);   
@@ -49,29 +61,29 @@ wl_status_t WiFiManager::connect(String sid, String password) {
         #if defined(ESP32)
 
             if ( lastConnectStatus == WL_CONNECTED) {
-                enabled = true;
+                enabledStatus = WiFi.getMode();
                 break;
             } else if (lastConnectStatus == WL_CONNECT_FAILED) {
-                Serial.print(F("FAIL TO CONNECT TO LAST CONFIGURED ACCESS POINT"));
+                Serial.print(F("...WL_CONNECT_FAILED..."));
                 break;
             } else if (lastConnectStatus == WL_NO_SSID_AVAIL) {
-                Serial.println(F("No any networks with specified network name | SSID"));
+                Serial.print(F("...Not found by SSID..."));
                 break;
             }
             
         #else 
 
             if ( lastConnectStatus == WL_CONNECTED) {
-                enabled = true;
+                enabledStatus = WiFi.getMode();
                 break;
             } else if (lastConnectStatus == WL_CONNECT_FAILED) {
-                Serial.print(F("FAIL TO CONNECT TO LAST CONFIGURED ACCESS POINT"));
+                Serial.print(F("...WL_CONNECT_FAILED..."));
                 break;
             } else if (lastConnectStatus == WL_WRONG_PASSWORD) {
-                Serial.print(F("WRONG PASSWORD"));
+                Serial.print(F("...Wrong password..."));
                 break;            
             } else if (lastConnectStatus == WL_NO_SSID_AVAIL) {
-                Serial.println(F("No any networks with specified network name | SSID"));
+                Serial.print(F("...Not found by SSID..."));
                 break;
             }
         #endif
@@ -80,7 +92,7 @@ wl_status_t WiFiManager::connect(String sid, String password) {
       }
 
       if (waitTime > 10) {
-          Serial.print(F("Connect fail, exit by timeout"));
+          Serial.print(F("...Exit by timeout..."));
           return WL_CONNECT_FAILED;
       }
 
@@ -91,13 +103,16 @@ wl_status_t WiFiManager::connect(String sid, String password) {
 }
 
 bool WiFiManager::isAPmode() {
-  return WiFi.getMode() == WIFI_AP || WiFi.getMode() == WIFI_AP_STA ? true : false;
+  return enabledStatus == WIFI_AP || enabledStatus == WIFI_AP_STA ? true : false;
 }
 
 void WiFiManager::runAsAccesspoint(String ssid, String pass) {
 
+    enabledStatus = WIFI_MODE_NULL;
     WiFi.softAPdisconnect();
-    WiFi.disconnect();
+    WiFi.disconnect();    
+    WiFi.persistent(false);
+
     //WiFi.mode(WIFI_AP);
 
     #if defined(ESP32_C3_SUPERMINI)
@@ -138,7 +153,8 @@ void WiFiManager::runAsAccesspoint(String ssid, String pass) {
       Serial.print(F("Run as Access Point [FAIL]"));
     }
 
-    enabled = true;
+    apReconnectTimer = millis() + (WIFI_AP_MODE_RECONNECT_TIMER * 1000);
+    enabledStatus = WiFi.getMode();
 }
 
 /* deprecated \ unused  replaced by webServerBase method instead */

@@ -39,10 +39,53 @@ Screen1in54UI screenController = Screen1in54UI(&env);
 #endif
 
 WebServerEink server = WebServerEink(&env);
-WiFiManager wifi = WiFiManager();
+WiFiManager * wifi = new WiFiManager();
+
+/* 
+  Attempt to connect to WiFi according to config 
+  return 0 - if wifi ap is not accessable, 1 - main wifi, 2 - fallback
+*/
+uint8_t wifiConnect() {
+   
+  Serial.print(F("Connect to wifi..."));
+  uint8_t result = 0;
+
+  if (env.getConfig()->getString(cWifiNetwork).length()) {
+
+    if (wifi->connect(env.getConfig()->getString(cWifiNetwork), env.getConfig()->getString(cWifiPassword)) == WL_CONNECTED) {
+        Serial.print(F("OK - ")); Serial.print(env.getConfig()->getString(cWifiNetwork));
+        result = 1;
+    } else {
+        Serial.print(F("FAIL - ")); Serial.print(env.getConfig()->getString(cWifiNetwork));
+    }
+  }
+
+  if (result == 0 && env.getConfig()->getString(cWifiNetworkFallback).length()) {
+
+    if (wifi->connect(env.getConfig()->getString(cWifiNetworkFallback), env.getConfig()->getString(cWifiPasswordFallback)) == WL_CONNECTED) {      
+      Serial.print(F("...OK [Fallback] - ")); Serial.print(env.getConfig()->getString(cWifiNetworkFallback));
+      result = 2;
+    } else {
+      Serial.print(F("...FAIL [Fallback] - ")); Serial.print(env.getConfig()->getString(cWifiNetworkFallback));
+    }
+  }
+
+  if (result > 0) {
+
+    Serial.print(F(" | IP: ")); Serial.print(wifi->getIP().toString());
+
+    if (!env.isSleepRequired()) {
+      env.wifiInfo = wifi->getIP().toString(); 
+    }
+  }
+
+  Serial.println();
+  return result;
+}
 
 void setup()
 {
+
   Serial.begin(115200);
 
   #if defined(DEBUG_ESP_WIFI)
@@ -79,47 +122,31 @@ void setup()
 
   } else {
 
-    // Sync & refresh data required
+    // Sync & Refresh data required
     // Connect to WiFi -> run full get data sequense (External sensor & update time by NTP, get battery info, update screen ... ) -> sleep if server mode disabled
 
-    Serial.println(F("[Update data needed] connect to wifi..."));
-    bool fallBackWifi = false;
+    Serial.println(F("[Update data needed]"));
+    uint8_t wifiConnectResult = wifiConnect();
 
-    wl_status_t wifiStatus = wifi.connect(env.getConfig()->getString(cWifiNetwork), env.getConfig()->getString(cWifiPassword)); 
-    if (wifiStatus != WL_CONNECTED && env.getConfig()->getString(cWifiNetworkFallback).length()) {
-        wifiStatus = wifi.connect(env.getConfig()->getString(cWifiNetworkFallback), env.getConfig()->getString(cWifiPasswordFallback)); 
-        fallBackWifi = true;
-        Serial.println(F("FAIL to connect main Wifi. Fallback wifi used"));
-    }
-
-    if (wifiStatus == WL_CONNECTED) {
-      
-        Serial.print(F("connected to Wifi - IP: ")); Serial.println(wifi.getIP().toString());
-
-        env.setupNTP();
-        env.updateExtSensorData();
-        env.mqttSendCurrentData();
-        env.wifiInfo = env.isSleepRequired() ? "" : wifi.getIP().toString(); 
+    if (wifiConnectResult > 0) {
+          
+      env.setupNTP();
+      env.updateExtSensorData();
+      env.mqttSendCurrentData();
 
     } else if (!env.isSleepRequired()) {
 
       // Not on battery & WiFi connection fail -> Run as Access Point
 
-      Serial.print(F("FAIL to connect Wifi - ")); 
-      if (!fallBackWifi) {
-        Serial.println(env.getConfig()->getString(cWifiNetwork)); 
-      } else {
-        Serial.print(F("Fallback - ")); 
-        Serial.println(env.getConfig()->getString(cWifiNetworkFallback)); 
-      }
+      wifi->runAsAccesspoint(FPSTR(defaultWifiAP), FPSTR(defaultWifiAPP));
+      env.wifiInfo = wifi->getIP().toString() + " AP"; 
+      env.initDefaultTime();
 
-      wifi.runAsAccesspoint(FPSTR(defaultWifiAP), FPSTR(defaultWifiAPP));     
-      env.wifiInfo = wifi.getIP().toString() + " AP"; 
-      Serial.print(F("IP: ")); Serial.println(wifi.getIP().toString());
+      Serial.print(F("IP: ")); Serial.println(wifi->getIP().toString());
 
     } else if (env.lastState.connectTimes == 0) { 
       
-      // WiFi connection fail
+      // WiFi connection fail -> Need to sleep -> Cant start AP mode
 
       // Ниразу не было успешных подключений по WiFi - мы не знаем даже примерного времени ни данных внешних датчиков
       // если на устройстве сохранено время по умолчанию, оно будет использовано
@@ -145,11 +172,11 @@ void setup()
       }
 
       Serial.println(F("[On battery] LOW POWER or wrong detect voltage - [power off]"));
-      env.sleep(); // todo - maybe increase sleep time in this mode too
+      env.sleep(); 
       return;
     }
 
-    if (wifiStatus == WL_CONNECTED) {
+    if (wifiConnectResult > 0) {
       env.sync();
     }
 
@@ -164,14 +191,44 @@ void setup()
       env.sleep();
     }
   }
-
-  // testTick = millis();
 }
 
 void loop()
 {  
   server.tick();
 
-  if (!screenController.tick()) env.tick();
+  /*
+    WiFi controller keeped only for AP mode, to keep trying to reconnect by wifi config every
+    WIFI_AP_MODE_RECONNECT_TIMER seconds (by default once per 3 min)
+
+    in case of usual connection setAutoReconnect=true is enabled
+  */
+  if (wifi) {
+    if (!wifi->isAPmode()) {
+
+      delete wifi; wifi = NULL;
+
+    } else if (wifi->stReconnectTick()) {
+
+      if (wifiConnect() > 0) {
+
+        Serial.println(F("[Successfull connect to WiFi] End AP mode, restart NTP"));
+        env.restartNTP();
+        env.forceRefreshAll();
+        env.updateScreen();
+
+        delete wifi; wifi = NULL;        
+      } else if (!wifi->isAPmode()) {
+
+        Serial.println(F("[Fail connect to WiFi] Restart AP mode"));
+        wifi->runAsAccesspoint(FPSTR(defaultWifiAP), FPSTR(defaultWifiAPP));
+      }
+    }
+  }
+
+  if (!screenController.tick()) {
+    env.tick();
+  }
+
   delay(10);
 }

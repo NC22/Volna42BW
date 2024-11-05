@@ -350,7 +350,7 @@ void Env::tick() {
         
         updateExtIconState();
         updateScreen();
-    } 
+    }
 }
 
 bool Env::isPartialUpdateRequired() {
@@ -414,7 +414,7 @@ bool Env::setupNTP(unsigned int attempt) {
 
     if (getConfig()->cfgValues[cExtSensorLink].length() > 0 && getConfig()->cfgValues[cExtSensorLink].indexOf(F("/api/states")) != -1) {
   
-      Serial.println(F("[HA] Get default time"));
+      Serial.print(F("[HA] Get default time..."));
       WiFiClient client;
       HTTPClient http;
 
@@ -442,8 +442,12 @@ bool Env::setupNTP(unsigned int attempt) {
 
         skipWait = true;
         
+        Serial.println(F("OK"));
+
       } else {
         lastError = "HA default time - bad response";
+        
+        Serial.println(F("FAIL"));
       }
 
       http.end();
@@ -1433,9 +1437,11 @@ void Env::updateScreen() {
       
       screen->drawUIToBuffer();
       
-      if (!noScreenTest) screen->updateScreen();
-      else Serial.println("Skip screen update by noScreenTest var!");
-
+      #if !defined(DISABLE_SCREEN_UPDATE)
+      screen->updateScreen();
+      #else
+      Serial.println("[updateScreen] DEBUG : Screen disabled");
+      #endif
     }    
 }
 
@@ -1560,6 +1566,24 @@ float Env::getBatteryLvlfromV(float v) {
 
     float percent = ((max - min) / 100.0); 
     return (float) ((v - min) / percent);
+}
+
+void Env::forceRefreshAll() {
+  
+    Serial.println(F("[forceRefreshAll] : refresh telemetry "));
+
+    resetPartialData();
+    updateTelemetry();
+    
+    Serial.println(F("[forceRefreshAll] : update external sensor "));
+
+    updateExtSensorData();
+    updateExtIconState();
+
+    // mqttSendCurrentData, keep less operations to prevent soft-wdt-reset
+    Serial.println(F("[forceRefreshAll] : reset timers"));
+
+    resetTimers();
 }
 
 bool Env::initSensors() {

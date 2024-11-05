@@ -14,11 +14,11 @@
 #define DEFAULT_I2C_SCL 5 // I2C SCL [ESP8266] dont edit, no variations
 #define DEFAULT_I2C_SDA 4 // I2C SDA [ESP8266] dont edit, no variations
 
+
 // Workaround wakeup from deepsleep issue - https://github.com/esp8266/Arduino/issues/6318
 // Решение для исправления проблемы дешевых клонов плат ESP8266 D1 Mini с зависанием при выходе из сна 
 #define FIX_DEEPSLEEP   0                     // 0 - OFF, 1 - первый метод - непроверен \ first method - untested, 2 - второй, проверен в долгих тестах \ second, tested in long tests
 #define BATTERY_SENSOR_PIN 0
-
 #endif
 
 #define PRESSURE_HPA false                    // pressure in hPa (default - mmHg - мм.рт.ст)
@@ -109,7 +109,7 @@
 		#define EPD_DC_PIN   6   
 		#define EPD_CS_PIN   -1    // GND (-1)  
 		#define EPD_CLK_PIN   15    
-		#define EPD_DIN_PIN   7    
+		#define EPD_DIN_PIN   17    
 
 	#else
 		
@@ -184,7 +184,7 @@
 #define BAT_MIN_V 3.25           // 0%
 #define BAT_MAX_V 4.2            // 100%, low bat tick 10%
 
-// #define DEFAULT_TIME_BY_EXTERAL  // подгружать время по умолчанию с внешнего датчика если доступно. работает для Home Assistant (скип ожидания синхронизации с NTP)
+#define DEFAULT_TIME_BY_EXTERAL  // подгружать время по умолчанию с внешнего датчика если доступно. работает для Home Assistant (скип ожидания синхронизации с NTP)
 
 // [Optional sleep switch] | [Опциональный тригер режима сна]
 // По умолчанию переход в режим сна осуществляется всегда при наличии данных от сенсора уровня батареи, но можно вынести на отдельную кнопку \ переключатель

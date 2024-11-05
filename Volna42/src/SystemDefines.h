@@ -1,4 +1,9 @@
-/* Global system constants, must be included after UserDefines.h */
+/* 
+
+  Global system constants, must be included after UserDefines.h 
+
+  Системные констранты & константы отладки. Не редактировать. Некоторые параметры могут быть определены через UserDefines (с проверкой !defined)
+*/
 
 #define BAD_SENSOR_DATA -1000.0
 #define AP_NETWORK_WIFI_CHANNEL 12  
@@ -21,3 +26,11 @@
 #endif
 
 // #define DISABLE_WEB_UPLOADER // reduce firmware size by 65kb (exclude webUI uploader packed files)
+// #define DISABLE_SCREEN_UPDATE
+
+// Если точка доступа не была найдена при запуске устройства и был включен режим точки доступа (Access Point) 
+// то пробовать повторно ее найти и подключится через заданное кол-во секунд :
+
+#if !defined(WIFI_AP_MODE_RECONNECT_TIMER)
+  #define WIFI_AP_MODE_RECONNECT_TIMER 3 * 60 // -1 или не задано - не пытаться подключится
+#endif
