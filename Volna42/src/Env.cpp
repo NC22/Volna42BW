@@ -681,6 +681,9 @@ String Env::getTelemetryJSON() {
   return "{\"id\":\"4in2einkTermometr\",\"data\":" + json + "}";
 }
 
+/*
+  Act on mqtt commands. Currently unused
+*/
 void Env::mqttMessageReceivedCallback(char* topic, uint8_t* payload, unsigned int length) {
  
     Serial.print("Message arrived [");
@@ -697,6 +700,9 @@ bool Env::mqttIsHAMode() {
   return cfg.cfgValues[cMqttHAPrefix].length() > 0;
 }
 
+/*
+  Send auto discovery data of Volna device for automaticly add all sensors to Home Assistant
+*/
 void Env::mqttHAAutodetectionInit() {
 
   if (_mqttClient.connected() && mqttIsHAMode()) {
@@ -1197,9 +1203,20 @@ bool Env::updateExtSensorData() {
       lastState.extData, 
       lastError
     )) {
+
       lastState.connectTimes++;
       return true;
+
     } else {
+
+      if (lastError.length() > 0) {
+
+          lastError += "|";
+          lastError += fTime.timeText;
+          lastError += " ";
+          lastError += fTime.dateShort;
+      }
+
       return false;
     }
 }
@@ -1270,6 +1287,9 @@ void Env::updateTelemetry()  {
   Serial.println(lastState.lastTelemetry[key].bat);
 }
 
+/* 
+  return true if CO2 sensor measurments is available 
+*/
 bool Env::updateSCD4X() {
 
   #if !defined(CO2_SCD41) 
@@ -1335,16 +1355,29 @@ float Env::readTemperature()  {
     #endif
 
     // Default BME280 or replacements
-
+    
+    // disable read temperature complitly
     #if defined(INTERNAL_SENSOR_BME280) && INTERNAL_SENSOR_BME280 == false
-
-        return -1000;
+        return BAD_SENSOR_DATA;
     #else
 
       if (tsensor) {
+
         return tempSensor.readTemperature() + tempOffset;
-      } else return -1000;
-    
+
+      } else {
+
+        // use data from CO2 sensor as altarnative if available
+        #if defined(CO2_SCD41) 
+            
+            Serial.println("[readTemperature] Used data from CO2 sensor");
+            if (updateSCD4X() && scd4XTemp != BAD_SENSOR_DATA) return scd4XTemp;
+            else return BAD_SENSOR_DATA;
+
+        #endif
+
+        return BAD_SENSOR_DATA;
+      }
     #endif
 }
 
@@ -1362,7 +1395,23 @@ float Env::readPressure() {
 
 float Env::readHumidity() {
 
-    return tsensor ? tempSensor.readHumidity() : -1000.0f;
+    if (!tsensor) {
+        
+      // use data from CO2 sensor as altarnative if available
+      #if defined(CO2_SCD41) 
+          
+          Serial.println("[readHumidity] Used data from CO2 sensor");
+          if (updateSCD4X() && scd4XHumidity != BAD_SENSOR_DATA) return scd4XHumidity;
+          else return BAD_SENSOR_DATA;
+
+      #endif
+
+      return BAD_SENSOR_DATA;
+
+    } else {
+
+      return tempSensor.readHumidity();
+    }    
 }
 
 bool Env::isOnBattery() {

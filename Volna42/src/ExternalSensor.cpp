@@ -18,22 +18,28 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
       return false;
     }
 
+    if (attempt > 1) {        
+        delay(400);
+    }
+
     // Open-Meteo, OpenWeather
-    
+
+    int resultCode = -1;
     KellyWeatherApi * weatherApi = NULL;
+
     if (url.indexOf("openweather") != -1) {
        weatherApi = new KellyOpenWeather(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
+       resultCode = weatherApi->loadCurrent(url);    
     } else if (url.indexOf("open-meteo") != -1) {
        weatherApi = new KellyOpenMeteo(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
+       resultCode = weatherApi->loadCurrent(url);    
+    } else if (url.indexOf("/api/states") != -1) {
+       weatherApi = new KellyOpenHA(EXTERNAL_SENSOR_CONNECT_TIMEOUT);
+       resultCode = weatherApi->loadCurrent(url, pass);    
     }
 
     if (weatherApi) {
 
-      if (attempt > 1) {        
-          delay(400);
-      }
-
-      int resultCode = weatherApi->loadCurrent(url);      
       if (resultCode == 200) {
 
         Serial.println(F("[Weather API] Success"));
@@ -75,13 +81,9 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
 
       return false;
     
-    // Domoticz & HomeAssistant, todo - move to common WeatherApi
+    // Default controller - used for Domoticz & HomeAssistant, todo - move to common WeatherApi
 
     } else {
-
-      if (attempt > 1) {
-          delay(200);
-      }
 
       WiFiClient client;
       HTTPClient http;

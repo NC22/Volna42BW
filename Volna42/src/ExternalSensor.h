@@ -8,6 +8,7 @@
 #include <EnvStructs.h>
 #include <KellyOpenWeather.h>
 #include <KellyOpenMeteo.h>
+#include <KellyOpenHA.h>
 
 #if defined(ESP32)
     #include <HTTPClient.h>

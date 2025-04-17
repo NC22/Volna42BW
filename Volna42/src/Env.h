@@ -148,7 +148,7 @@ class Env {
 
         int syncEvery = 6;  // external data update \ data sync by wifi every n wake-ups --- check validateConfig for defaults
         
-        bool tsensor = false;
+        bool tsensor = false; /* main Temperature & Humidity sensor is detected & initialized */
         bool asensor = false;
         bool ntp = false;
         bool partialUpdateRequired = false;

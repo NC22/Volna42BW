@@ -14,7 +14,7 @@ KellyHAPartialType KellyOpenHA::fillPartialData(String & payload, String & colle
         hum = KellyOWParserTools::validateFloatVal(collectedData);
         return kowHAHumidity;
     } else if (payload.indexOf("pressure") != -1 && KellyOWParserTools::collectJSONFieldData("state", payload, collectedData)) {
-        pressure = KellyOWParserTools::validateFloatVal(collectedData) * 100.0f;
+        pressure = KellyOWParserTools::validateFloatVal(collectedData);
         return kowHAPressure;
     } else if (payload.indexOf("battery") != -1 && KellyOWParserTools::collectJSONFieldData("state", payload, collectedData)) {
         bat = KellyOWParserTools::validateFloatVal(collectedData);
@@ -24,11 +24,17 @@ KellyHAPartialType KellyOpenHA::fillPartialData(String & payload, String & colle
     return kowHAUnknown;
 }
 
-KellyHAPartialType KellyOpenHA::requestProcess(String & url, bool partialOnly) {
+KellyHAPartialType KellyOpenHA::requestProcess(String & url, String & token, bool partialOnly) {
     
     WiFiClient client;
     HTTPClient http;
+
     http.begin(client, url);
+
+    http.setAuthorization("");
+    String auth = "Bearer " + token;
+    http.addHeader("Authorization", auth.c_str());
+
     int httpResponseCode = http.GET();    
     
     if (httpResponseCode <= 0) {
@@ -54,8 +60,10 @@ KellyHAPartialType KellyOpenHA::requestProcess(String & url, bool partialOnly) {
     String collectedData;
 
     http.end();        
+
+    KellyHAPartialType ptype = kowHAUnknown;
     
-    // Check if answer already contain all needed data
+    // Case when server answer contains all sensor data at once
     
     if (!partialOnly && KellyOWParserTools::collectJSONFieldData("temperature", payload, collectedData)) {
         
@@ -64,24 +72,45 @@ KellyHAPartialType KellyOpenHA::requestProcess(String & url, bool partialOnly) {
         if (KellyOWParserTools::collectJSONFieldData("humidity", payload, collectedData)) {
             hum = KellyOWParserTools::validateFloatVal(collectedData);
         }
+
         if (KellyOWParserTools::collectJSONFieldData("pressure", payload, collectedData)) {
-            pressure = KellyOWParserTools::validateFloatVal(collectedData) * 100.0f;
+            pressure = KellyOWParserTools::validateFloatVal(collectedData);
         }
+
         if (KellyOWParserTools::collectJSONFieldData("battery", payload, collectedData)) {
-            bat = KellyOWParserTools::validateFloatVal(collectedData);
+            bat = KellyOWParserTools::validateFloatVal(collectedData);            
         }
+
         if (KellyOWParserTools::collectJSONFieldData("state", payload, collectedData)) {
             weatherType = getMeteoIconState(collectedData);  
         }
 
-        return kowHAALL;
+        ptype = kowHAALL;
         
-    } else {
-    
-        // Only partial data in answer        
-        return fillPartialData(payload, collectedData);        
+    } else {    
+        // find partial data in answer        
+        ptype = fillPartialData(payload, collectedData);        
     }
-    
+
+    if (ptype == kowHAALL || ptype == kowHABattery) {
+
+        if (bat > 100) bat = 100;
+        else if (bat < 0) bat = BAD_SENSOR_DATA;
+    } 
+
+    if (ptype == kowHAALL || ptype == kowHAPressure) {
+
+        if (pressure > BAD_SENSOR_DATA) {
+            pressure = pressure * 100.0f;
+        }
+    }
+
+    return ptype;    
+}
+
+int KellyOpenHA::loadCurrent(String & nurl) {
+    String token = "";
+    return loadCurrent(nurl, token);
 }
 
 /*
@@ -90,50 +119,76 @@ KellyHAPartialType KellyOpenHA::requestProcess(String & url, bool partialOnly) {
   result code : 
   200 - success
   -1 - fail to connect to url (description in error state & in log)
-  1, 2 - no data, not enough data
+  1 - no data
+  2 - bad or not enough data
 */
-int KellyOpenHA::loadCurrent(String & nurl) {
+int KellyOpenHA::loadCurrent(String & nurl, String & token) {
     
     Serial.println(F("[Weather API] - Home Assistant parser"));
     weatherLoaded = false;
     error = "";
     
     int separatorPos = nurl.indexOf(",");
-    String baseUrl = separatorPos != -1 ? nurl.substring(0, separatorPos) : nurl;
+    String baseUrl = separatorPos != -1 ? nurl.substring(0, separatorPos) : nurl; // take only first ID for baseUrl if more then one /api/state/[id1]
     
-    KellyHAPartialType addedData = requestProcess(baseUrl, false);
-    if (addedData == kowHAConnectError) {
-        return -1;
-    } else if (addedData == kowHAUnknown) {               
-        return 1; // no data
-    } else if (addedData != kowHATemperature && separatorPos == -1) {
-        return 2; // not enough data
-    }
+    KellyHAPartialType addedData = requestProcess(baseUrl, token, separatorPos == -1 ? false : true); // if only one ID specifed - take all data at once
 
-    weatherLoaded = true;
+    if (addedData == kowHAConnectError) { // no connection
+                
+        // error string setted in requestProcess() method
+
+        if (error.length() <= 0) {
+            error = "[KellyOpenHA] Connection fail";
+        }
+
+        return -1;
+
+    } else if (addedData == kowHAUnknown) { // unexpected data or format   
+
+        if (error.length() <= 0) {
+            error = "[KellyOpenHA] Wrong data format";
+        }
+
+        return 1; // no data
+
+    } else if (separatorPos == -1) { 
+
+        // collected all we can from one request. If some thing not found we need to specify list of IDs 
+
+    } else {
+
+        // continue to grab addition sensors by IDs
+            
+        baseUrl = baseUrl.substring(0, nurl.lastIndexOf('/') + 1);
+        String currentId = "";
+        for (unsigned int i = separatorPos+1; i <= nurl.length(); i++) { // separatorPos - skip to second element /api/state/[id1],[id2],...[idn]
+            char c = i < nurl.length() ? nurl[i] : ',';
+            
+            if (c == ',') {
     
-    // Partial data addition devices requests    
-    // no addition device ids -> exit, At least temperature is collected
+                Serial.print(F("[KellyOpenHA] Request sensor data for addition ID - "));
+                Serial.println(currentId);
     
-    if (separatorPos == -1) {
+                currentId = baseUrl + currentId;
+                requestProcess(currentId, token, true);            
+                currentId = "";
+
+            } else {
+                currentId += c;
+            }
+        }
+    }    
+
+    if (temp <= BAD_SENSOR_DATA) {   
+
+        error = "[KellyOpenHA] no temperature data";
+        return 2;
+
+    } else {
+
+        weatherLoaded = true;
         return 200;
     }
-    
-    baseUrl = baseUrl.substring(0, nurl.lastIndexOf('/') + 1);
-    String currentId = "";
-    for (unsigned int i = separatorPos; i <= nurl.length(); i++) { // separatorPos - skip to second element /api/state/[id1],[id2],...[idn]
-        char c = i < nurl.length() ? nurl[i] : ',';
-        
-        if (c == ',') {
-            currentId = baseUrl + currentId;
-            requestProcess(currentId, true);            
-            currentId = ""; 
-        } else {
-            currentId += c;
-        }
-    }
-    
-    return 200;
 }
 
 KellyOWIconType KellyOpenHA::getMeteoIconState(const String& collectedData) {

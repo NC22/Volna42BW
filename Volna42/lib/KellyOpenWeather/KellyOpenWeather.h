@@ -15,7 +15,7 @@ class KellyOpenWeather : public KellyWeatherApi {
         
         KellyOpenWeather(int timeout = 5000);
         KellyOWIconType getMeteoIconState(String icon);
-        int loadCurrent(String & nurl);
+        int loadCurrent(String & nurl);        
 };
 
 #endif	

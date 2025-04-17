@@ -28,7 +28,9 @@ class KellyWeatherApi {
         KellyWeatherApi(int timeout = 5000);
         virtual KellyOWIconType getMeteoIconState(int weatherCode);
         virtual int loadCurrent(String & nurl) = 0;
+        virtual int loadCurrent(String & nurl, String & token);
         virtual void end();
+
 
         virtual ~KellyWeatherApi() = default; 
 };

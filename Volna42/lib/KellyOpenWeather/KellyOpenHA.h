@@ -1,5 +1,5 @@
-#ifndef KellyOpenMeteo_h
-#define KellyOpenMeteo_h
+#ifndef KellyOpenHA_h
+#define KellyOpenHA_h
 
 #include <Arduino.h>
 #include <vector>
@@ -25,12 +25,13 @@ enum KellyHAPartialType {
 
 class KellyOpenHA : public KellyWeatherApi {
     protected :
-        KellyHAPartialType requestProcess(String & url, bool partialOnly);
+        KellyHAPartialType requestProcess(String & url, String & token, bool partialOnly);
         KellyHAPartialType fillPartialData(String & payload, String & collectedData);
     public:        
         KellyOpenHA(int timeout = 5000);
         KellyOWIconType getMeteoIconState(const String& collectedData);
         int loadCurrent(String & nurl);
+        int loadCurrent(String & nurl, String & token);
 };
 
 #endif	
