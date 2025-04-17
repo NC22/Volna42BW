@@ -69,7 +69,7 @@ int KellyOpenMeteo::loadCurrent(String & nurl) {
 
     String collectedData;
     if (KellyOWParserTools::collectJSONFieldData("error", tmp, collectedData)) {
-        error = collectedData;
+        error = "[OpenMeteo] Returned error Answer : " + collectedData;
         return 5;
     }
 
