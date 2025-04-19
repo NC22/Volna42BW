@@ -64,6 +64,7 @@ KellyHAPartialType KellyOpenHA::requestProcess(String & url, String & token, boo
     KellyHAPartialType ptype = kowHAUnknown;
     
     // Case when server answer contains all sensor data at once
+    // for ex. weather.forecast_home_assistant - contains also weather state with icon 
     
     if (!partialOnly && KellyOWParserTools::collectJSONFieldData("temperature", payload, collectedData)) {
         

@@ -444,17 +444,31 @@ void Screen4in2UI::drawUIToBuffer() {
     }
   }
 
-  theight = localHeight - 100;       
-  int rwidth = -1; int rheight = -1;
 
-  int baseX = 10;
-  if (clockFontType == 2) {
-    baseX = 25;
-  } else if (clockFontType == 3) {
-    baseX = 25;
-  }
+  #if defined(DUI_CALENDAR) // Режим вывода календарика вместо больших часов
+ 
+    int baseX = 10;
+    theight = localHeight / 2 + 2;  
+    theight += 50;
 
-  widgetController->drawClockWidget(baseX, theight, false, false, false, rwidth, rheight, clockFontType);
+    baseX = widgetController->drawCalendarWidget(baseX, theight, false, true);
+    // widgetController->drawClockWidgetTiny(baseX, theight, true);
+
+  #else
+
+    theight = localHeight - 100;       
+    int rwidth = -1; int rheight = -1;
+
+    int baseX = 10;
+    if (clockFontType == 2) {
+      baseX = 25;
+    } else if (clockFontType == 3) {
+      baseX = 25;
+    }
+
+    widgetController->drawClockWidget(baseX, theight, false, false, false, rwidth, rheight, clockFontType);
+
+  #endif
 
   // env->lastState.lastTelemetry[lkey].pressure
   // hPa -> мм. рт. ст. parseFloat(hpa) * 0.750062
@@ -464,6 +478,7 @@ void Screen4in2UI::drawUIToBuffer() {
 
   // screen->drawImage(localWidth - 125, localHeight - 125 - 2, &catSnowflakes_115x125bw_settings, true);    
    drawCat(false); 
+
 }
 
 void Screen4in2UI::updatePartialClock() {

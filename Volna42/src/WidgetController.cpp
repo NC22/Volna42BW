@@ -125,7 +125,7 @@ int WidgetController::getDaysInMonth(tm & time) {
     return days;
 }
 
-void WidgetController::drawCalendarWidget(int baseX, int baseY, bool showTitles) {
+int WidgetController::drawCalendarWidget(int baseX, int baseY, bool showTitles, bool showCurrentDate) {
 
   time_t now = time(nullptr);
   struct tm stnow;
@@ -150,8 +150,21 @@ void WidgetController::drawCalendarWidget(int baseX, int baseY, bool showTitles)
   // шаг по ширине при выводе дней недели 
   int dayBlockWidth; 
   int posX; int posY = baseY;
+  int heightStep = font18x18Config.height + 2;
 
   bool baseColor = true;
+
+  if (showCurrentDate) {
+
+    clockFormatted dt = env->getFormattedTime();
+    if (pgm_read_byte(&textDateFormat) == 2) {
+      screen->drawString(baseX, posY, dt.monthText + "(" + dt.dayText + ")", baseColor);
+    } else {
+      screen->drawString(baseX, posY, dt.monthText + ", " + dt.dayText, baseColor);
+    }
+   
+    posY += font18x18Config.height + 12;
+  }
 
   /*
     для других языков нужно будет подгонять отступы заголовков дней недели т.к. они длинней чем на кирилице
@@ -160,6 +173,8 @@ void WidgetController::drawCalendarWidget(int baseX, int baseY, bool showTitles)
   if (showTitles && strcmp_P("ru", defaultLocale) != 0) {
     showTitles = false;
   }
+
+  // todo - вывод текущей даты - 19 апреля, сб, тогда можно будет комбинировать с мини часами
 
   if (showTitles) {    
 
@@ -196,12 +211,13 @@ void WidgetController::drawCalendarWidget(int baseX, int baseY, bool showTitles)
 
     }
     
+    posY += heightStep;
+
   } else {
     
-    dayBlockWidth = font18x18Config.width + 6;
+    dayBlockWidth = font18x18Config.width + 4;
   }
 
-  posY += font18x18Config.height + 4;
   int dayOfWeekCounter = firstDayOfWeek;
   String tmp;
 
@@ -216,7 +232,7 @@ void WidgetController::drawCalendarWidget(int baseX, int baseY, bool showTitles)
       
 	    uText dateText;
       dateText = screen->getUText(tmp);
-      screen->drawRect(posX - 4, posY - 2, dateText.pixelWidth + 8, font18x18Config.height + 4, baseColor);
+      screen->drawRect(posX - 4, posY - 1, dateText.pixelWidth + 8, font18x18Config.height + 4, baseColor);
       screen->drawStringUtext(posX, posY, dateText, !baseColor);
 
     } else {
@@ -227,20 +243,22 @@ void WidgetController::drawCalendarWidget(int baseX, int baseY, bool showTitles)
     dayOfWeekCounter++;
     if (dayOfWeekCounter > 7) {
       dayOfWeekCounter = 1;
-      posY += font18x18Config.height + 4;
+      posY += heightStep;
     }   
   }
+
+  return dayBlockWidth * 7 + 20;
 }
 
-void WidgetController::drawClockWidgetTiny(int baseX, int baseY) {
+void WidgetController::drawClockWidgetTiny(int baseX, int baseY, bool clockOnly) {
 
   KellyCanvas * screen = env->getCanvas();
   clockFormatted dt = env->getFormattedTime();
-  uText dateShortText = screen->getUText(dt.timeText + " " + dt.dayText + ", " + dt.dateShort);
-  partialDataSet(baseX, baseY, 80, 24);
+  uText dateShortText = screen->getUText(clockOnly ? dt.timeText : dt.timeText + " " + dt.dayText + ", " + dt.dateShort);
+  partialDataSet(baseX, baseY, 60, 24);
 
   screen->setFont(&font18x18Config);
-  screen->drawStringUtext(baseX + 10, baseY, dateShortText, true);
+  screen->drawStringUtext(baseX, baseY, dateShortText, true);
 }
 
 void WidgetController::drawClockWidget(int baseX, int baseY, bool border, bool fill, bool invert, int & resultWidth, int & resultHeight, uint8_t fontType) {
@@ -619,7 +637,7 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
 
         widgetWidth = 216;
         widgetHeight = 216;
-        drawCalendarWidget(baseX, baseY, widget.params.indexOf("-t") != -1);
+        drawCalendarWidget(baseX, baseY, widget.params.indexOf("-t") != -1, widget.params.indexOf("-d") != -1);
         
     } else if  (widget.type == uiSCD4XHum || widget.type == uiSCD4XTemp || widget.type == uiSCD4XCO2) {
 
