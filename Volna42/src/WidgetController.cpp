@@ -86,6 +86,163 @@ void WidgetController::partialDataApplyMaxBounds() {
     env->lastState.lastPartialPos.yEnd = max(clockPartial.yEnd, env->lastState.lastPartialPos.yEnd);
 }
 
+int WidgetController::getDaysInMonth(tm & time) {
+
+  //  https://habr.com/ru/articles/261773/#comment_8486521
+
+  int days;
+  int month = time.tm_mon + 1;
+  int year = time.tm_year + 1900;
+
+  switch (month) {
+    case 1:
+    case 3:
+    case 5:
+    case 7:
+    case 8:
+    case 10:
+    case 12:
+       days = 31;
+       break;
+    case 4:
+    case 6:
+    case 9:
+    case 11:
+       days = 30;
+       break;
+    case 2:
+ 
+       days = 28;
+       if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
+          days += 1;
+       }
+
+       break;
+    default:
+        days = -1;
+    }
+
+    return days;
+}
+
+void WidgetController::drawCalendarWidget(int baseX, int baseY, bool showTitles) {
+
+  time_t now = time(nullptr);
+  struct tm stnow;
+
+  localtime_r(&now, &stnow);
+
+  int maxDayOfMonth = getDaysInMonth(stnow);
+  int currentDayOfMonth = stnow.tm_mday;
+
+  stnow.tm_mday = 1;
+  mktime(&stnow);
+
+  // с понедельника. от 1 до 7
+  int firstDayOfWeek = (stnow.tm_wday == 0) ? 7 : stnow.tm_wday;
+
+  stnow.tm_mday = currentDayOfMonth;
+  mktime(&stnow);
+
+  KellyCanvas * screen = env->getCanvas();
+	screen->setFont(&font18x18Config);
+
+  // шаг по ширине при выводе дней недели 
+  int dayBlockWidth; 
+  int posX; int posY = baseY;
+
+  bool baseColor = true;
+
+  /*
+    для других языков нужно будет подгонять отступы заголовков дней недели т.к. они длинней чем на кирилице
+  */
+
+  if (showTitles && strcmp_P("ru", defaultLocale) != 0) {
+    showTitles = false;
+  }
+
+  if (showTitles) {    
+
+    dayBlockWidth = font18x18Config.width + 10;
+
+    // строчки дня недели - пн вт ср чт пт сб вс
+    for (int i = 1; i <= 7; i++) {
+
+      posX = baseX + ((i - 1) * dayBlockWidth) - 4;
+
+      switch(i) {
+        case 1:
+          screen->drawString(posX, posY, FPSTR(locShortMonday), baseColor);
+          break;
+        case 2:
+          screen->drawString(posX, posY, FPSTR(locShortTuesday), baseColor);
+          break;
+        case 3:
+          screen->drawString(posX, posY, FPSTR(locShortWednesday), baseColor);
+          break;
+        case 4:
+          screen->drawString(posX, posY, FPSTR(locShortThursday), baseColor);
+          break;
+        case 5:
+          screen->drawString(posX, posY, FPSTR(locShortFriday), baseColor);
+          break;
+        case 6:
+          screen->drawString(posX, posY, FPSTR(locShortSaturday), baseColor);
+          break;      
+        case 7:
+          screen->drawString(posX, posY, FPSTR(locShortSunday), baseColor);
+        break;
+      }
+
+    }
+    
+  } else {
+    
+    dayBlockWidth = font18x18Config.width + 6;
+  }
+
+  posY += font18x18Config.height + 4;
+  int dayOfWeekCounter = firstDayOfWeek;
+  String tmp;
+
+  Serial.print(F("maxDayOfMonth : ")); Serial.println(String(maxDayOfMonth));
+
+  for (int i = 1; i <= maxDayOfMonth; i++) {
+
+    posX = baseX + ((dayOfWeekCounter - 1) * dayBlockWidth);
+    tmp = i;
+
+    if (i == currentDayOfMonth) {
+      
+	    uText dateText;
+      dateText = screen->getUText(tmp);
+      screen->drawRect(posX - 4, posY - 2, dateText.pixelWidth + 8, font18x18Config.height + 4, baseColor);
+      screen->drawStringUtext(posX, posY, dateText, !baseColor);
+
+    } else {
+
+      screen->drawString(posX, posY, tmp, baseColor);
+    } 
+
+    dayOfWeekCounter++;
+    if (dayOfWeekCounter > 7) {
+      dayOfWeekCounter = 1;
+      posY += font18x18Config.height + 4;
+    }   
+  }
+}
+
+void WidgetController::drawClockWidgetTiny(int baseX, int baseY) {
+
+  KellyCanvas * screen = env->getCanvas();
+  clockFormatted dt = env->getFormattedTime();
+  uText dateShortText = screen->getUText(dt.timeText + " " + dt.dayText + ", " + dt.dateShort);
+  partialDataSet(baseX, baseY, 80, 24);
+
+  screen->setFont(&font18x18Config);
+  screen->drawStringUtext(baseX + 10, baseY, dateShortText, true);
+}
+
 void WidgetController::drawClockWidget(int baseX, int baseY, bool border, bool fill, bool invert, int & resultWidth, int & resultHeight, uint8_t fontType) {
 	
   KellyCanvas * screen = env->getCanvas();
@@ -337,22 +494,32 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
 
     if (widget.type == uiClock) {
       
-      uint8_t fontType = 1;
+      // tiny inline clock format
 
-           if (widget.params.indexOf("-f2")) fontType = 2;
-      else if (widget.params.indexOf("-f3")) fontType = 3;
+      if (widget.params.indexOf("-f0") != -1) {
 
-      drawClockWidget(
-        baseX, 
-        baseY, 
-        border, 
-        fill, 
-        invert, 
-        widgetWidth, 
-        widgetHeight,
-        fontType
-      );
-		
+          drawClockWidgetTiny(baseX, baseY);
+
+      } else {
+
+        uint8_t fontType = 1;
+
+              if (widget.params.indexOf("-f2")  != -1) fontType = 2;
+        else if (widget.params.indexOf("-f3")  != -1) fontType = 3;
+
+        drawClockWidget(
+          baseX, 
+          baseY, 
+          border, 
+          fill, 
+          invert, 
+          widgetWidth, 
+          widgetHeight,
+          fontType
+        );
+      
+      }
+
     } else if (
           widget.type == uiInfoIP || 
           widget.type == uiInfoVoltage || 
@@ -447,7 +614,13 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
         }
 
         drawBatWidget(baseX + 20, baseY, false, widget.type == uiBatRemote ? true : false, false); // baseX started from bat icon, not count prefix text
+    
+    } else if (widget.type == uiCalendar) {
 
+        widgetWidth = 216;
+        widgetHeight = 216;
+        drawCalendarWidget(baseX, baseY, widget.params.indexOf("-t") != -1);
+        
     } else if  (widget.type == uiSCD4XHum || widget.type == uiSCD4XTemp || widget.type == uiSCD4XCO2) {
 
       #if defined(CO2_SCD41)  

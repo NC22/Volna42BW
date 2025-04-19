@@ -1828,10 +1828,10 @@ void Env::updateTime(time_t dt) {
 
     switch(tmpN) {
       case 0:
-        fTime.dayText = FPSTR(locShortSunday);
+        fTime.dayText = FPSTR(locShortSunday); // Воскресенье
         break;
       case 1:
-        fTime.dayText = FPSTR(locShortMonday);
+        fTime.dayText = FPSTR(locShortMonday); // Понедельник
         break;
       case 2:
         fTime.dayText = FPSTR(locShortTuesday);

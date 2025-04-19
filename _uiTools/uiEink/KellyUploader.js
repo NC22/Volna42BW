@@ -7,10 +7,11 @@ function KellyImgUpl(env) {
     
     var screen = env.screen;
     
+    // max number of possible enabled widgets
     var PARAMS_MAX_SIZE = 64;
     
     // uuid - unique widget id in format stored in device memory
-    // mast be the same as in EnvConfigOptions.h for specified widget
+    // must be the same as in EnvConfigOptions.h for specified widget
     
     var widgets = [
         {uuid : 1, id : "uiClock", width : 102, height : 80, x : 20, y : 20}, 
@@ -32,7 +33,8 @@ function KellyImgUpl(env) {
         {uuid : 17, id : "uiPressureRemote", width : 100, height : 20, x : 20, y : 160},      
         {uuid : 18, id : "uiSCD4XCO2", width : 100, height : 20, x : 20, y : 160},
         {uuid : 19, id : "uiSCD4XTemp", width : 100, height : 20, x : 20, y : 160},  
-        {uuid : 20, id : "uiSCD4XHum", width : 100, height : 20, x : 20, y : 160},  
+        {uuid : 20, id : "uiSCD4XHum", width : 100, height : 20, x : 20, y : 160},   
+        {uuid : 21, id : "uiCalendar", width : 216, height : 216, x : 20, y : 160}, 
     ];
     
     var widgetsOrder  = [
@@ -54,6 +56,7 @@ function KellyImgUpl(env) {
         'uiPressure',
         'uiDate',
         'uiPressureRemote',
+        'uiCalendar',
         'uiSCD4XCO2',
         'uiSCD4XTemp',
         'uiSCD4XHum',

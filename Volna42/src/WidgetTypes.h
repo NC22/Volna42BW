@@ -22,6 +22,7 @@ enum uiWidgetType {
 	uiPressure, 
 	uiDate,
 	uiPressureRemote,
+	uiCalendar,
 
     uiSCD4XCO2,
     uiSCD4XTemp,

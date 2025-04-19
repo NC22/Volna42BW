@@ -545,11 +545,11 @@ void Screen4in2UI::updatePartialClock() {
     #endif
 
     delay(100); 
-
+        
     // для корректного обновления заполняем область фоновым цветом, иначе на контроллере SSD1683 после выхода из сна обноляет некорректно
     #if defined(WAVESHARE_BW_42_SSD1683)
 
-      if (methodInvert) {
+      if (methodInvert) { // вариант с инвертированием текущего буфера - тоже срабатывает, но выглядит при обновлении иначе
 
           displayDriver->displayPartial(
             screen->bufferBW,
@@ -561,7 +561,7 @@ void Screen4in2UI::updatePartialClock() {
             true 
           );
 
-      } else {
+      } else { // заполнение фоновым цветом
 
           displayDriver->displayPartial(
             NULL, 

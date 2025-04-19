@@ -112,6 +112,7 @@ const uiWidgetDefaults widgetsDefaults[] PROGMEM = {
     {18, uiSCD4XCO2},
     {19, uiSCD4XTemp},
     {20, uiSCD4XHum},
+    {21, uiCalendar},
 };
 
 const size_t widgetsDefaultsSize PROGMEM = sizeof(widgetsDefaults) / sizeof(widgetsDefaults[0]);
