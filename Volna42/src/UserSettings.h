@@ -33,7 +33,7 @@
 #include <ui/out/locale_en/locale.h>
 #endif
 
-const char productVersion[] PROGMEM = "0.95";
+const char productVersion[] PROGMEM = "0.96";
 
 // [Режим точки доступа в случае отсутствия возможности подключится к Wifi]
 
@@ -99,6 +99,6 @@ const char cfgMqttHADevice[] PROGMEM = "";                     // any unique dev
 const char cfgMqttDomoticzPrefix[] PROGMEM = "";               // usually "domoticz/in"
 const char cfgMqttDomoticzDeviceIds[] PROGMEM = "";            // numeric ids from Domoticz controll panel
 
-const unsigned int cdConfigVersion PROGMEM = 1013;             // [1003-20000] Увеличить значение для сброса кэша веб-версии \ корректного обновления без полной перезагрузки
+const unsigned int cdConfigVersion PROGMEM = 1014;             // [1003-20000] Увеличить значение для сброса кэша веб-версии \ корректного обновления без полной перезагрузки
 
 #endif    
