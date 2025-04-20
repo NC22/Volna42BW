@@ -125,6 +125,7 @@ var ENVLOCALE = {
     "widget_uiTempRemote" : "[Внешний] Температура",
     "widget_uiPressureRemote": "[Внешний] Давление",
     "widget_uiHumRemote" : "[Внешний] Влажность",
+    "widget_uiCalendar": "Календарь",
     
     "widget_uiSCD4XCO2" : "[CO2 Sensor] CO2",
     "widget_uiSCD4XTemp": "[CO2 Sensor] Температура",

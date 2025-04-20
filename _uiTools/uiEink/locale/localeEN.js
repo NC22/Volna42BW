@@ -127,6 +127,8 @@ var ENVLOCALE = {
     "widget_uiTempRemote": "[External] Temperature",
     "widget_uiPressureRemote": "[External] Pressure",
     "widget_uiHumRemote": "[External] Humidity",
+    "widget_uiCalendar": "Calendar",
+    
     
     "widget_uiSCD4XCO2" : "[CO2 Sensor] CO2",
     "widget_uiSCD4XTemp": "[CO2 Sensor] Temperature",

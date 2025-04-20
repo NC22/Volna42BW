@@ -174,8 +174,6 @@ int WidgetController::drawCalendarWidget(int baseX, int baseY, bool showTitles, 
     showTitles = false;
   }
 
-  // todo - вывод текущей даты - 19 апреля, сб, тогда можно будет комбинировать с мини часами
-
   if (showTitles) {    
 
     dayBlockWidth = font18x18Config.width + 10;
