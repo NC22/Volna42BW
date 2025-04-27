@@ -18,7 +18,7 @@
 #define BATTERY_INPUT_MAXRANGE 4095.0
 #define BATTERY_INPUT_MAXRANGEV 2.6
 
-#define WIFI_TX_POWER 40    // Переопределить мощность wifi датчика поумолчанию (в случае с проблемами с подключением к сети)
+// #define WIFI_TX_POWER 40    // Переопределить мощность wifi датчика поумолчанию (в случае с проблемами с подключением к сети)
 
 #else
 
