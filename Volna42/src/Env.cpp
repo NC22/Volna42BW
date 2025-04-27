@@ -38,7 +38,14 @@ void Env::begin() {
   initSensors();
 
   #if defined(ESP32)
+
       esp_reset_reason_t reason = esp_reset_reason();
+
+      #if defined(BAT_A0) && BAT_A0 >= 0
+          analogReadResolution(12);
+          analogSetAttenuation(ADC_11db); 
+      #endif
+
   #else
 
      int reason = -1;
@@ -1499,7 +1506,23 @@ KellyCanvas * Env::getCanvas() {
 }
 
 float Env::readBatteryV() {
-    
+
+    #if !defined(BATTERY_R1V)
+    #define BATTERY_R1V 50.7f
+    #endif
+
+    #if !defined(BATTERY_R2GND)
+    #define BATTERY_R2GND 99.26f
+    #endif
+
+    #if !defined(BATTERY_INPUT_MAXRANGE)
+    #define BATTERY_INPUT_MAXRANGE 4095.0
+    #endif
+
+    #if !defined(BATTERY_INPUT_MAXRANGEV)
+    #define BATTERY_INPUT_MAXRANGEV 2.8
+    #endif
+
     #ifdef BAT_ADS1115
 
       if (!asensor) return -1;
@@ -1510,8 +1533,8 @@ float Env::readBatteryV() {
       // return float(adc0) * 0.1875 / 1000.0;
 
       
-      float R1V = 50.7f;
-      float R2GND = 99.26f;
+      float R1V = BATTERY_R1V;
+      float R2GND = BATTERY_R2GND;
       // Vout = (4.2f * R2GND) / (R1V + R2GND) 
       // float rV = aInputSensor.computeVolts(adc0) * ((R1V + R2GND) / R2GND); // back devider val
       float rV2 = (float(adc0) * 0.1875 / 1000.0) * ((R1V + R2GND) / R2GND); // back devider val
@@ -1520,13 +1543,18 @@ float Env::readBatteryV() {
     #elif defined(BAT_A0) && BAT_A0 >= 0
 
       #if defined(ESP32)
-          // todo - check method 
-          float R1V = 50.7f;
-          float R2GND = 99.26f;
+          
+          float R1V = BATTERY_R1V;
+          float R2GND = BATTERY_R2GND;
           int adcValue = analogRead(BAT_A0); 
-          float voltage = (adcValue / 4095.0) * 3.3; 
-          // возможно соответствие 4095 - 3.3v будет не стабильным т.к. есп не будет делать корректировок, именно для ESP32, не тестировал
-          return voltage * ((R1V + R2GND) / R2GND); 
+          float voltage = (adcValue / BATTERY_INPUT_MAXRANGE) * BATTERY_INPUT_MAXRANGEV; 
+
+          float rV = voltage * ((R1V + R2GND) / R2GND);
+
+          Serial.print(F("[TEST voltage : ] ")); Serial.println(rV);
+          Serial.print(F("[TEST analog read : ] ")); Serial.println(analogRead(adcValue));
+
+          return rV;
 
       #else
 

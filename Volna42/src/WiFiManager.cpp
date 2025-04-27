@@ -36,10 +36,14 @@ wl_status_t WiFiManager::connect(String sid, String password) {
     enabledStatus = WIFI_MODE_NULL;
     WiFi.softAPdisconnect();
     WiFi.disconnect();
-    WiFi.mode(WIFI_STA);   
+    WiFi.mode(WIFI_STA);
 
-    #if defined(ESP32_C3_SUPERMINI)
-    esp_wifi_set_max_tx_power(40); 
+    #if defined(ESP32_C3_SUPERMINI) && !defined(WIFI_TX_POWER)
+    #define WIFI_TX_POWER 40 
+    #endif
+    
+    #if defined(ESP32) && defined(WIFI_TX_POWER)
+        esp_wifi_set_max_tx_power(WIFI_TX_POWER); 
     #endif
     // WiFi.setSleepMode(WIFI_NONE_SLEEP);
 

@@ -7,7 +7,18 @@
 #define DEFAULT_I2C_SDA SDA // I2C SDA [ESP32] Can be assigned any unused pin
 
 #define DEEPSLEEP_MEMORY 1  // 1 - Использовать RTC (энергозависимая память) при уходе в режим глубокого сна, 2 - Использовать NVS память (постоянная память - рекомендуется использовать если есть проблемы с RTC)
-#define BATTERY_SENSOR_PIN -1
+
+#define BATTERY_SENSOR_PIN -1 // аналоговый пин для замеров уровня заряда батареи -1 - без батареи
+
+// Из оф. документации ESP32
+// ADC_11db The input voltage of ADC will be attenuated, extending the range of measurement to up to approx. 2600 mV. (1V input = ADC reading of 1575)
+// соответственно делитель напряжения подбирать чтобы на вход  
+#define BATTERY_R1V 32.6f
+#define BATTERY_R2GND 47.2f
+#define BATTERY_INPUT_MAXRANGE 4095.0
+#define BATTERY_INPUT_MAXRANGEV 2.6
+
+#define WIFI_TX_POWER 40    // Переопределить мощность wifi датчика поумолчанию (в случае с проблемами с подключением к сети)
 
 #else
 
@@ -53,8 +64,8 @@
 // [Battery sensor mode] | [Режим чтения показаний заряда батареи]
 
 // #define BAT_NO                 // Disable battery sensor - always ON | Выключить чтение показаний батареи - не засыпать
-// #define BAT_ADS1115            // Read V by ADS1115 module | Чтение V батареи через I2C модуль ADS1115 [Input = A1, R1V=50.7kOm, R2GND=99.26kOm, Env::readBatteryV()]
-#define BAT_A0 BATTERY_SENSOR_PIN // Read V by analog pin A0 (or by PIN N in ESP32) | Чтение V через аналоговый вход A0 (или через заданый пин в ESP32) [ESP8266, R1V=180kOm], [ESP32, R1V=50.7kOm, R2GND=99.26kOm, Env::readBatteryV()]
+// #define BAT_ADS1115            // Read V by ADS1115 module | Чтение V батареи через I2C модуль ADS1115 [Input = A1, R1V=BATTERY_R1V, R2GND=BATTERY_R2GND, Env::readBatteryV()]
+#define BAT_A0 BATTERY_SENSOR_PIN // Read V by analog pin A0 (or by PIN N in ESP32) | Чтение V через аналоговый вход A0 (или через заданый пин в ESP32) [ESP8266, R1V=180kOm], [ESP32, R1V=BATTERY_R1V, R2GND=BATTERY_R2GND, Env::readBatteryV()]
 
 #if defined(HELTEC_BW_15_S810F) || defined(WAVESHARE_R_BW_15_SSD1683)
 /*
@@ -189,7 +200,7 @@
 
 // [Optional sleep switch] | [Опциональный тригер режима сна]
 // По умолчанию переход в режим сна осуществляется всегда при наличии данных от сенсора уровня батареи, но можно вынести на отдельную кнопку \ переключатель
-// Если установлен SLEEP_SWITCH_PIN, переход в режим сна осуществляется только если SLEEP_SWITCH_PIN в состоянии digitalRead = LOW
+// Если установлен SLEEP_SWITCH_PIN, переход в режим сна осуществляется только если SLEEP_SWITCH_PIN в состоянии digitalRead = LOW, если параметр не установлен то уходим в сон если работаем от батареи (есть данные на сенсоре A0)
 
 // #define SLEEP_SWITCH_PIN -1    // [ESP32] [ESP8266 - not enough pins, if 4.2' display used]
 

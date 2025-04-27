@@ -635,6 +635,7 @@ void WidgetController::drawWidget(uiWidgetStyle widget) {
 
         widgetWidth = 216;
         widgetHeight = 216;
+        // todo - check size and add fill support
         drawCalendarWidget(baseX, baseY, widget.params.indexOf("-t") != -1, widget.params.indexOf("-d") != -1);
         
     } else if  (widget.type == uiSCD4XHum || widget.type == uiSCD4XTemp || widget.type == uiSCD4XCO2) {
