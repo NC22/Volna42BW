@@ -56,9 +56,10 @@ Firmware Update page : http://192.168.1.1/update (login : admin, password : admi
 # Photos
 
 ![Weatherstation 4.2](_ImagesSrc/previews/2.png)
+![Weatherstation 4.2](_ImagesSrc/previews/3.jpg)
+![Weatherstation 4.2](_ImagesSrc/previews/5.jpg)
 ![Weatherstation 1.5](_ImagesSrc/previews/3.png)
 ![Weatherstation 4.2](_ImagesSrc/previews/1.png)
-
 # License
 
 [GNU General Public License v3](http://www.gnu.org/licenses/gpl.html)

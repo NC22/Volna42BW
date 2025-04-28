@@ -10,13 +10,13 @@
 
 #define BATTERY_SENSOR_PIN -1 // аналоговый пин для замеров уровня заряда батареи -1 - без батареи
 
-// Из оф. документации ESP32
-// ADC_11db The input voltage of ADC will be attenuated, extending the range of measurement to up to approx. 2600 mV. (1V input = ADC reading of 1575)
-// соответственно делитель напряжения подбирать чтобы на вход было не более 2.6v. Возможно допуски будут отличатся в конкретных моделях еспешек и может потребовотся калибровка.
-#define BATTERY_R1V 32.6f
+// Делитель (BATTERY_R1V и BATTERY_R2GND) подбирается исходя из верхнего порога чтения V аналогового входа вашей ESP32 (зависит от модели) и максимального V источника питания (4.2v)
+// Разные ESP32 имеют разный порог чтения V. Из тех что проверял - ESP32-S3 SuperMini понимает входное напряжение до 3.1v, ESP-C3 Zero ~2.5v, ESP-S2 Mini ~2.6v
+// Вы можете найти документацию по своей плате или провести тест используя Serial.println(analogRead(BATTERY_SENSOR_PIN)) для разных входных напряжений и вычислить соответствие V для значения 4095
+#define BATTERY_R1V 32.6f            
 #define BATTERY_R2GND 47.2f
-#define BATTERY_INPUT_MAXRANGE 4095.0
-#define BATTERY_INPUT_MAXRANGEV 2.6
+#define BATTERY_INPUT_MAXRANGE 4095.0 // максимально возможное значение в условных единицах analogRead(BATTERY_SENSOR_PIN)
+#define BATTERY_INPUT_MAXRANGEV 2.6   // соответствующее условному значению напряжение на входе BATTERY_SENSOR_PIN
 
 // #define WIFI_TX_POWER 40    // Переопределить мощность wifi датчика поумолчанию (в случае с проблемами с подключением к сети)
 
