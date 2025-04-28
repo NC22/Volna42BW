@@ -12,7 +12,7 @@
 
 // Из оф. документации ESP32
 // ADC_11db The input voltage of ADC will be attenuated, extending the range of measurement to up to approx. 2600 mV. (1V input = ADC reading of 1575)
-// соответственно делитель напряжения подбирать чтобы на вход  
+// соответственно делитель напряжения подбирать чтобы на вход было не более 2.6v. Возможно допуски будут отличатся в конкретных моделях еспешек и может потребовотся калибровка.
 #define BATTERY_R1V 32.6f
 #define BATTERY_R2GND 47.2f
 #define BATTERY_INPUT_MAXRANGE 4095.0
