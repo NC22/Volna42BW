@@ -9,12 +9,18 @@ KellyHAPartialType KellyOpenHA::fillPartialData(String & payload, String & colle
     
     if (payload.indexOf("temperature") != -1 && KellyOWParserTools::collectJSONFieldData("state", payload, collectedData)) {
         temp = KellyOWParserTools::validateFloatVal(collectedData);
+        if (KellyOWParserTools::collectJSONFieldData("unit_of_measurement", payload, collectedData)) {
+            temp = validateByUnitTemperature(temp, collectedData);
+        }
         return kowHATemperature;
     } else if (payload.indexOf("humidity") != -1 && KellyOWParserTools::collectJSONFieldData("state", payload, collectedData)) {
         hum = KellyOWParserTools::validateFloatVal(collectedData);
         return kowHAHumidity;
     } else if (payload.indexOf("pressure") != -1 && KellyOWParserTools::collectJSONFieldData("state", payload, collectedData)) {
         pressure = KellyOWParserTools::validateFloatVal(collectedData);
+        if (KellyOWParserTools::collectJSONFieldData("unit_of_measurement", payload, collectedData)) {
+            pressure = validateByUnitPressure(pressure, collectedData);
+        }
         return kowHAPressure;
     } else if (payload.indexOf("battery") != -1 && KellyOWParserTools::collectJSONFieldData("state", payload, collectedData)) {
         bat = KellyOWParserTools::validateFloatVal(collectedData);
@@ -22,6 +28,29 @@ KellyHAPartialType KellyOpenHA::fillPartialData(String & payload, String & colle
     }
     
     return kowHAUnknown;
+}
+
+// back to Celsius if returned format mismatched
+float KellyOpenHA::validateByUnitTemperature(float temperature, String & unitsInfo) {
+    
+    // first symbol is UTF8 - (0) degree and its two bytes - 0xC2 0xB0
+    
+    if (unitsInfo[2] == 'F') {
+        return (temperature - 32.0f) * 0.55556f;
+    } else {
+        return temperature;
+    }
+}
+
+// back to hPa if returned format mismatched
+float KellyOpenHA::validateByUnitPressure(float pressure, String & unitsInfo) {
+    if (unitsInfo == "mmHg") {
+        return pressure * 1.3332239f;
+    } else if (unitsInfo == "inHg") {
+        return pressure * 33.8639f; 
+    } else {
+        return pressure; // hPa or mbar
+    }
 }
 
 KellyHAPartialType KellyOpenHA::requestProcess(String & url, String & token, bool partialOnly) {
@@ -69,13 +98,20 @@ KellyHAPartialType KellyOpenHA::requestProcess(String & url, String & token, boo
     if (!partialOnly && KellyOWParserTools::collectJSONFieldData("temperature", payload, collectedData)) {
         
         temp = KellyOWParserTools::validateFloatVal(collectedData);
-
+        if (KellyOWParserTools::collectJSONFieldData("temperature_unit", payload, collectedData)) {
+            temp = validateByUnitTemperature(temp, collectedData);
+        }
+        
         if (KellyOWParserTools::collectJSONFieldData("humidity", payload, collectedData)) {
             hum = KellyOWParserTools::validateFloatVal(collectedData);
         }
 
         if (KellyOWParserTools::collectJSONFieldData("pressure", payload, collectedData)) {
+
             pressure = KellyOWParserTools::validateFloatVal(collectedData);
+            if (KellyOWParserTools::collectJSONFieldData("pressure_unit", payload, collectedData)) {
+                pressure = validateByUnitPressure(pressure, collectedData);
+            }
         }
 
         if (KellyOWParserTools::collectJSONFieldData("battery", payload, collectedData)) {

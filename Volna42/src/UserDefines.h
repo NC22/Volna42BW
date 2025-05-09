@@ -29,7 +29,7 @@
 // Workaround wakeup from deepsleep issue - https://github.com/esp8266/Arduino/issues/6318
 // Решение для исправления проблемы дешевых клонов плат ESP8266 D1 Mini с зависанием при выходе из сна 
 #define FIX_DEEPSLEEP   0                     // 0 - OFF, 1 - первый метод - непроверен \ first method - untested, 2 - второй, проверен в долгих тестах \ second, tested in long tests
-#define BATTERY_SENSOR_PIN 0
+#define BATTERY_SENSOR_PIN 0				  // A0 или -1 - без батареи 
 #endif
 
 #define PRESSURE_HPA false                    // pressure in hPa (default - mmHg - мм.рт.ст)
@@ -158,7 +158,7 @@
 #define DUI_PRESSURE_HOME true  // Показывать давление вместо надписи "влажность" если датчик поддерживает 
 #define DUI_PRESSURE_EXTERNAL true // тоже для улицы, если данные доступны
 // #define DUI_PRESSURE_COPY_TO_EXT // наследовать данные давления с внутреннего датчика BME280 если данные улицы не доступны (не поддерживает измерение давления)
-// #define DUI_CO2 // Показывать CO2 вместо надписи "влажность" в блоке "дом" если датчик есть (приоритетней DUI_PRESSURE_HOME если так же активно)
+// #define DUI_CO2 // Показывать CO2 вместо надписи "влажность" в блоке "дом" если датчик есть (DUI_CO2 приоритетней DUI_PRESSURE_HOME если так же активно)
 
 // [ 4.2' Default interface ] [Оформление интерфейса по умолчанию]
 

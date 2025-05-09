@@ -461,6 +461,11 @@ int WidgetController::drawBatWidget(int baseX, int baseY, bool invert, bool ext,
     }
 }
 
+/*
+    Get formatted to mmHg or to hPa pressure value 
+    
+    pressure - input pressure value in pascals format (hpa * 100)
+*/
 String WidgetController::getPressureFormattedString(float pressure, bool hpa) {
 
     String result = "";

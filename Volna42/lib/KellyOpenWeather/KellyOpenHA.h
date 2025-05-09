@@ -27,6 +27,9 @@ class KellyOpenHA : public KellyWeatherApi {
     protected :
         KellyHAPartialType requestProcess(String & url, String & token, bool partialOnly);
         KellyHAPartialType fillPartialData(String & payload, String & collectedData);
+        float validateByUnitTemperature(float temperature, String & unitsInfo);
+        float validateByUnitPressure(float pressure, String & unitsInfo);
+
     public:        
         KellyOpenHA(int timeout = 5000);
         KellyOWIconType getMeteoIconState(const String& collectedData);
