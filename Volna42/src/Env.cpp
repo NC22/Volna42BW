@@ -1373,7 +1373,7 @@ float Env::readTemperature(bool defaultSource)  {
     // use data from CO2 sensor as altarnative if available
     #if defined(CO2_SCD41) 
         
-        Serial.println(F("[SCD41] [readTemperature]"));   
+        // Serial.println(F("[SCD41] [readTemperature]"));   
         if (updateSCD4X() && scd4XTemp != BAD_SENSOR_DATA) {
 
            return scd4XTemp + humOffset;
@@ -1412,12 +1412,12 @@ float Env::readPressure() {
 
 float Env::readHumidity(bool defaultSource) {
 
-    if (!defaultSource && tempSource == 1) {
+    if (!defaultSource && humSource == 1) {
 
         // use data from CO2 sensor as altarnative if available
         #if defined(CO2_SCD41) 
             
-             Serial.println(F("[SCD41] [readHumidity]"));   
+            // Serial.println(F("[SCD41] [readHumidity]"));   
 
             if (updateSCD4X() && scd4XHumidity != BAD_SENSOR_DATA) {
 
