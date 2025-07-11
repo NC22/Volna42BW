@@ -1342,50 +1342,58 @@ bool Env::updateSCD4X() {
 
     } else {
 
+        scd4XCO2 += co2Offset;
         scd4XerrorTick = 0;
         return true;
     }
   #endif
 }
 
-float Env::readTemperature()  {
+float Env::readTemperature(bool defaultSource)  {
+
+  if (!defaultSource && tempSource == 2) {
 
     // Optional one wire temperature sensor
-
     #if defined(INTERNAL_SENSOR_DS18B20)
 
       float tempC = dsSensors->getTempC(dsTermometr);
+
       if(tempC == DEVICE_DISCONNECTED_C) {
-        Serial.println(F("[DS18B20] Error: Could not read temperature data"));        
-      } else return tempC + tempOffset;
 
-    #endif
-
-    // Default BME280 or replacements
-    
-    // disable read temperature complitly
-    #if defined(INTERNAL_SENSOR_BME280) && INTERNAL_SENSOR_BME280 == false
-        return BAD_SENSOR_DATA;
-    #else
-
-      if (tsensor) {
-
-        return tempSensor.readTemperature() + tempOffset;
+        Serial.println(F("[DS18B20] [readTemperature] Error: Could not read temperature data"));        
 
       } else {
-
-        // use data from CO2 sensor as altarnative if available
-        #if defined(CO2_SCD41) 
-            
-            Serial.println("[readTemperature] Used data from CO2 sensor");
-            if (updateSCD4X() && scd4XTemp != BAD_SENSOR_DATA) return scd4XTemp;
-            else return BAD_SENSOR_DATA;
-
-        #endif
-
-        return BAD_SENSOR_DATA;
+        return tempC + tempOffset;
       }
+
     #endif
+
+  } else if (!defaultSource && tempSource == 1) {
+
+    // use data from CO2 sensor as altarnative if available
+    #if defined(CO2_SCD41) 
+        
+        Serial.println(F("[SCD41] [readTemperature]"));   
+        if (updateSCD4X() && scd4XTemp != BAD_SENSOR_DATA) {
+
+           return scd4XTemp + humOffset;
+
+        } else {          
+           Serial.println(F("[SCD41] [readTemperature] Error: Could not read temperature data"));   
+        }        
+
+    #endif
+
+  } else {
+
+    if (tsensor) {
+
+      if (defaultSource) return tempSensor.readTemperature();
+      else return tempSensor.readTemperature() + tempOffset;
+    } 
+  }
+
+  return BAD_SENSOR_DATA;
 }
 
 // (1 °C × 9/5) + 32 = 33,8 °F
@@ -1397,28 +1405,39 @@ float Env::toFahrenheit(float celsius) {
 
 float Env::readPressure() {
 
-    return tsensor ? tempSensor.readPressure() : -1000.0f;
+  if (tsensor) return tempSensor.readPressure();
+  return BAD_SENSOR_DATA;
+    
 }
 
-float Env::readHumidity() {
+float Env::readHumidity(bool defaultSource) {
 
-    if (!tsensor) {
-        
-      // use data from CO2 sensor as altarnative if available
-      #if defined(CO2_SCD41) 
-          
-          Serial.println("[readHumidity] Used data from CO2 sensor");
-          if (updateSCD4X() && scd4XHumidity != BAD_SENSOR_DATA) return scd4XHumidity;
-          else return BAD_SENSOR_DATA;
+    if (!defaultSource && tempSource == 1) {
 
-      #endif
+        // use data from CO2 sensor as altarnative if available
+        #if defined(CO2_SCD41) 
+            
+             Serial.println(F("[SCD41] [readHumidity]"));   
 
-      return BAD_SENSOR_DATA;
+            if (updateSCD4X() && scd4XHumidity != BAD_SENSOR_DATA) {
+
+              return scd4XHumidity + humOffset;
+
+            } else {          
+              Serial.println(F("[SCD41] [readHumidity] Error: Could not read pressure data"));   
+            }        
+
+        #endif
 
     } else {
 
-      return tempSensor.readHumidity();
-    }    
+        if (tsensor) {
+          if (defaultSource) return tempSensor.readHumidity();
+          else return tempSensor.readHumidity() + humOffset;
+        }
+    }
+
+    return BAD_SENSOR_DATA;
 }
 
 bool Env::isOnBattery() {
@@ -2959,6 +2978,42 @@ void Env::validateConfig(unsigned int version, std::vector<cfgOptionKeys> * upda
 
     } else {
         tempOffset = 0.0;
+    }
+
+    if (cfg.cfgValues[cHumOffset].length() > 0) {
+
+        humOffset = cfg.getFloat(cHumOffset);
+        if (cfg.sanitizeError) humOffset = 0.0;
+
+    } else {
+        humOffset = 0.0;
+    }
+
+    if (cfg.cfgValues[cCO2Offset].length() > 0) {
+
+        co2Offset = cfg.getInt(cCO2Offset);
+        if (cfg.sanitizeError) co2Offset = 0;
+
+    } else {
+        co2Offset = 0;
+    }
+
+    if (cfg.cfgValues[cTempSourceInternal].length() > 0) {
+
+        tempSource = cfg.getInt(cTempSourceInternal);
+        if (cfg.sanitizeError || tempSource > 2) tempSource = 0;
+
+    } else {
+        tempSource = 0;
+    }
+
+    if (cfg.cfgValues[cHumSourceInternal].length() > 0) {
+
+        humSource = cfg.getInt(cHumSourceInternal);
+        if (cfg.sanitizeError || humSource > 1) humSource = 0;
+
+    } else {
+        humSource = 0;
     }
 
     if (cfg.cfgValues[cSyncEvery].length() > 0) {

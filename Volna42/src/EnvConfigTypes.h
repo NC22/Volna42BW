@@ -46,6 +46,11 @@ enum cfgOptionKeys {
 
     cTitleIndoor,
     cTitleExternal,
+    
+    cHumOffset,
+    cCO2Offset,
+    cTempSourceInternal,
+    cHumSourceInternal,
 
     cNull,
 };

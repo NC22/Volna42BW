@@ -184,7 +184,12 @@ class Env {
         void mqttMessageReceivedCallback(char* topic, uint8_t* payload, unsigned int length);
 
         clockFormatted fTime;
+
         float tempOffset = 0.0;
+        uint8_t humOffset = 0;
+        uint8_t co2Offset = 0.0;
+        uint8_t tempSource = 0;
+        uint8_t humSource = 0;
 
     public:
         time_t defaultTime = 1510592825;
@@ -255,9 +260,9 @@ class Env {
         bool updateSCD4X();
         void updateBattery(int &telemetryIndex);
 
-        float readTemperature();
+        float readTemperature(bool defaultSource = false);
         float readPressure();
-        float readHumidity();
+        float readHumidity(bool defaultSource = false);
         
         bool isPartialUpdateRequired();
         bool isSyncRequired();

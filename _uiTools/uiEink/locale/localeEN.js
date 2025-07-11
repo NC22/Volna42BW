@@ -14,7 +14,13 @@ var ENVLOCALE = {
     "cfg_titleIndoor" : "Indoor title",
     "cfg_titleExternal" : "Outdoor title",
     "cfg_timestamp" : "Date & Time",
-    "cfg_tempOffset" : "Temperature offset (from -10℃ to 10℃)",
+    "cfg_tempOffset" : "Temperature offset",
+    
+    "cfg_humOffset" : "Humidity offset",
+    "cfg_co2Offset" : "CO2 offset",    
+    "cfg_tempSource" : "Internal sensor temp source (0 - default, 1 - scd4x, 2 - ds18b20)",
+    "cfg_humSource" : "Internal sensor humidity source (0 - default, 1 - scd4x)",
+    
     "cfg_ntpHosts" : "NTP Server (off - for disable)",
 
     "cfg__extSensor" : "External sensor (Domoticz & HA & OpenWeather)",      

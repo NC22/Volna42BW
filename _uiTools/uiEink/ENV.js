@@ -29,10 +29,16 @@ var ENVDATA = {
       "_general" : null,
       
           "ntpHosts": {"filter" : "string"},
-          "timezone": {"filter" : "string"},   
+          "timezone": {"filter" : "string"},
           "timestamp" : {"filter" : "string", "placeholder" : "2024-05-01 13:37:00"}, 
-		  "updateMinutes" : {"filter" : "string"},
-          "tempOffset" : {"filter" : "string"},   
+          "updateMinutes" : {"filter" : "string"},
+          "tempOffset" : {"filter" : "string"},
+          
+          "humOffset" : {"filter" : "string"},
+          "co2Offset" : {"filter" : "string"},
+          "tempSource" : {"filter" : "string"},
+          "humSource" : {"filter" : "string"},
+          
           "sleepTime" : {"filter" : "string"},  
           "syncEvery" : {"filter" : "string"}, 
           "timeFormat12" : {"filter" : "string"},

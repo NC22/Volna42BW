@@ -42,6 +42,13 @@ const char pgmCfgUpdateMinutes[] PROGMEM = "updateMinutes";
 const char pgmCfgTitleIndoor[] PROGMEM = "titleIndoor";
 const char pgmCfgTitleExternal[] PROGMEM = "titleExternal";
 
+
+const char pgmCfgHumOffset[] PROGMEM = "humOffset";
+const char pgmCfgCO2Offset[] PROGMEM = "co2Offset";
+const char pgmCfgTempSourceInternal[] PROGMEM = "tempSource"; 
+const char pgmCfgHumSourceInternal[] PROGMEM = "humSource";
+
+
 const cfgOption cfgOptions[] = {
     {cWifiNetwork, ctypeString, false, pgmCfgWifiNetwork, true},
     {cWifiPassword, ctypeString, true, pgmCfgWifiPassword, true},
@@ -84,6 +91,11 @@ const cfgOption cfgOptions[] = {
     {cUpdateMinutes, ctypeInt, false, pgmCfgUpdateMinutes, false},
     {cTitleIndoor, ctypeString, false, pgmCfgTitleIndoor, false},
     {cTitleExternal, ctypeString, false, pgmCfgTitleExternal, false},
+
+    {cHumOffset, ctypeInt, false, pgmCfgHumOffset, false},
+    {cCO2Offset, ctypeInt, false, pgmCfgCO2Offset, false},
+    {cTempSourceInternal, ctypeInt, false, pgmCfgTempSourceInternal, false},
+    {cHumSourceInternal, ctypeInt, false, pgmCfgHumSourceInternal, false},
 };
 
 const size_t cfgOptionsSize PROGMEM = sizeof(cfgOptions) / sizeof(cfgOptions[0]);

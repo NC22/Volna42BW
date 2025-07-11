@@ -14,7 +14,13 @@ var ENVLOCALE = {
     "cfg_titleIndoor" : "Заголовок датчика помещения",
     "cfg_titleExternal" : "Заголовок внешнего датчика",
     "cfg_timestamp" : "Дата & Время",
-    "cfg_tempOffset" : "Корректировка температуры (от -10℃ до 10℃)",  
+    "cfg_tempOffset" : "Корректировка температуры",  
+    
+    "cfg_humOffset" : "Корректировка влажности",
+    "cfg_co2Offset" : "Корректировка CO2",
+    "cfg_tempSource" : "Источник данных температуры (0 - по умолчанию, 1 - датчик scd4x, 2 - ds18b20)",
+    "cfg_humSource" : "Источник данных влажности (0 - по умолчанию, 1 - датчик scd4x)",
+    
     "cfg_ntpHosts" : "NTP сервер (off - не использовать)",
 
     "cfg__extSensor" : "Внешний датчик (Domoticz & HA & OpenWeather)",      

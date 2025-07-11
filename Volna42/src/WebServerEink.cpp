@@ -1019,6 +1019,10 @@ String WebServerEink::getInfo() {
                 json += "\",";
             }
 
+            json += "\"temperature__default\":" + String(env->readTemperature(true)) + ",";
+            json += "\"humidity__default\":" + String(env->readHumidity(true)) + ",";
+            json += "\"pressure__default\":" + String(env->readPressure()) + ",";
+
             #if defined(CO2_SCD41)
             if (env->scd4XCO2 != 0) {
 
