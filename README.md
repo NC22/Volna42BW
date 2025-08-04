@@ -1,6 +1,6 @@
 ## Weather station *Volna 2BW42* firmware
 
-[Project homepage](https://volna42.com/)
+[Project homepage](https://42volna.ru/)
 
 ![Interface for weatherstation 4.2](_ImagesSrc/previews/ui1.png)
 ![Interface for weatherstation 1.5](_ImagesSrc/previews/ui3.png)
@@ -8,7 +8,7 @@
 A weather station project with a monochrome E-Ink display
 
 - E-Ink displays 4.2' (400x300), 1.5' (200x200)  
-  (Waveshare, WeAct, Heltec or equivalents - [List of supported displays](https://volna42.com/displays/))
+  (Waveshare, WeAct, Heltec or equivalents - [List of supported displays](https://42volna.ru/displays/))
 - Temperature and humidity sensor - BME280; Optional : CO2 - SCD41 sensor, Temp - DS18B20 sensor;
 - Arduino Framework (C++, PlatformIO); compatible with **ESP8266** and **ESP32**
 - Create and upload your own design through the web panel
@@ -37,21 +37,21 @@ Password : volnaaccess
 Web-interface : http://192.168.1.1/  
 Firmware Update page : http://192.168.1.1/update (login : admin, password : admin)  
 
-[Full documentation & extended build instructions](https://volna42.com/instructions/)  
-[Schematics](https://volna42.com/scheme/)
+[Full documentation & extended build instructions](https://42volna.ru/instructions/)  
+[Schematics](https://42volna.ru/scheme/)
 
 # Developer tools 
 
-[1-bit Image Converter & Icon Editor](https://volna42.com/tools/glypheditor)  
-[Fonts generator](https://volna42.com/tools/fontconverter)  
+[1-bit Image Converter & Icon Editor](https://42volna.ru/tools/glypheditor)  
+[Fonts generator](https://42volna.ru/tools/fontconverter)  
 [Tools GitHub Repo](https://github.com/NC22/Volna42BW-Tools)  
 
 # Links
 
-[Cases examples](https://volna42.com/boxes/)  
-[How to setup connection with external sensor](https://volna42.com/instructions/external)  
-[How to setup sending data to mqtt broker](https://volna42.com/instructions/mqtt)  
-[Trobleshooting](https://volna42.com/instructions/issues)  
+[Cases examples](https://42volna.ru/boxes/)  
+[How to setup connection with external sensor](https://42volna.ru/instructions/external)  
+[How to setup sending data to mqtt broker](https://42volna.ru/instructions/mqtt)  
+[Trobleshooting](https://42volna.ru/instructions/issues)  
 
 # Photos
 

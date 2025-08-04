@@ -74,7 +74,7 @@ KellyTools.showTitle = function(subpage) {
     document.title = subpage ? lloc('title') + ' - ' + subpage : lloc('title');
     
     var host = "kelly.catface.ru/";
-    if (lloc('title').indexOf('2BW42') != -1) host = "volna42.com/author/?from=webui";    
+    if (lloc('title').indexOf('2BW42') != -1) host = "42volna.ru/author/?from=webui";    
     
     var html =  '<a href="/" class="kelly-app-name">' + lloc('title') + (KellyTools.version ? ' <span class="kelly-app-version">v' + KellyTools.version : '') + '</span></a>';
         html += '<span class="kelly-copyright">created by <a href="https:/' + '/' + host + '" target="_blank">nradiowave</a></span>';
