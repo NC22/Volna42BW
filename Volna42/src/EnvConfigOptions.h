@@ -48,6 +48,10 @@ const char pgmCfgCO2Offset[] PROGMEM = "co2Offset";
 const char pgmCfgTempSourceInternal[] PROGMEM = "tempSource"; 
 const char pgmCfgHumSourceInternal[] PROGMEM = "humSource";
 
+const char pgmCfgImageNightStart[] PROGMEM = "imageNightStart"; 
+const char pgmCfgImageNightEnd[] PROGMEM = "imageNightEnd";
+
+/* KEEP ORDER to prevent unexpected read from saved config */
 
 const cfgOption cfgOptions[] = {
     {cWifiNetwork, ctypeString, false, pgmCfgWifiNetwork, true},
@@ -71,7 +75,7 @@ const cfgOption cfgOptions[] = {
 
     {cScreenRotate, ctypeBool, false, pgmCfgScreenRotate, false},
     {cScreenLandscape, ctypeBool, false, pgmCfgScreenLandscape, false},
-    {cSleepTime, ctypeInt, false, pgmCfgSleepTime, false},
+    {cSleepTime, ctypeInt, false, pgmCfgSleepTime, false},  // full screen update timer in minutes, for partial update (clock) interval see [PARTIAL_UPDATE_INTERVAL]
     {cTimestamp, ctypeString, false, pgmCfgTimestamp, false},
 
     {cWifiNetworkFallback, ctypeString, false, pgmCfgWifiNetworkFallback, false},
@@ -96,6 +100,10 @@ const cfgOption cfgOptions[] = {
     {cCO2Offset, ctypeInt, false, pgmCfgCO2Offset, false},
     {cTempSourceInternal, ctypeInt, false, pgmCfgTempSourceInternal, false},
     {cHumSourceInternal, ctypeInt, false, pgmCfgHumSourceInternal, false},
+    
+    
+    {cImageNightStart, ctypeInt, false, pgmCfgImageNightStart, false},
+    {cImageNightEnd, ctypeInt, false, pgmCfgImageNightEnd, false},
 };
 
 const size_t cfgOptionsSize PROGMEM = sizeof(cfgOptions) / sizeof(cfgOptions[0]);

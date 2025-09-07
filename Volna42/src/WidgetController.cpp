@@ -9,6 +9,14 @@ void WidgetController::setEnv(Env * senv) {
 	env = senv;
 }
 
+bool WidgetController::isHourInRange(int h, int hourFrom, int hourTo) {
+    if (hourFrom <= hourTo) {
+      return (h >= hourFrom && h < hourTo);
+    } else {
+      return (h >= hourFrom || h < hourTo);
+    }
+}
+
 void WidgetController::partialDataSet(int x, int y, unsigned int width, unsigned int height) {
         
     KellyCanvas * screen = env->getCanvas();

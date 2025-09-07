@@ -112,8 +112,12 @@ void setup()
   } else if (env.isSleepRequired() && !env.isSyncRequired()) {
     
     Serial.println(F("[Sleep requested]: no any addition actions required...update screen & goto sleep"));  
-    
+     
+    //  ToDo : датчик SCD требует 5сек. на переинициализацию т.к. шина I2C остается жить. Нужно выключать его по питанию отдельно 
+    env.initSCD4XAfterSleep();
+
     delay(300);
+
     env.updateTelemetry();
 
     env.initDefaultTime();

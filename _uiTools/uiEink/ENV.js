@@ -8,6 +8,8 @@ var ENVDATA = {
           
           "imageUpload": {"ftype" : "action", "location" : "/upload/image"},   
           "imagePreset": {"filter" : "string"},
+          "imageNightStart": {"filter" : "string"},
+          "imageNightEnd": {"filter" : "string"},
       
       "_/imageFeed" : null,
       

@@ -48,9 +48,11 @@ var ENVLOCALE = {
     "cfg_screenRotate" : "Screen flip",
     "cfg_screenLandscape" : "Landscape mode (0-1)",
 
-    "cfg__imageFeed" : "Custom design",
+    "cfg__imageFeed" : "Design",
     "cfg_imagePreset" : "Preset (-loop - all files by order)",
-
+    "cfg_imageNightStart" : "Night starts at (0-23)",
+    "cfg_imageNightEnd" : "Night ends at (0-23)",
+    
     "form_text_send" : "Send",
 
     "help" : "Tip",

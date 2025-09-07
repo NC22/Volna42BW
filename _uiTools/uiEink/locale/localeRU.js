@@ -48,8 +48,10 @@ var ENVLOCALE = {
     "cfg_screenRotate" : "Перевернуть экран (0-1)",
     "cfg_screenLandscape" : "Альбомный режим (0-1)",
 
-    "cfg__imageFeed" : "Свое оформление",
+    "cfg__imageFeed" : "Оформление",
     "cfg_imagePreset" : "Пресет (-loop - по порядку)",
+    "cfg_imageNightStart" : "Ночь начинается в (0-23)",
+    "cfg_imageNightEnd" : "Ночь заканчивается в (0-23)",
 
     "form_text_send" : "Отправить",   
 

@@ -51,6 +51,9 @@ enum cfgOptionKeys {
     cCO2Offset,
     cTempSourceInternal,
     cHumSourceInternal,
+    
+    cImageNightStart,
+    cImageNightEnd,
 
     cNull,
 };

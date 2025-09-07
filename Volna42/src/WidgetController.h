@@ -31,6 +31,8 @@ class WidgetController {
 	void drawClockWidgetTiny(int baseX, int baseY, bool clockOnly = false); // в формате одной строки  --  12:00 пн, 12.04.25
 	void drawClockWidget(int baseX, int baseY, bool border, bool fill, bool invert, int & resultWidth, int & resultHeight, uint8_t fontType = 1); 
 	void drawSystemInfoWidget(int baseX, int baseY, bool shortFormat = false);
+
+    bool isHourInRange(int h, int hourFrom, int hourTo);
 };
 
 #endif	

@@ -628,7 +628,7 @@ void Env::sleep()  {
     #else
 
       Serial.print(F("[Deep sleep] "));  
-
+      
       if (lastState.updateMinutes) {
         int partialSleepTime = getPartialSleepTime();
         Serial.println(partialSleepTime); 
@@ -1294,6 +1294,35 @@ void Env::updateTelemetry()  {
   Serial.println(lastState.lastTelemetry[key].bat);
 }
 
+bool Env::initSCD4XAfterSleep() {
+  
+  #if !defined(CO2_SCD41) 
+
+      return false;
+
+  #else
+
+    uint16_t error;
+    char errorMessage[256];
+
+    error = scd4x.stopPeriodicMeasurement();
+    delay(500);
+
+    error = scd4x.startPeriodicMeasurement();
+    if (error) {
+      errorToString(error, errorMessage, 256);
+      Serial.print(F("[initSCD4X] Error: "));
+      Serial.println(errorMessage);
+      return false;
+    }
+
+    Serial.println(F("[initSCD4X] SCD4X measurement started..."));
+    delay(5000); 
+    return true;
+
+  #endif
+}
+
 /* 
   return true if CO2 sensor measurments is available 
 */
@@ -1314,8 +1343,13 @@ bool Env::updateSCD4X() {
     scd4XLastRead = millis();
     uint16_t error; 
     char errorMessage[256];
-    error = scd4x.readMeasurement(scd4XCO2, scd4XTemp, scd4XHumidity);
-    if (error) {
+
+    uint16_t tmpScd4XCO2 = 0;
+    float tmpScd4XTemp;
+    float tmpScd4XHumidity;
+
+    error = scd4x.readMeasurement(tmpScd4XCO2, tmpScd4XTemp, tmpScd4XHumidity);
+    if (error) { // clear report error
 
         Serial.println(F("[updateSCD4X] Error trying to execute readMeasurement(): "));
         errorToString(error, errorMessage, 256);
@@ -1329,7 +1363,7 @@ bool Env::updateSCD4X() {
 
         return (scd4XCO2 > 0) ? true : false;
 
-    } else if (scd4XCO2 == 0) {
+    } else if (tmpScd4XCO2 == 0) { // bad measurment
 
         Serial.println(F("[updateSCD4X] Invalid sample detected, skipping."));
         scd4XerrorTick++;
@@ -1340,7 +1374,11 @@ bool Env::updateSCD4X() {
 
         return (scd4XCO2 > 0) ? true : false;
 
-    } else {
+    } else { // all good
+
+        scd4XCO2 = tmpScd4XCO2;
+        scd4XTemp = tmpScd4XTemp;
+        scd4XHumidity = tmpScd4XHumidity;
 
         scd4XCO2 += co2Offset;
         scd4XerrorTick = 0;
@@ -1761,7 +1799,7 @@ bool Env::initSensors() {
           errorToString(terror, errorMessage, 256);
           Serial.println(errorMessage);
       } else {
-          Serial.print("Serial: 0x");
+          Serial.print("[SCD4X] Serial: 0x");
           Serial.print(serial0 < 4096 ? "0" : "");
           Serial.print(serial0 < 256 ? "0" : "");
           Serial.print(serial0 < 16 ? "0" : "");
@@ -2839,7 +2877,7 @@ bool Env::cuiReadStorageFile(bool widgetsOnly) {
 }
 
 /*
-  Get Partial update time based on user config.
+  Get Partial update time in SECONDS based on user config.
   If user setted cUpdateMinutes = 1, default PARTIAL_UPDATE_INTERVAL or 60sec will be used, if setted any correct integer seconds value > 60 it will be accepted instead
 */
 int Env::getPartialSleepTime() {
@@ -3047,6 +3085,25 @@ void Env::validateConfig(unsigned int version, std::vector<cfgOptionKeys> * upda
     } else {
         hour12 = pgm_read_byte(&cfg12HourFormat) > 0;
     }
+
+    if (cfg.cfgValues[cImageNightStart].length() > 0) {
+
+        nightStart = cfg.getInt(cImageNightStart);
+        if (cfg.sanitizeError) nightStart = 0;
+
+    } else {
+        nightStart = 0;
+    }
+
+    if (cfg.cfgValues[cImageNightEnd].length() > 0) {
+
+        nightEnd = cfg.getInt(cImageNightEnd);
+        if (cfg.sanitizeError) nightStart = 6;
+
+    } else {
+        nightEnd = 6;
+    }
+
 
     if (cfg.cfgValues[cScreenLandscape].length() > 0) {
 

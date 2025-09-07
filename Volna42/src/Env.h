@@ -76,6 +76,8 @@ extern const size_t widgetsDefaultsSize PROGMEM;
 extern const uint8_t cfgCelsius PROGMEM;
 extern const uint8_t cfg12HourFormat PROGMEM;
 extern const uint8_t cfgUpdateMinutes PROGMEM;
+extern const uint8_t cfgNightStart PROGMEM;
+extern const uint8_t cfgNightEnd PROGMEM;
 
 extern const uint8_t cfgExtLocal PROGMEM;                 
 extern const char cfgExtSensorLocal[] PROGMEM;
@@ -210,6 +212,9 @@ class Env {
         bool hour12;   // 12-hour format
         bool land;     // landscape screen orientation mode
         bool rotate;   // flip screen by 180deg
+        
+        uint8_t nightStart;
+        uint8_t nightEnd;
 		
         bool workEnabled = true; // redraw screen in constant mode - false - pause until webapi signal (/api/update)
 
@@ -258,6 +263,7 @@ class Env {
         float toFahrenheit(float celsius);
         
         bool updateSCD4X();
+        bool initSCD4XAfterSleep();
         void updateBattery(int &telemetryIndex);
 
         float readTemperature(bool defaultSource = false);
