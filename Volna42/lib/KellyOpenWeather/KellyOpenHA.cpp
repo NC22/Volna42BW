@@ -194,6 +194,11 @@ int KellyOpenHA::loadCurrent(String & nurl, String & token) {
 
     } else {
 
+        // todo - optionaly can return false here also on parse fail
+        
+        Serial.print(F("[KellyOpenHA] Base Request [OK] - "));
+        Serial.println(baseUrl);
+
         // continue to grab addition sensors by IDs
             
         baseUrl = baseUrl.substring(0, nurl.lastIndexOf('/') + 1);
@@ -203,7 +208,7 @@ int KellyOpenHA::loadCurrent(String & nurl, String & token) {
             
             if (c == ',') {
     
-                Serial.print(F("[KellyOpenHA] Request sensor data for addition ID - "));
+                Serial.print(F("[KellyOpenHA] Addition request sensor data for ID - "));
                 Serial.println(currentId);
     
                 currentId = baseUrl + currentId;

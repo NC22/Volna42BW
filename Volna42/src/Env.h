@@ -263,7 +263,7 @@ class Env {
         float toFahrenheit(float celsius);
         
         bool updateSCD4X();
-        bool initSCD4XAfterSleep();
+        bool waitSCD4X();
         void updateBattery(int &telemetryIndex);
 
         float readTemperature(bool defaultSource = false);

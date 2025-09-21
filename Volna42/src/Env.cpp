@@ -1294,32 +1294,29 @@ void Env::updateTelemetry()  {
   Serial.println(lastState.lastTelemetry[key].bat);
 }
 
-bool Env::initSCD4XAfterSleep() {
-  
+bool Env::waitSCD4X() {
+
   #if !defined(CO2_SCD41) 
+      return true;
+  #else 
 
-      return false;
-
-  #else
-
-    uint16_t error;
-    char errorMessage[256];
-
-    error = scd4x.stopPeriodicMeasurement();
-    delay(500);
-
-    error = scd4x.startPeriodicMeasurement();
-    if (error) {
-      errorToString(error, errorMessage, 256);
-      Serial.print(F("[initSCD4X] Error: "));
-      Serial.println(errorMessage);
-      return false;
-    }
-
-    Serial.println(F("[initSCD4X] SCD4X measurement started..."));
-    delay(5000); 
-    return true;
-
+    if (updateSCD4X() == false) {
+          for(unsigned int attempt=0; attempt < 20; attempt++) {
+              delay(500);
+              if (updateSCD4X() == true) {
+                Serial.println("[waitSCD4X] SCD data ready [OK]");
+                return true;
+              } else Serial.println("[waitSCD4X] SCD data not ready | Attempt : " + String(attempt) + " / 20");
+          }
+    } else {
+      
+      Serial.println("[waitSCD4X] SCD data ready [OK][0]");
+      return true;
+    }   
+    
+    
+    Serial.println("[waitSCD4X] SCD data ready [All attempts fail]");
+    return false;
   #endif
 }
 
@@ -1337,10 +1334,9 @@ bool Env::updateSCD4X() {
     // sensor api return errors when read faster -> return cached value
     if (scd4XLastRead > 0 && millis() - scd4XLastRead < 1000) {  
         Serial.println(F("[updateSCD4X] Reading delay. Prevent read faster then once per second"));
-        return (scd4XCO2 > 0) ? true : false;
+        return true;
     }
 
-    scd4XLastRead = millis();
     uint16_t error; 
     char errorMessage[256];
 
@@ -1375,7 +1371,8 @@ bool Env::updateSCD4X() {
         return (scd4XCO2 > 0) ? true : false;
 
     } else { // all good
-
+        
+        scd4XLastRead = millis(); // last successfull read
         scd4XCO2 = tmpScd4XCO2;
         scd4XTemp = tmpScd4XTemp;
         scd4XHumidity = tmpScd4XHumidity;

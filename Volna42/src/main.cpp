@@ -114,7 +114,7 @@ void setup()
     Serial.println(F("[Sleep requested]: no any addition actions required...update screen & goto sleep"));  
      
     //  ToDo : датчик SCD требует 5сек. на переинициализацию т.к. шина I2C остается жить. Нужно выключать его по питанию отдельно 
-    env.initSCD4XAfterSleep();
+    env.waitSCD4X();
 
     delay(300);
 
@@ -159,7 +159,8 @@ void setup()
       Serial.println(F("FAIL to connect Wifi - critical - device not configured"));    
     }
 
-    Serial.println(F("[Screen update]"));    
+    Serial.println(F("[Screen update]"));
+    env.waitSCD4X();    
     env.updateTelemetry();
     env.updateExtIconState();
 

@@ -48,12 +48,14 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
         Serial.println(weatherApi->temp);
         Serial.println(weatherApi->hum);
         Serial.println(weatherApi->pressure);
+        Serial.println(weatherApi->bat);
         Serial.println(F("--------"));
 
         resultData.isDataValid = true;
         resultData.temperature = weatherApi->temp;
         resultData.pressure = weatherApi->pressure;
         resultData.humidity = weatherApi->hum;
+        resultData.bat = weatherApi->bat;
         resultData.t = time(nullptr);
         resultData.icon = weatherApi->weatherType;
         

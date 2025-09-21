@@ -763,7 +763,7 @@ void Screen4in2UI::drawCat(bool land) {
 
     hpad = 72 + 8;
 
-    marginX = land ? calcMarginMiddle(localWidth/2, 110) +10 : localWidth - 130;
+    marginX = land ? calcMarginMiddle(localWidth/2, 110) +10 : localWidth - 125;
 
     screen->drawImage(marginX, localHeight - hpad, &cat_night_96x72bw_settings, true);
     hpad -= 10;
