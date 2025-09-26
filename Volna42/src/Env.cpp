@@ -18,10 +18,29 @@ Env::Env() {
 
 }
 
+void Env::ledBlink(int n) {
+  
+  #if defined(FEEDBACK_LED)
+    for (int i = 0; i < n; i++) {
+      digitalWrite(FEEDBACK_LED, HIGH); 
+      delay(200);                 
+      digitalWrite(FEEDBACK_LED, LOW); 
+      delay(200); 
+    }           
+  #endif
+
+}
+
 void Env::begin() {
 
   cfg.version = cdConfigVersion;
   cfg.excludeOptions.clear();
+
+  #if defined(FEEDBACK_LED)
+    pinMode(FEEDBACK_LED, OUTPUT);
+    digitalWrite(FEEDBACK_LED, LOW); 
+  #endif
+
 
   #if !defined(PARTIAL_UPDATE_SUPPORT)  
   cfg.excludeOptions.push_back(cUpdateMinutes); 
@@ -552,6 +571,8 @@ bool Env::setupNTP(unsigned int attempt) {
         };
         
         Serial.print(".");
+        
+        ledBlink();
         delay(500);
       }
 
@@ -1606,7 +1627,7 @@ float Env::readBatteryV() {
           float rV = voltage * ((R1V + R2GND) / R2GND);
 
           Serial.print(F("[TEST voltage : ] ")); Serial.println(rV);
-          Serial.print(F("[TEST analog read : ] ")); Serial.println(analogRead(adcValue));
+          Serial.print(F("[TEST analog read : ] ")); Serial.println(adcValue);
 
           return rV;
 

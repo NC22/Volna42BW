@@ -235,6 +235,8 @@ class Env {
 
         Env();
         
+        void ledBlink(int n=1);
+
         bool setupNTP(unsigned int attempt = 1);
 
         bool mqttSendCurrentData();
