@@ -4,6 +4,7 @@
 
 RTC_DATA_ATTR uint8_t RTCLastStateRaw[sizeof(rtcData)];
 RTC_DATA_ATTR bool RTCLastStateRawWrited = false;
+// RTC_DATA_ATTR int64_t rtcSleepStart = 0;
 
 bool readRTCUserMemoryActualRTC(rtcData &lastState) {
 

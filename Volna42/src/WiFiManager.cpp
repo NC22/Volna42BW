@@ -27,25 +27,24 @@ bool WiFiManager::stReconnectTick() {
   return false;
 }
 
-wl_status_t WiFiManager::connect(String sid, String password) {
+wl_status_t WiFiManager::connect(String sid, String password, bool resetDefault) {
 
     if (sid.length() <= 0) {
       return WL_NO_SSID_AVAIL;
     }
 
     enabledStatus = WIFI_MODE_NULL;
-    WiFi.softAPdisconnect();
-    WiFi.disconnect();
+
+    if (resetDefault) {
+      WiFi.softAPdisconnect();
+      WiFi.disconnect();
+    }
+
     WiFi.mode(WIFI_STA);
 
-    #if defined(ESP32_C3_SUPERMINI) && !defined(WIFI_TX_POWER)
-    #define WIFI_TX_POWER 40 
-    #endif
-    
     #if defined(ESP32) && defined(WIFI_TX_POWER)
         esp_wifi_set_max_tx_power(WIFI_TX_POWER); 
     #endif
-    // WiFi.setSleepMode(WIFI_NONE_SLEEP);
 
     WiFi.setAutoReconnect(true);
     WiFi.persistent(true);
@@ -66,6 +65,15 @@ wl_status_t WiFiManager::connect(String sid, String password) {
 
             if ( lastConnectStatus == WL_CONNECTED) {
                 enabledStatus = WiFi.getMode();
+                
+                // #if defined(ESP32) && defined(WIFI_TX_POWER)
+                //    WiFi.setSleep(false);
+                //    esp_wifi_set_ps(WIFI_PS_NONE);
+                //    delay(500); 
+                //    esp_netif_dhcpc_start(esp_netif_get_handle_from_ifkey("WIFI_STA_DEF")); // force DCHP restart to fix http requests - they not work by default ~20-30sec 
+                // 
+                // #endif
+
                 break;
             } else if (lastConnectStatus == WL_CONNECT_FAILED) {
                 Serial.print(F("...WL_CONNECT_FAILED..."));
@@ -117,11 +125,10 @@ void WiFiManager::runAsAccesspoint(String ssid, String pass) {
     WiFi.disconnect();    
     WiFi.persistent(false);
 
-    //WiFi.mode(WIFI_AP);
-
-    #if defined(ESP32_C3_SUPERMINI)
-    esp_wifi_set_max_tx_power(40); 
+    #if defined(ESP32) && defined(WIFI_TX_POWER)
+        esp_wifi_set_max_tx_power(WIFI_TX_POWER); 
     #endif
+    //WiFi.mode(WIFI_AP);
 
     IPAddress local_ip(192, 168, 1, 1);
     IPAddress gateway(192, 168, 1, 1);

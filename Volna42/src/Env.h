@@ -108,10 +108,16 @@ class Screen1in54UI;
     #define REASON_DEEP_SLEEP_AWAKE ESP_RST_DEEPSLEEP
     #define REASON_SOFT_RESTART ESP_RST_SW
 
+    // RTC_DATA_ATTR extern int64_t rtcSleepStart;
+
     extern bool readRTCUserMemoryNVS(uint32_t* data, size_t len);
     extern bool writeRTCUserMemoryNVS(uint32_t* data, size_t len);
     extern bool readRTCUserMemoryActualRTC(rtcData &lastState);
     extern bool writeRTCUserMemoryActualRTC(rtcData &lastState);
+
+    extern "C" {
+    #include "esp32/clk.h"
+    }
 #else
 
     extern "C" {
@@ -177,7 +183,8 @@ class Env {
             DallasTemperature * dsSensors;
             DeviceAddress dsTermometr;
         #endif
-
+        
+        bool requestTimeByHA(u_int8_t tryn = 1, u_int8_t attempts = 2);
         void setDefaultLastStateData();
         bool restoreRTCmem();
         void applyConfigToRTC(bool configUpdate = false);
@@ -238,6 +245,7 @@ class Env {
         void ledBlink(int n=1);
 
         bool setupNTP(unsigned int attempt = 1);
+        void disableNTP(); 
 
         bool mqttSendCurrentData();
         void mqttInit();

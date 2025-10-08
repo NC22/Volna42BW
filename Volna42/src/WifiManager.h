@@ -31,7 +31,7 @@ class WiFiManager {
         #endif
 
         WiFiManager();
-        wl_status_t connect(String sid, String password);
+        wl_status_t connect(String sid, String password, bool resetDefault = false);
         String getWiFiSelectorHtml();
         IPAddress getIP();
         bool isAPmode();

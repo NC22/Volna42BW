@@ -76,6 +76,8 @@ bool ExternalSensor::requestData(String &url, String &login, String &pass, exter
 
           Serial.println(F("[Weather API] Fail to connect web-server - no response or unavailable..."));
           Serial.println(F("[Weather API] Retry to connect..."));
+          
+          error = "";
           return requestData(url, login, pass, resultData, error, attempt);
         }
 

@@ -7,7 +7,11 @@ Env::Env() {
     lastState.sleepTimeCurrent = 1000;
     lastState.onBattery = false;
     partialUpdateRequired = false;
-    
+
+    #if defined(ESP32)
+    _wifiClient.setTimeout(10);
+    #endif
+
     secondTimerStart = millis();
     cuiWidgets.clear();
     resetPartialData(); // pos will restore from RTC memory
@@ -61,6 +65,7 @@ void Env::begin() {
       esp_reset_reason_t reason = esp_reset_reason();
 
       #if defined(BAT_A0) && BAT_A0 >= 0
+          pinMode(BAT_A0, INPUT);
           analogReadResolution(12);
           analogSetAttenuation(ADC_11db); 
       #endif
@@ -105,7 +110,9 @@ void Env::begin() {
             
               int partialUpdateTime = getPartialSleepTime();
               lastState.sleepTimeCurrent -= partialUpdateTime;
+
               lastState.t += partialUpdateTime;
+             
               defaultTime = lastState.t;
 
               if (lastState.sleepTimeCurrent > 0) {
@@ -293,6 +300,8 @@ void Env::setDefaultLastStateData() {
 /*
     Init default time
 
+    to prevent time mismatch during updates - must be updated before any blocking \ delay functions
+
     Priority 
 
     1. defaultTime variable if RTC memory restored
@@ -419,6 +428,79 @@ void Env::restartNTP(bool resetOnly) {
     if (!resetOnly) setupNTP();
 }
 
+/* For manual time set scenario */
+void Env::disableNTP() {
+  
+    Serial.print(F("Time setup will be manual. Prevent any NTP service activity"));
+    #if defined(ESP32)
+      sntp_stop();
+      sntp_set_sync_status(SNTP_SYNC_STATUS_COMPLETED);
+    #endif
+}
+
+
+bool Env::requestTimeByHA(u_int8_t tryn, u_int8_t attempts) {
+  
+  if (tryn > attempts) return false;
+  tryn++;
+
+  if (getConfig()->cfgValues[cExtSensorLink].length() > 0 && getConfig()->cfgValues[cExtSensorLink].indexOf(F("/api/states")) != -1) {
+  
+      bool result = false;
+
+      Serial.print(F("[HA] Get default time..."));
+      WiFiClient client;  
+      HTTPClient http;
+      #if defined(ESP32)
+        http.setTimeout(20000);
+      #endif
+
+      String url = getConfig()->cfgValues[cExtSensorLink].substring(0, getConfig()->cfgValues[cExtSensorLink].indexOf(F("/api/states")));
+             url += "/api/template";
+
+      http.begin(client, url);
+
+      if (getConfig()->cfgValues[cExtSensorPassword].length() > 0) {
+          
+        http.setAuthorization("");
+        String token = "Bearer " + getConfig()->cfgValues[cExtSensorPassword];
+        http.addHeader("Authorization", token.c_str());
+      }
+
+      http.setReuse(false);  
+      http.addHeader("Connection", "close");
+      http.addHeader("Content-Type", "application/json");
+      int resultCode = http.POST(F("{\"template\": \"{{ now().strftime('%Y-%m-%d %H:%M:%S') }}\"}"));
+      if (resultCode == 200) {
+
+        lastState.timeConfigured = false;
+        getConfig()->cfgValues[cTimestamp] = http.getString();
+        setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
+        tzset();
+        initDefaultTime();
+
+        // lastState.connectTimes = 999; // todo - remove - for test
+
+        Serial.println(F("OK"));
+        result = true;
+
+      } else {
+
+        lastError = "HA default time - bad response : " + String(resultCode);        
+        Serial.println(F("FAIL"));
+      }
+
+      http.end();
+      client.stop();
+      
+      if (result == true) return true;
+
+      delay(500);
+      return requestTimeByHA(tryn, attempts);
+
+    } else return false;    
+}
+
 bool Env::setupNTP(unsigned int attempt) {
 
     if (ntp) return true;
@@ -437,152 +519,118 @@ bool Env::setupNTP(unsigned int attempt) {
     bool skipWait = false;
 
     #if defined(DEFAULT_TIME_BY_EXTERAL)
-
-    if (getConfig()->cfgValues[cExtSensorLink].length() > 0 && getConfig()->cfgValues[cExtSensorLink].indexOf(F("/api/states")) != -1) {
-  
-      Serial.print(F("[HA] Get default time..."));
-      WiFiClient client;
-      HTTPClient http;
-
-      String url = getConfig()->cfgValues[cExtSensorLink].substring(0, getConfig()->cfgValues[cExtSensorLink].indexOf(F("/api/states")));
-             url += "/api/template";
-
-      http.begin(client, url);
-
-      if (getConfig()->cfgValues[cExtSensorPassword].length() > 0) {
-          
-        http.setAuthorization("");
-        String token = "Bearer " + getConfig()->cfgValues[cExtSensorPassword];
-        http.addHeader("Authorization", token.c_str());
-      }
-
-      http.addHeader("Content-Type", "application/json");  
-
-      if (http.POST(F("{\"template\": \"{{ now().strftime('%Y-%m-%d %H:%M:%S') }}\"}")) == 200) {
-
-        lastState.timeConfigured = false;
-        getConfig()->cfgValues[cTimestamp] = http.getString();
-        setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
-        tzset();
-        initDefaultTime();
-
-        skipWait = true;
-        
-        Serial.println(F("OK"));
-
-      } else {
-        lastError = "HA default time - bad response";
-        
-        Serial.println(F("FAIL"));
-      }
-
-      http.end();
-    }
-
+    skipWait = requestTimeByHA();
     #endif
 
     ntp = true;
-
-    String &ntpHosts = getConfig()->cfgValues[cNtpHosts];
-    if (ntpHosts.indexOf(',') != -1) {
-      
-      Serial.print(F("NTP list parsing..."));
-      char ntpServers[3][64]; 
-      unsigned int nSize = ntpHosts.length();
-      uint8_t serverCount = 0; 
-      int16_t ntpServersCursor = 0; 
-
-      for (unsigned int i = 0; i < nSize; i++) { 
-          if (ntpHosts[i] == ',' || i == nSize-1) {
-            ntpServers[serverCount][ntpServersCursor] = '\0'; 
-            serverCount++;
-            ntpServersCursor = 0;
-            if (serverCount >= 3) break;
-          } else {            
-            if (ntpServersCursor < 63 && ntpHosts[i] != ' ') {
-              ntpServers[serverCount][ntpServersCursor] = ntpHosts[i];
-              ntpServersCursor++;
-            }
-          } 
-      }
-
-      if (serverCount == 1) {
-          CONFIG_TIME_FUNCTION(cfg.cfgValues[cTimezone].c_str(), ntpServers[0]);  
-          Serial.println(ntpServers[0]);
-          Serial.println(F("[1] server added"));
-      } else if (serverCount == 2) {
-          CONFIG_TIME_FUNCTION(cfg.cfgValues[cTimezone].c_str(), ntpServers[0], ntpServers[1]); 
-          Serial.println(ntpServers[0]);Serial.println(ntpServers[1]);
-          Serial.println(F("[2] servers added"));
-      } else if (serverCount == 3) {
-          CONFIG_TIME_FUNCTION(cfg.cfgValues[cTimezone].c_str(), ntpServers[0], ntpServers[1], ntpServers[2]);      
-          Serial.println(ntpServers[0]);Serial.println(ntpServers[1]);Serial.println(ntpServers[2]);     
-          Serial.println(F("[3] servers added"));
-      }
-
+    if (skipWait && isSleepRequired()) {
+        disableNTP();      
     } else {
-      CONFIG_TIME_FUNCTION(cfg.cfgValues[cTimezone].c_str(), ntpHosts.c_str());  
-    }
 
-    yield();
-
-    if (lastState.timeConfigured) {
-      Serial.print(F("Waiting for NTP time sync: [RTC time already exist -> reduce wait time, no retry]"));
-    } else {
-      Serial.print(F("Waiting for NTP time sync: "));
-    }
-
-    int i = 0;
-    time_t now = time(nullptr);
-    
-    // timeout = 25sec, second try 10sec
-    
-    if (!skipWait) {
-      
-      while (now < 1000000000) {
+        String &ntpHosts = getConfig()->cfgValues[cNtpHosts];
+        if (ntpHosts.indexOf(',') != -1) {
           
-        now = time(nullptr);
-        i++;
-        
-        if (((attempt > 1 || lastState.timeConfigured) && i > 20) || i > 50) {
+          Serial.print(F("NTP list parsing..."));
+          char ntpServers[3][64]; 
+          unsigned int nSize = ntpHosts.length();
+          uint8_t serverCount = 0; 
+          int16_t ntpServersCursor = 0; 
 
-          Serial.println(F("Time sync failed!"));
-          
-          #if defined(NTP_CONNECT_ATTEMPTS)
+          for (unsigned int i = 0; i < nSize; i++) { 
+              if (ntpHosts[i] == ',' || i == nSize-1) {
+                ntpServers[serverCount][ntpServersCursor] = '\0'; 
+                serverCount++;
+                ntpServersCursor = 0;
+                if (serverCount >= 3) break;
+              } else {            
+                if (ntpServersCursor < 63 && ntpHosts[i] != ' ') {
+                  ntpServers[serverCount][ntpServersCursor] = ntpHosts[i];
+                  ntpServersCursor++;
+                }
+              } 
+          }
 
-            if (!lastState.timeConfigured) {
+          if (serverCount == 1) {
+              CONFIG_TIME_FUNCTION(cfg.cfgValues[cTimezone].c_str(), ntpServers[0]);  
+              Serial.println(ntpServers[0]);
+              Serial.println(F("[1] server added"));
+          } else if (serverCount == 2) {
+              CONFIG_TIME_FUNCTION(cfg.cfgValues[cTimezone].c_str(), ntpServers[0], ntpServers[1]); 
+              Serial.println(ntpServers[0]);Serial.println(ntpServers[1]);
+              Serial.println(F("[2] servers added"));
+          } else if (serverCount == 3) {
+              CONFIG_TIME_FUNCTION(cfg.cfgValues[cTimezone].c_str(), ntpServers[0], ntpServers[1], ntpServers[2]);      
+              Serial.println(ntpServers[0]);Serial.println(ntpServers[1]);Serial.println(ntpServers[2]);     
+              Serial.println(F("[3] servers added"));
+          }
 
-              if (attempt < NTP_CONNECT_ATTEMPTS) {
+        } else {
+          CONFIG_TIME_FUNCTION(cfg.cfgValues[cTimezone].c_str(), ntpHosts.c_str());  
+        }
+
+        yield();
+
+        if (lastState.timeConfigured) {
+          Serial.print(F("Waiting for NTP time sync: [RTC time already exist -> reduce wait time, no retry]"));
+        } else {
+          Serial.print(F("Waiting for NTP time sync: "));
+        }
+
+        int i = 0;
+        bool synced = false;
+
+        if (!skipWait) {
+
+          while (true) {
+
+            #if defined(ESP32)
+              synced = (sntp_get_sync_status() == SNTP_SYNC_STATUS_COMPLETED);
+            #else
+              time_t now = time(nullptr);
+              synced = (now >= 1000000000);
+            #endif
+
+            if (synced) break;
+
+            i++;
+            Serial.print(".");
+            ledBlink();
+            delay(500);
+
+            // Проверка таймаута
+            if (((attempt > 1 || lastState.timeConfigured) && i > NTP_ATTEMPT1_TIMEOUT) || i > NTP_ATTEMPTN_TIMEOUT) {
+              Serial.println(F("Time sync failed!"));
+
+              #if defined(NTP_CONNECT_ATTEMPTS)
+                if (!lastState.timeConfigured && attempt < NTP_CONNECT_ATTEMPTS) {
                   restartNTP(true);
                   Serial.println(F("Time sync - reattempt!"));
                   return setupNTP(attempt + 1);
-              }
+                }
+              #endif
 
+              lastError = F("NTP server is not accessible. Default time set (by config or firmware variable)");
+              initDefaultTime();
+              return false;
             }
+          }
 
-          #endif
-
-          lastError = "NTP server is not accessable. Default time setted (by config or firmware variable)";
-
-
-          initDefaultTime();
-
-          return false;
-        };
-        
-        Serial.print(".");
-        
-        ledBlink();
-        delay(500);
-      }
-
+          Serial.println(F("NTP sync completed."));
+        }
     }
-    
+
     Serial.println(F("NTP ready!"));
     defaultTime = time(nullptr);
     
     lastState.t = defaultTime;
     lastState.timeConfigured = true;
+
+    #if defined(ESP32)
+      // После успешной синхронизации NTP калибруем RTC slow clock
+      uint32_t cal = esp_clk_slowclk_cal_get();
+      esp_clk_slowclk_cal_set(cal);
+      Serial.printf("[RTC] Slow clock calibrated (cal=%u)\n", cal);
+    #endif
 
     // lastState.syncT = defaultTime;
     
@@ -629,6 +677,7 @@ void Env::saveCurrentState()  {
 void Env::sleep()  {
     
     lastState.t = time(nullptr);
+
     saveCurrentState();
 
     #if defined(ESP8266) && defined(FIX_DEEPSLEEP) && FIX_DEEPSLEEP > 0
@@ -647,7 +696,7 @@ void Env::sleep()  {
         }
 
     #else
-
+      
       Serial.print(F("[Deep sleep] "));  
       
       if (lastState.updateMinutes) {
@@ -969,7 +1018,7 @@ bool Env::mqttSendCurrentData() {
 
         if (isOnBattery()) {
           if (lastState.lastTelemetrySize > 0) {
-              payload += ",\"battery\":" + String((int) round(getBatteryLvlfromV(lastState.lastTelemetrySize)));
+              payload += ",\"battery\":" + String((int) round(getBatteryLvlfromV(lastState.lastTelemetry[lastState.lastTelemetrySize-1].bat)));
           } else payload += ",\"battery\":100";
         } else payload += ",\"battery\":100";
 
@@ -1529,7 +1578,7 @@ bool Env::isOnBattery() {
       #endif
       
       
-      Serial.println("[TEST Battery] Analog pin read : " + String(analogRead(A0)));
+      //Serial.println("[TEST Battery] Analog pin read : " + String(analogRead(A0)));
 
     #else
 
@@ -1621,15 +1670,33 @@ float Env::readBatteryV() {
           
           float R1V = BATTERY_R1V;
           float R2GND = BATTERY_R2GND;
-          int adcValue = analogRead(BAT_A0); 
-          float voltage = (adcValue / BATTERY_INPUT_MAXRANGE) * BATTERY_INPUT_MAXRANGEV; 
 
-          float rV = voltage * ((R1V + R2GND) / R2GND);
+          #if defined(BATTERY_READ_METHOD) && BATTERY_READ_METHOD == 2
+          
+            uint32_t Vbatt = 0;
+            for(int i = 0; i < 16; i++) {
+              Vbatt = Vbatt + analogReadMilliVolts(BAT_A0); // ADC with correction   
+            }
 
-          Serial.print(F("[TEST voltage : ] ")); Serial.println(rV);
-          Serial.print(F("[TEST analog read : ] ")); Serial.println(adcValue);
+            float Vbattf = (Vbatt / 16.0) / 1000.0 * ( (R1V + R2GND) / R2GND );     // attenuation ratio 1/2, mV --> V
 
-          return rV;
+            Serial.print(F("[TEST voltage : ] ")); Serial.println(Vbattf);
+            return Vbattf;
+
+          #else
+
+            int adcValue = analogRead(BAT_A0); 
+            float voltage = (adcValue / BATTERY_INPUT_MAXRANGE) * BATTERY_INPUT_MAXRANGEV; 
+
+            float rV = voltage * ((R1V + R2GND) / R2GND);
+
+            Serial.print(F("[TEST voltage : ] ")); Serial.println(rV);
+            Serial.print(F("[TEST analog read : ] ")); Serial.println(adcValue);
+
+            return rV;
+          #endif
+          
+
 
       #else
 
@@ -1865,7 +1932,7 @@ String Env::getFormattedSensorTitle(bool indoor) {
 
 String Env::getFormattedExtSensorLastSyncTime(bool full) {
     if (lastState.extData.isDataValid == false) {
-        return "--:--";
+        return "--:-- (" + String(lastState.wakeUps) + " / " + String(syncEvery) + ")";
     } else {
  
       struct tm resultT;
@@ -1883,6 +1950,9 @@ String Env::getFormattedExtSensorLastSyncTime(bool full) {
     }
 }
 
+/*
+  Update formatted time strings
+*/
 void Env::updateTime(time_t dt) {
 
     struct tm stnow;

@@ -52,7 +52,7 @@ uint8_t wifiConnect() {
 
   if (env.getConfig()->getString(cWifiNetwork).length()) {
 
-    if (wifi->connect(env.getConfig()->getString(cWifiNetwork), env.getConfig()->getString(cWifiPassword)) == WL_CONNECTED) {
+    if (wifi->connect(env.getConfig()->getString(cWifiNetwork), env.getConfig()->getString(cWifiPassword)) == WL_CONNECTED, true) {
         Serial.print(F("OK - ")); Serial.print(env.getConfig()->getString(cWifiNetwork));
         result = 1;
     } else {
@@ -62,7 +62,7 @@ uint8_t wifiConnect() {
 
   if (result == 0 && env.getConfig()->getString(cWifiNetworkFallback).length()) {
 
-    if (wifi->connect(env.getConfig()->getString(cWifiNetworkFallback), env.getConfig()->getString(cWifiPasswordFallback)) == WL_CONNECTED) {      
+    if (wifi->connect(env.getConfig()->getString(cWifiNetworkFallback), env.getConfig()->getString(cWifiPasswordFallback)) == WL_CONNECTED, true) {      
       Serial.print(F("...OK [Fallback] - ")); Serial.print(env.getConfig()->getString(cWifiNetworkFallback));
       result = 2;
     } else {
@@ -101,7 +101,8 @@ void setup()
   env.begin(); 
 
   if (env.isPartialUpdateRequired()) {
-      
+    
+    env.disableNTP();  
     env.initDefaultTime();
     env.updateTime();
 
@@ -112,15 +113,15 @@ void setup()
   } else if (env.isSleepRequired() && !env.isSyncRequired()) {
     
     Serial.println(F("[Sleep requested]: no any addition actions required...update screen & goto sleep"));  
-     
+    env.disableNTP();  
+    env.initDefaultTime(); 
+
     //  ToDo : датчик SCD требует 5сек. на переинициализацию т.к. шина I2C остается жить. Нужно выключать его по питанию отдельно 
     env.waitSCD4X();
-
     delay(300);
 
     env.updateTelemetry();
 
-    env.initDefaultTime();
     env.updateScreen();
     env.sleep();
 
@@ -128,6 +129,7 @@ void setup()
 
     // Sync & Refresh data required
     // Connect to WiFi -> run full get data sequense (External sensor & update time by NTP, get battery info, update screen ... ) -> sleep if server mode disabled
+    if (!env.lastState.timeConfigured) env.ledBlink(2); // clean load blink
 
     Serial.println(F("[Update data needed]"));
     uint8_t wifiConnectResult = wifiConnect();
@@ -135,8 +137,6 @@ void setup()
     if (wifiConnectResult > 0) {
           
       env.setupNTP();
-      env.updateExtSensorData();
-      env.mqttSendCurrentData();
 
     } else if (!env.isSleepRequired()) {
 
@@ -159,14 +159,21 @@ void setup()
       Serial.println(F("FAIL to connect Wifi - critical - device not configured"));    
     }
 
-    Serial.println(F("[Screen update]"));
-    env.waitSCD4X();    
+    env.waitSCD4X();        
     env.updateTelemetry();
+
+    if (wifiConnectResult > 0) {
+      env.updateExtSensorData();
+      env.mqttSendCurrentData();
+    }
+
     env.updateExtIconState();
 
     // [extra exit] on battery low power, lowBatTick - 10% от заряда
     // По наблюдениям - для запуска ESP8266 + экран + I2S датчики критическое напряжение аккумулятора ~3.57v-3.50v - после, в определенный цикл запуска устройство может выключится в процессе работы
     // или просто не проснутся
+
+    Serial.println(F("[Screen update]"));
 
     if (env.isOnBattery() && env.lastState.lowBatTick > 3) {
 
@@ -181,10 +188,7 @@ void setup()
       return;
     }
 
-    if (wifiConnectResult > 0) {
-      env.sync();
-    }
-
+    env.sync();
     env.updateScreen();
 
     if (!env.isSleepRequired()) {

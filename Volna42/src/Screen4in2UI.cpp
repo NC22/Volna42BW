@@ -763,7 +763,7 @@ void Screen4in2UI::drawCat(bool land) {
 
     hpad = 72 + 8;
 
-    marginX = land ? calcMarginMiddle(localWidth/2, 110) +10 : localWidth - 125;
+    marginX = land ? calcMarginMiddle(localWidth/2, 110) +10 : localWidth - 110;
 
     screen->drawImage(marginX, localHeight - hpad, &cat_night_96x72bw_settings, true);
     hpad -= 10;
@@ -827,7 +827,7 @@ void Screen4in2UI::drawCat(bool land) {
       } else {
 
         hpad = 94;
-        marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 125;
+        marginX = land ? calcMarginMiddle(localWidth/2, 105) : localWidth - 115;
         screen->drawImage(marginX, localHeight - hpad, &cat_happy_80x94bw_settings, true);        
       }
       

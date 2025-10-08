@@ -86,7 +86,7 @@ typedef struct {
     int sleepTimeCurrent = 1000;   // [Used only in constant mode & if partial update is active] seconds timer for non-deep sleep mode or for update minutes mode
     
     unsigned int cfgVersion = 0;
-    
+
 } rtcData; 
 
 #endif

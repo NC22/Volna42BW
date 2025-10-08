@@ -329,7 +329,15 @@ void WidgetController::drawClockWidget(int baseX, int baseY, bool border, bool f
 	unsigned int partialY = baseY;
 	unsigned int partialHeight = screen->font->height;
 
+  //////// DEBUG
+
+	// screen->setFont(&font18x18Config);  
+	// timeText = screen->getUText(dt.timeText + " " + env->lastError);
+
+  //////// DEBUG
+
 	int timePoseX = screen->drawStringUtext(partialX, partialY, timeText, colorText);	
+
 	screen->setFont(&font18x18Config);
 
 	if (env->hour12) {
