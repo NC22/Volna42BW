@@ -27,6 +27,19 @@ bool WiFiManager::stReconnectTick() {
   return false;
 }
 
+void WiFiManager::prepareToSleep() {
+  #if defined(WIFI_CLOSE_BEFORE_SLEEP)
+    WiFi.disconnect(true);   
+    delay(100);              
+
+    WiFi.mode(WIFI_OFF);
+    #if defined(ESP32)
+    esp_wifi_stop();
+    #endif
+    delay(50);
+  #endif
+}
+
 wl_status_t WiFiManager::connect(String sid, String password, bool resetDefault) {
 
     if (sid.length() <= 0) {
@@ -66,13 +79,13 @@ wl_status_t WiFiManager::connect(String sid, String password, bool resetDefault)
             if ( lastConnectStatus == WL_CONNECTED) {
                 enabledStatus = WiFi.getMode();
                 
-                // #if defined(ESP32) && defined(WIFI_TX_POWER)
-                //    WiFi.setSleep(false);
-                //    esp_wifi_set_ps(WIFI_PS_NONE);
-                //    delay(500); 
-                //    esp_netif_dhcpc_start(esp_netif_get_handle_from_ifkey("WIFI_STA_DEF")); // force DCHP restart to fix http requests - they not work by default ~20-30sec 
-                // 
-                // #endif
+                #if defined(ESP32) && defined(WIFI_MAX_POWER)
+                    WiFi.setSleep(false);
+                    esp_wifi_set_ps(WIFI_PS_NONE);
+                    delay(500); 
+                    esp_netif_dhcpc_start(esp_netif_get_handle_from_ifkey("WIFI_STA_DEF")); // force DCHP restart to fix http requests - they not work by default ~20-30sec 
+                 
+                 #endif
 
                 break;
             } else if (lastConnectStatus == WL_CONNECT_FAILED) {

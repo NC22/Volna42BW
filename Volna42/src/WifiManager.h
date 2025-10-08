@@ -34,6 +34,7 @@ class WiFiManager {
         wl_status_t connect(String sid, String password, bool resetDefault = false);
         String getWiFiSelectorHtml();
         IPAddress getIP();
+        void prepareToSleep();
         bool isAPmode();
         void runAsAccesspoint(String ssid, String pass);
 

@@ -24,7 +24,6 @@
 #include <LocalData.h>
 #include <KellyCanvas.h>
 #include <Env.h>
-
 Env env = Env();
 
 #if defined(DISPLAY_TYPE_42)
@@ -52,7 +51,7 @@ uint8_t wifiConnect() {
 
   if (env.getConfig()->getString(cWifiNetwork).length()) {
 
-    if (wifi->connect(env.getConfig()->getString(cWifiNetwork), env.getConfig()->getString(cWifiPassword)) == WL_CONNECTED, true) {
+    if (wifi->connect(env.getConfig()->getString(cWifiNetwork), env.getConfig()->getString(cWifiPassword), true) == WL_CONNECTED) {
         Serial.print(F("OK - ")); Serial.print(env.getConfig()->getString(cWifiNetwork));
         result = 1;
     } else {
@@ -62,7 +61,7 @@ uint8_t wifiConnect() {
 
   if (result == 0 && env.getConfig()->getString(cWifiNetworkFallback).length()) {
 
-    if (wifi->connect(env.getConfig()->getString(cWifiNetworkFallback), env.getConfig()->getString(cWifiPasswordFallback)) == WL_CONNECTED, true) {      
+    if (wifi->connect(env.getConfig()->getString(cWifiNetworkFallback), env.getConfig()->getString(cWifiPasswordFallback), true) == WL_CONNECTED) {      
       Serial.print(F("...OK [Fallback] - ")); Serial.print(env.getConfig()->getString(cWifiNetworkFallback));
       result = 2;
     } else {
@@ -184,6 +183,7 @@ void setup()
       }
 
       Serial.println(F("[On battery] LOW POWER or wrong detect voltage - [power off]"));
+      if (wifiConnectResult > 0) wifi->prepareToSleep();
       env.sleep(); 
       return;
     }
@@ -197,6 +197,7 @@ void setup()
       Serial.println(F("[Not on battery] Http server enabled | wait sync by timeout"));
     } else {
       Serial.println(F("[Sleep requested] goto sleep"));
+      if (wifiConnectResult > 0) wifi->prepareToSleep();
       env.sleep();
     }
   }

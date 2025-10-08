@@ -473,6 +473,8 @@ bool Env::requestTimeByHA(u_int8_t tryn, u_int8_t attempts) {
       int resultCode = http.POST(F("{\"template\": \"{{ now().strftime('%Y-%m-%d %H:%M:%S') }}\"}"));
       if (resultCode == 200) {
 
+        Serial.println(F("OK"));
+        
         lastState.timeConfigured = false;
         getConfig()->cfgValues[cTimestamp] = http.getString();
         setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
@@ -481,7 +483,6 @@ bool Env::requestTimeByHA(u_int8_t tryn, u_int8_t attempts) {
 
         // lastState.connectTimes = 999; // todo - remove - for test
 
-        Serial.println(F("OK"));
         result = true;
 
       } else {
@@ -594,7 +595,7 @@ bool Env::setupNTP(unsigned int attempt) {
 
             i++;
             Serial.print(".");
-            ledBlink();
+            if (!lastState.timeConfigured) ledBlink();
             delay(500);
 
             // Проверка таймаута
