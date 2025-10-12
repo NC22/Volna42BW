@@ -138,8 +138,7 @@ class Env {
 
         Config cfg;
 
-        WiFiClient _wifiClient;        
-        WiFiClient _httpWifiClient;
+        WiFiClient _wifiClient;      
         PubSubClient _mqttClient;
         bool mqtt = false; // connected (init stage passed)
         std::vector<String> rawMqttIds;
@@ -149,11 +148,6 @@ class Env {
         int telemetryBufferMax = 5;
         
         int minuteTimer;
-
-        // todo - show connectfailsnum
-        // todo - night mode isNight
-        // todo - ntpUpdateEvery = 144; // sync time by ntp every
-        // int syncEveryNight = 12; // bufferMax = 12; 
 
         int syncEvery = 6;  // external data update \ data sync by wifi every n wake-ups --- check validateConfig for defaults
         
