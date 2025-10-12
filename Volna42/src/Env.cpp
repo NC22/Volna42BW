@@ -438,68 +438,134 @@ void Env::disableNTP() {
     #endif
 }
 
+bool Env::requestTimeByDomoticz(u_int8_t tryn, u_int8_t attempts) {
+  
+  if (tryn > attempts) return false;
+  tryn++;
+
+  bool result = false;
+
+  Serial.print(F("[Domoticz] Get default time..."));
+  WiFiClient client;  
+  HTTPClient http;
+  
+  String url = getConfig()->cfgValues[cExtSensorLink];
+  int jsonIndex = url.indexOf(F("/json.htm"));
+  if (jsonIndex > 0) {
+      url = url.substring(0, jsonIndex);
+  }
+
+  url = url + F("/json.htm?type=command&param=getSunRiseSet");
+  Serial.print(F("[Domoticz] Get time from ")); Serial.println(url);
+
+  http.begin(client, url);
+  if (getConfig()->cfgValues[cExtSensorLogin].length() > 0) {
+
+      http.setAuthorization(getConfig()->cfgValues[cExtSensorLogin].c_str(), getConfig()->cfgValues[cExtSensorPassword].c_str());
+      Serial.println(F("[Domoticz] [AUTH] Basic auth mode"));
+
+  } else {
+      Serial.println(F("[Domoticz] [AUTH] Anonimous mode"));
+  }
+
+  http.setReuse(false);
+  http.addHeader("Connection", "close");
+
+  int resultCode = http.GET();
+  if (resultCode == 200) {
+
+      String payload = http.getString();
+      String collectedData = "";
+
+      if (!KellyOWParserTools::collectJSONFieldData("ServerTime", payload, collectedData, 40)) {
+          Serial.println(F("[Domoticz] No ServerTime in response"));
+          http.end(); client.stop();
+          return false;
+      }
+
+      Serial.print(F("[Domoticz] ServerTime: "));
+      Serial.println(collectedData);
+
+      getConfig()->cfgValues[cTimestamp] = collectedData;
+      setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
+      tzset();
+      initDefaultTime();
+
+      http.end();
+      client.stop();
+      return true;
+
+  } else {
+
+      lastError = "[Domoticz] default time - bad response : " + String(resultCode);        
+      Serial.println(F("FAIL"));
+  }
+
+    http.end();
+    client.stop();
+    
+    if (result == true) return true;
+
+    delay(500);
+    return requestTimeByDomoticz(tryn, attempts);
+
+}
 
 bool Env::requestTimeByHA(u_int8_t tryn, u_int8_t attempts) {
   
   if (tryn > attempts) return false;
   tryn++;
 
-  if (getConfig()->cfgValues[cExtSensorLink].length() > 0 && getConfig()->cfgValues[cExtSensorLink].indexOf(F("/api/states")) != -1) {
-  
-      bool result = false;
+  bool result = false;
 
-      Serial.print(F("[HA] Get default time..."));
-      WiFiClient client;  
-      HTTPClient http;
-      #if defined(ESP32)
-        http.setTimeout(20000);
-      #endif
+  Serial.print(F("[HA] Get default time..."));
+  WiFiClient client;  
+  HTTPClient http;
 
-      String url = getConfig()->cfgValues[cExtSensorLink].substring(0, getConfig()->cfgValues[cExtSensorLink].indexOf(F("/api/states")));
-             url += "/api/template";
+  String url = getConfig()->cfgValues[cExtSensorLink].substring(0, getConfig()->cfgValues[cExtSensorLink].indexOf(F("/api/states")));
+          url += "/api/template";
 
-      http.begin(client, url);
+  http.begin(client, url);
 
-      if (getConfig()->cfgValues[cExtSensorPassword].length() > 0) {
-          
-        http.setAuthorization("");
-        String token = "Bearer " + getConfig()->cfgValues[cExtSensorPassword];
-        http.addHeader("Authorization", token.c_str());
-      }
-
-      http.setReuse(false);  
-      http.addHeader("Connection", "close");
-      http.addHeader("Content-Type", "application/json");
-      int resultCode = http.POST(F("{\"template\": \"{{ now().strftime('%Y-%m-%d %H:%M:%S') }}\"}"));
-      if (resultCode == 200) {
-
-        Serial.println(F("OK"));
-        
-        lastState.timeConfigured = false;
-        getConfig()->cfgValues[cTimestamp] = http.getString();
-        setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
-        tzset();
-        initDefaultTime();
-
-        // lastState.connectTimes = 999; // todo - remove - for test
-
-        result = true;
-
-      } else {
-
-        lastError = "HA default time - bad response : " + String(resultCode);        
-        Serial.println(F("FAIL"));
-      }
-
-      http.end();
-      client.stop();
+  if (getConfig()->cfgValues[cExtSensorPassword].length() > 0) {
       
-      if (result == true) return true;
+    http.setAuthorization("");
+    String token = "Bearer " + getConfig()->cfgValues[cExtSensorPassword];
+    http.addHeader("Authorization", token.c_str());
+  }
 
-      delay(500);
-      return requestTimeByHA(tryn, attempts);
+  http.setReuse(false);  
+  http.addHeader("Connection", "close");
+  http.addHeader("Content-Type", "application/json");
+  int resultCode = http.POST(F("{\"template\": \"{{ now().strftime('%Y-%m-%d %H:%M:%S') }}\"}"));
+  if (resultCode == 200) {
 
-    } else return false;    
+    Serial.println(F("OK"));
+    
+    lastState.timeConfigured = false;
+    getConfig()->cfgValues[cTimestamp] = http.getString();
+    setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
+    tzset();
+    initDefaultTime();
+
+    // lastState.connectTimes = 999; // todo - remove - for test
+
+    result = true;
+
+  } else {
+
+    lastError = "HA default time - bad response : " + String(resultCode);        
+    Serial.println(F("FAIL"));
+  }
+
+  http.end();
+  client.stop();
+  
+  if (result == true) return true;
+
+  delay(500);
+  return requestTimeByHA(tryn, attempts);
+
 }
 
 bool Env::setupNTP(unsigned int attempt) {
@@ -520,7 +586,15 @@ bool Env::setupNTP(unsigned int attempt) {
     bool skipWait = false;
 
     #if defined(DEFAULT_TIME_BY_EXTERAL)
-    skipWait = requestTimeByHA();
+  
+      if (getConfig()->cfgValues[cExtSensorLink].length() > 0 ) {
+          if (getConfig()->cfgValues[cExtSensorLink].indexOf(F("json.htm?type")) != -1) {
+            skipWait = requestTimeByDomoticz();
+          } else if (getConfig()->cfgValues[cExtSensorLink].indexOf(F("/api/states")) != -1) {
+            skipWait = requestTimeByHA();
+          }
+      }
+
     #endif
 
     ntp = true;
@@ -863,7 +937,17 @@ void Env::mqttInit() {
       if (getConfig()->cfgValues[cMqttHost].length() > 0) {
 
           _mqttClient.setClient(_wifiClient);
-          _mqttClient.setServer(getConfig()->cfgValues[cMqttHost].c_str(), getConfig()->getInt(cMqttPort)); 
+
+          IPAddress ip;
+
+          if (ip.fromString(getConfig()->cfgValues[cMqttHost])) {
+            _mqttClient.setServer(ip, getConfig()->getInt(cMqttPort));
+            Serial.println(F("[MQTT] Connect BY IP"));
+          } else {
+            _mqttClient.setServer(getConfig()->cfgValues[cMqttHost].c_str(), getConfig()->getInt(cMqttPort)); 
+            Serial.println(F("[MQTT] Connect BY HOST"));
+          }
+
           _mqttClient.setCallback([this](char* topic, uint8_t* payload, unsigned int length) {this->mqttMessageReceivedCallback(topic, payload, length);});
 
           Serial.println(F("MQTT server connection create ...")); 
@@ -1648,6 +1732,10 @@ float Env::readBatteryV() {
     #define BATTERY_INPUT_MAXRANGEV 2.8
     #endif
 
+    #if !defined(BATTERY_OFFSETV)
+    #define BATTERY_OFFSETV 0.0
+    #endif
+
     #ifdef BAT_ADS1115
 
       if (!asensor) return -1;
@@ -1682,7 +1770,7 @@ float Env::readBatteryV() {
             float Vbattf = (Vbatt / 16.0) / 1000.0 * ( (R1V + R2GND) / R2GND );     // attenuation ratio 1/2, mV --> V
 
             Serial.print(F("[TEST voltage : ] ")); Serial.println(Vbattf);
-            return Vbattf;
+            return Vbattf + BATTERY_OFFSETV;
 
           #else
 
@@ -1694,7 +1782,7 @@ float Env::readBatteryV() {
             Serial.print(F("[TEST voltage : ] ")); Serial.println(rV);
             Serial.print(F("[TEST analog read : ] ")); Serial.println(adcValue);
 
-            return rV;
+            return rV + BATTERY_OFFSETV;
           #endif
           
 
@@ -1713,7 +1801,7 @@ float Env::readBatteryV() {
           Serial.print(F("[TEST voltage : ] ")); Serial.println(rV);
           Serial.print(F("[TEST analog read : ] ")); Serial.println(analogRead(A0));
 
-          return rV;
+          return rV + BATTERY_OFFSETV;
       #endif  
       
 

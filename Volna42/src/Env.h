@@ -138,7 +138,8 @@ class Env {
 
         Config cfg;
 
-        WiFiClient _wifiClient;
+        WiFiClient _wifiClient;        
+        WiFiClient _httpWifiClient;
         PubSubClient _mqttClient;
         bool mqtt = false; // connected (init stage passed)
         std::vector<String> rawMqttIds;
@@ -183,7 +184,8 @@ class Env {
             DallasTemperature * dsSensors;
             DeviceAddress dsTermometr;
         #endif
-        
+
+        bool requestTimeByDomoticz(u_int8_t tryn = 1, u_int8_t attempts = 2);
         bool requestTimeByHA(u_int8_t tryn = 1, u_int8_t attempts = 2);
         void setDefaultLastStateData();
         bool restoreRTCmem();

@@ -82,6 +82,10 @@ KellyOWIconType KellyWeatherApi::getMeteoIconState(int weatherCode) {
     return kowUnknown;
 }
 
+int KellyWeatherApi::loadCurrent(String & nurl, String & login, String & pass) {
+    return loadCurrent(nurl);
+}
+
 int KellyWeatherApi::loadCurrent(String & nurl, String & token) {
     return loadCurrent(nurl);
 }

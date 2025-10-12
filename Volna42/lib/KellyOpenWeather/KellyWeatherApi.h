@@ -29,6 +29,7 @@ class KellyWeatherApi {
         virtual KellyOWIconType getMeteoIconState(int weatherCode);
         virtual int loadCurrent(String & nurl) = 0;
         virtual int loadCurrent(String & nurl, String & token);
+        virtual int loadCurrent(String & nurl, String & login, String & pass);
         virtual void end();
 
 

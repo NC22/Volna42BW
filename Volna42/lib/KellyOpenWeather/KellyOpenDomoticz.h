@@ -1,5 +1,5 @@
-#ifndef KellyOpenHA_h
-#define KellyOpenHA_h
+#ifndef KellyDomoticz_h
+#define KellyDomoticz_h
 
 #include <Arduino.h>
 #include <vector>
@@ -16,30 +16,22 @@
     #include <ESP8266HTTPClient.h>
 #endif
 
-/* Warning - untested */
-/* Implemented to replace External Sensor native method for Home Assistant responses parsing */
 
-enum KellyHAPartialType { 
-    kowHATemperature, kowHAHumidity, kowHAPressure, kowHABattery, kowHAUnknown, kowHAALL, kowHAConnectError
-};
-
-class KellyOpenHA : public KellyWeatherApi {
+class KellyOpenDomoticz : public KellyWeatherApi {
     protected :
         
         WiFiClient client;
         HTTPClient http;
 
-        KellyHAPartialType requestProcess(String & url, String & token, bool partialOnly);
-        KellyHAPartialType fillPartialData(String & payload, String & collectedData);
         float validateByUnitTemperature(float temperature, String & unitsInfo);
         float validateByUnitPressure(float pressure, String & unitsInfo);
         void closeConnection();
 
     public:        
-        KellyOpenHA(int timeout = 5000);
+        KellyOpenDomoticz(int timeout = 5000);
         KellyOWIconType getMeteoIconState(const String& collectedData);
         int loadCurrent(String & nurl);
-        int loadCurrent(String & nurl, String & token);
+        int loadCurrent(String & nurl, String & login,  String & pass);
         bool retrySubData = true; // retry once addition requests
 };
 

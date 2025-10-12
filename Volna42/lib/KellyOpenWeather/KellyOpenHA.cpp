@@ -53,26 +53,30 @@ float KellyOpenHA::validateByUnitPressure(float pressure, String & unitsInfo) {
     }
 }
 
+void KellyOpenHA::closeConnection() {
+    http.end();
+    client.stop();
+}
+
 KellyHAPartialType KellyOpenHA::requestProcess(String & url, String & token, bool partialOnly) {
     
-    WiFiClient client;
-    HTTPClient http;
-
     http.begin(client, url);
 
     http.setAuthorization("");
     String auth = "Bearer " + token;
     http.addHeader("Authorization", auth.c_str());
 
+    http.setReuse(false);  
+    http.addHeader("Connection", "close");
     int httpResponseCode = http.GET();    
     
     if (httpResponseCode <= 0) {
         
-        Serial.print(F("[KellyOpenHA] Failed to connect"));
+        Serial.print(F("[KellyOpenHA] Failed to connect "));
         Serial.println(url);
         
         error = "Connection error with Home Assistant (No response)";        
-        http.end();
+        closeConnection();
         return kowHAConnectError;
         
     } else if (httpResponseCode != 200) {
@@ -81,14 +85,13 @@ KellyHAPartialType KellyOpenHA::requestProcess(String & url, String & token, boo
         Serial.println(url);
         
         error = "Home Assistant response error | Code : " + String(httpResponseCode);        
-        http.end();
+        closeConnection();
         return kowHAConnectError;
     }
     
     String payload = http.getString();
     String collectedData;
-
-    http.end();        
+    closeConnection();       
 
     KellyHAPartialType ptype = kowHAUnknown;
     
@@ -212,7 +215,13 @@ int KellyOpenHA::loadCurrent(String & nurl, String & token) {
                 Serial.println(currentId);
     
                 currentId = baseUrl + currentId;
-                requestProcess(currentId, token, true);            
+                if (requestProcess(currentId, token, true) == kowHAConnectError && retrySubData) {
+                    
+                    Serial.println(F("[KellyOpenHA] retry once"));
+                    delay(400);
+                    requestProcess(currentId, token, true);
+                }            
+
                 currentId = "";
 
             } else {

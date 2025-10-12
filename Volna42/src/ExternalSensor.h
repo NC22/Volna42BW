@@ -9,6 +9,7 @@
 #include <KellyOpenWeather.h>
 #include <KellyOpenMeteo.h>
 #include <KellyOpenHA.h>
+#include <KellyOpenDomoticz.h>
 
 #if defined(ESP32)
     #include <HTTPClient.h>
@@ -18,7 +19,7 @@
 
 class ExternalSensor {
 public:
-    static bool requestData(String &url, String &login, String &pass, externalSensorData &resultData, String &error, int8_t attempt = 0);
+    static bool requestData(String &url, String &login, String &pass, externalSensorData &resultData, String &error);
 };
 
 

@@ -121,16 +121,22 @@ bool KellyOWParserTools::parseURL(String &url, String &host, int &port, String &
   }
 
   String proto = url.substring(0, protocolEnd);
-
   int hostStart = protocolEnd + 3;
-  int pathStart = url.indexOf("/", hostStart);
-  if (pathStart == -1) {
-    pathStart = url.length();
-  }
-  host = url.substring(hostStart, pathStart);
-  path = url.substring(pathStart);
 
-  port = (proto == "https") ? 443 : 80;
+  int pathStart = url.indexOf("/", hostStart);
+  if (pathStart == -1) pathStart = url.length();
+
+  String hostPort = url.substring(hostStart, pathStart);
+  path = (pathStart < url.length()) ? url.substring(pathStart) : "/";
+
+  int colonIndex = hostPort.indexOf(':');
+  if (colonIndex != -1) {
+    host = hostPort.substring(0, colonIndex);
+    port = hostPort.substring(colonIndex + 1).toInt();
+  } else {
+    host = hostPort;
+    port = (proto == "https") ? 443 : 80;
+  }
 
   return true;
 }
