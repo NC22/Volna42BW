@@ -484,19 +484,13 @@ bool Env::requestTimeByDomoticz(u_int8_t tryn, u_int8_t attempts) {
             return false;
         }
 
-        Serial.print(F("[Domoticz] ServerTime: "));
-        Serial.println(collectedData);
-
         lastState.timeConfigured = false;        
         getConfig()->cfgValues[cTimestamp] = collectedData;
-
         setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
         tzset();
         initDefaultTime();
 
-        http.end();
-        client.stop();
-        return true;
+        result = true;
 
     } else {
 
@@ -578,10 +572,6 @@ bool Env::setupNTP(unsigned int attempt) {
     if (getConfig()->cfgValues[cNtpHosts].equals(F("off")) || getConfig()->cfgValues[cNtpHosts].length() <= 0) {
 
       Serial.println(F("No NTP servers specified, setting time by default timestamp"));
-    
-      // setenv("TZ", "GMT0", 1);
-      // tzset();
-
       initDefaultTime();
       return false;
     }
@@ -590,11 +580,11 @@ bool Env::setupNTP(unsigned int attempt) {
 
     #if defined(DEFAULT_TIME_BY_EXTERAL)
   
-      if (getConfig()->cfgValues[cExtSensorLink].length() > 0 ) {
+      if (attempt == 1 && getConfig()->cfgValues[cExtSensorLink].length() > 0 ) {
           if (getConfig()->cfgValues[cExtSensorLink].indexOf(F("json.htm?type")) != -1) {
-            skipWait = requestTimeByDomoticz();
+            skipWait = requestTimeByDomoticz(1, NTP_CONNECT_ATTEMPTS);
           } else if (getConfig()->cfgValues[cExtSensorLink].indexOf(F("/api/states")) != -1) {
-            skipWait = requestTimeByHA();
+            skipWait = requestTimeByHA(1, NTP_CONNECT_ATTEMPTS);
           }
       }
 
@@ -604,6 +594,8 @@ bool Env::setupNTP(unsigned int attempt) {
     if (skipWait && isSleepRequired()) {
         disableNTP();      
     } else {
+
+        // Always configure NTP if not going to sleep
 
         String &ntpHosts = getConfig()->cfgValues[cNtpHosts];
         if (ntpHosts.indexOf(',') != -1) {
@@ -653,7 +645,8 @@ bool Env::setupNTP(unsigned int attempt) {
         } else {
           Serial.print(F("Waiting for NTP time sync: "));
         }
-
+        
+        // wait NTP if not requested time by External http request
         int i = 0;
         bool synced = false;
 
