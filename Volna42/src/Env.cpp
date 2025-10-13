@@ -300,6 +300,7 @@ void Env::setDefaultLastStateData() {
 /*
     Init default time
 
+    to init time by user config (getConfig()->cfgValues[cTimestamp]) - lastState.timeConfigured must be false
     to prevent time mismatch during updates - must be updated before any blocking \ delay functions
 
     Priority 
@@ -431,7 +432,7 @@ void Env::restartNTP(bool resetOnly) {
 /* For manual time set scenario */
 void Env::disableNTP() {
   
-    Serial.print(F("Time setup will be manual. Prevent any NTP service activity"));
+    Serial.println(F("Time setup will be manual. Prevent any NTP service activity"));
     #if defined(ESP32)
       sntp_stop();
       sntp_set_sync_status(SNTP_SYNC_STATUS_COMPLETED);
@@ -440,66 +441,68 @@ void Env::disableNTP() {
 
 bool Env::requestTimeByDomoticz(u_int8_t tryn, u_int8_t attempts) {
   
-  if (tryn > attempts) return false;
-  tryn++;
+    if (tryn > attempts) return false;
+    tryn++;
 
-  bool result = false;
+    bool result = false;
 
-  Serial.print(F("[Domoticz] Get default time..."));
-  WiFiClient client;  
-  HTTPClient http;
-  
-  String url = getConfig()->cfgValues[cExtSensorLink];
-  int jsonIndex = url.indexOf(F("/json.htm"));
-  if (jsonIndex > 0) {
-      url = url.substring(0, jsonIndex);
-  }
+    Serial.print(F("[Domoticz] Get default time..."));
+    WiFiClient client;  
+    HTTPClient http;
+    
+    String url = getConfig()->cfgValues[cExtSensorLink];
+    int jsonIndex = url.indexOf(F("/json.htm"));
+    if (jsonIndex > 0) {
+        url = url.substring(0, jsonIndex);
+    }
 
-  url = url + F("/json.htm?type=command&param=getSunRiseSet");
-  Serial.print(F("[Domoticz] Get time from ")); Serial.println(url);
+    url = url + F("/json.htm?type=command&param=getSunRiseSet");
+    Serial.print(F("[Domoticz] Get time from ")); Serial.println(url);
 
-  http.begin(client, url);
-  if (getConfig()->cfgValues[cExtSensorLogin].length() > 0) {
+    http.begin(client, url);
+    if (getConfig()->cfgValues[cExtSensorLogin].length() > 0) {
 
-      http.setAuthorization(getConfig()->cfgValues[cExtSensorLogin].c_str(), getConfig()->cfgValues[cExtSensorPassword].c_str());
-      Serial.println(F("[Domoticz] [AUTH] Basic auth mode"));
+        http.setAuthorization(getConfig()->cfgValues[cExtSensorLogin].c_str(), getConfig()->cfgValues[cExtSensorPassword].c_str());
+        Serial.println(F("[Domoticz] [AUTH] Basic auth mode"));
 
-  } else {
-      Serial.println(F("[Domoticz] [AUTH] Anonimous mode"));
-  }
+    } else {
+        Serial.println(F("[Domoticz] [AUTH] Anonimous mode"));
+    }
 
-  http.setReuse(false);
-  http.addHeader("Connection", "close");
+    http.setReuse(false);
+    http.addHeader("Connection", "close");
 
-  int resultCode = http.GET();
-  if (resultCode == 200) {
+    int resultCode = http.GET();
+    if (resultCode == 200) {
 
-      String payload = http.getString();
-      String collectedData = "";
+        String payload = http.getString();
+        String collectedData = "";
 
-      if (!KellyOWParserTools::collectJSONFieldData("ServerTime", payload, collectedData, 40)) {
-          Serial.println(F("[Domoticz] No ServerTime in response"));
-          http.end(); client.stop();
-          return false;
-      }
+        if (!KellyOWParserTools::collectJSONFieldData("ServerTime", payload, collectedData, 40)) {
+            Serial.println(F("[Domoticz] No ServerTime in response"));
+            http.end(); client.stop();
+            return false;
+        }
 
-      Serial.print(F("[Domoticz] ServerTime: "));
-      Serial.println(collectedData);
+        Serial.print(F("[Domoticz] ServerTime: "));
+        Serial.println(collectedData);
 
-      getConfig()->cfgValues[cTimestamp] = collectedData;
-      setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
-      tzset();
-      initDefaultTime();
+        lastState.timeConfigured = false;        
+        getConfig()->cfgValues[cTimestamp] = collectedData;
 
-      http.end();
-      client.stop();
-      return true;
+        setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
+        tzset();
+        initDefaultTime();
 
-  } else {
+        http.end();
+        client.stop();
+        return true;
 
-      lastError = "[Domoticz] default time - bad response : " + String(resultCode);        
-      Serial.println(F("FAIL"));
-  }
+    } else {
+
+        lastError = "[Domoticz] default time - bad response : " + String(resultCode);        
+        Serial.println(F("FAIL"));
+    }
 
     http.end();
     client.stop();
@@ -672,7 +675,6 @@ bool Env::setupNTP(unsigned int attempt) {
             if (!lastState.timeConfigured) ledBlink();
             delay(500);
 
-            // Проверка таймаута
             if (((attempt > 1 || lastState.timeConfigured) && i > NTP_ATTEMPT1_TIMEOUT) || i > NTP_ATTEMPTN_TIMEOUT) {
               Serial.println(F("Time sync failed!"));
 
@@ -1008,7 +1010,16 @@ void Env::mqttInit() {
 bool Env::mqttSendCurrentData() {
 
     mqttSuccess = false;
-    mqttInit();
+    if (getConfig()->cfgValues[cMqttHost].length() > 0) {
+        for (int8_t attempt = 1; attempt <= 3; attempt++) {
+            mqttInit();
+            if (mqtt) {
+              break;
+            } else {
+              delay(200);
+            }
+        }
+    }
 
     if (!mqtt) return false;
     if (!_mqttClient.connected()) {
