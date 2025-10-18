@@ -127,7 +127,7 @@ bool KellyOWParserTools::parseURL(String &url, String &host, int &port, String &
   if (pathStart == -1) pathStart = url.length();
 
   String hostPort = url.substring(hostStart, pathStart);
-  path = (pathStart < url.length()) ? url.substring(pathStart) : "/";
+  path = (pathStart < (int) url.length()) ? url.substring(pathStart) : "/";
 
   int colonIndex = hostPort.indexOf(':');
   if (colonIndex != -1) {

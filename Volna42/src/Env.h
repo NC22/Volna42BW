@@ -261,6 +261,7 @@ class Env {
 
         void forceRefreshAll();
 
+        void sleepSensors();
         void sleep();
         void begin();
         void sync();

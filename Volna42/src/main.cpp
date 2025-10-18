@@ -111,6 +111,7 @@ void setup()
 
   } else if (env.isSleepRequired() && !env.isSyncRequired()) {
     
+    env.initSensors();
     Serial.println(F("[Sleep requested]: no any addition actions required...update screen & goto sleep"));  
     env.disableNTP();  
     env.initDefaultTime(); 
@@ -122,10 +123,12 @@ void setup()
     env.updateTelemetry();
 
     env.updateScreen();
+    env.sleepSensors();
     env.sleep();
 
   } else {
 
+    env.initSensors();
     // Sync & Refresh data required
     // Connect to WiFi -> run full get data sequense (External sensor & update time by NTP, get battery info, update screen ... ) -> sleep if server mode disabled
     if (!env.lastState.timeConfigured) env.ledBlink(2); // clean load blink
@@ -198,6 +201,7 @@ void setup()
     } else {
       Serial.println(F("[Sleep requested] goto sleep"));
       if (wifiConnectResult > 0) wifi->prepareToSleep();
+      env.sleepSensors();
       env.sleep();
     }
   }

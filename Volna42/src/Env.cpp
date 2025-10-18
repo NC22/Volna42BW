@@ -58,7 +58,6 @@ void Env::begin() {
   #endif
 
   resetTimers(true);
-  initSensors();
 
   #if defined(ESP32)
 
@@ -744,6 +743,13 @@ void Env::saveCurrentState()  {
 #endif
 }
 
+void Env::sleepSensors() {
+  
+    #if defined(CO2_SCD41) 
+        scd4x.stopPeriodicMeasurement();
+    #endif
+}
+
 void Env::sleep()  {
     
     lastState.t = time(nullptr);
@@ -766,7 +772,7 @@ void Env::sleep()  {
         }
 
     #else
-      
+
       Serial.print(F("[Deep sleep] "));  
       
       if (lastState.updateMinutes) {
