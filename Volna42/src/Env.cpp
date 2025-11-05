@@ -16,7 +16,7 @@ Env::Env() {
     cuiWidgets.clear();
     resetPartialData(); // pos will restore from RTC memory
 
-    #if defined(SLEEP_SWITCH_PIN)    
+    #if defined(SLEEP_SWITCH_PIN) && SLEEP_SWITCH_PIN >= 0 
       pinMode(SLEEP_SWITCH_PIN, INPUT);
     #endif
 
@@ -24,7 +24,7 @@ Env::Env() {
 
 void Env::ledBlink(int n) {
   
-  #if defined(FEEDBACK_LED)
+  #if defined(FEEDBACK_LED) && FEEDBACK_LED >= 0
     for (int i = 0; i < n; i++) {
       digitalWrite(FEEDBACK_LED, HIGH); 
       delay(200);                 
@@ -39,12 +39,6 @@ void Env::begin() {
 
   cfg.version = cdConfigVersion;
   cfg.excludeOptions.clear();
-
-  #if defined(FEEDBACK_LED)
-    pinMode(FEEDBACK_LED, OUTPUT);
-    digitalWrite(FEEDBACK_LED, LOW); 
-  #endif
-
 
   #if !defined(PARTIAL_UPDATE_SUPPORT)  
   cfg.excludeOptions.push_back(cUpdateMinutes); 
@@ -221,6 +215,16 @@ void Env::begin() {
       
     }
 
+  #if defined(FEEDBACK_LED) && FEEDBACK_LED >= 0
+    pinMode(FEEDBACK_LED, OUTPUT);
+    digitalWrite(FEEDBACK_LED, LOW); 
+  #endif
+
+  #if defined(VCCCONTROLL_PIN) && VCCCONTROLL_PIN > 0
+    pinMode(VCCCONTROLL_PIN, OUTPUT);
+    digitalWrite(VCCCONTROLL_PIN, VCCCONTROLL_ON);
+    delay(50);
+  #endif
 }
 
 bool Env::restoreRTCmem() {
@@ -297,7 +301,7 @@ void Env::setDefaultLastStateData() {
 }
 
 /*
-    Init default time
+    Init default time by most relevant source
 
     to init time by user config (getConfig()->cfgValues[cTimestamp]) - lastState.timeConfigured must be false
     to prevent time mismatch during updates - must be updated before any blocking \ delay functions
@@ -333,6 +337,19 @@ void Env::initDefaultTime() {
       }
     }     
     
+    // important for long autonomus work without ntp \ http time sync
+    // todo - possibly can be more accurate if calc blocking time (ex. wifi connection time) = blocking time (ms) = millis() - secondTimerStart (on init = millis from esp start)
+    // defaultTime in sec. We can fix time if its innaccurate more then a sec. Add lastState.blockingTime - to collect assync time and apply it
+
+    unsigned long elapsedMs = millis() - secondTimerStart;
+    if (elapsedMs > 1000) {
+        defaultTime += (elapsedMs / 1000);
+        Serial.printf("[Time Sync] Adjusted by +%lu ms (%.2f sec)\n", elapsedMs, elapsedMs / 1000.0);
+    } else {
+       Serial.printf("[Time Sync] Ignore blocking time +%lu ms \n", elapsedMs);
+    }
+
+
     Serial.println(F("Restore time by defaults (RTC or default setting)"));
     timeval tv = { defaultTime, 0 };
     settimeofday(&tv, nullptr);
@@ -745,13 +762,18 @@ void Env::saveCurrentState()  {
 
 void Env::sleepSensors() {
   
-    #if defined(CO2_SCD41) 
+    #if (!defined(VCCCONTROLL_PIN) || VCCCONTROLL_PIN < 0) && defined(CO2_SCD41) 
         scd4x.stopPeriodicMeasurement();
     #endif
 }
 
 void Env::sleep()  {
     
+    #if defined(VCCCONTROLL_PIN) && VCCCONTROLL_PIN > 0
+    digitalWrite(VCCCONTROLL_PIN, VCCCONTROLL_OFF); 
+    delay(10);
+    #endif
+
     lastState.t = time(nullptr);
 
     saveCurrentState();
@@ -801,7 +823,7 @@ bool Env::isSleepRequired() {
       return false;
     #endif
 
-    #if defined(SLEEP_SWITCH_PIN)
+    #if defined(SLEEP_SWITCH_PIN) && SLEEP_SWITCH_PIN >= 0 
 
       if (digitalRead(SLEEP_SWITCH_PIN) == LOW) {
         return true;
@@ -1010,7 +1032,7 @@ bool Env::mqttSendCurrentData() {
 
     mqttSuccess = false;
     if (getConfig()->cfgValues[cMqttHost].length() > 0) {
-        for (int8_t attempt = 1; attempt <= 3; attempt++) {
+        for (int8_t attempt = 1; attempt <= MQTT_SYNC_ATTEMPTS; attempt++) {
             mqttInit();
             if (mqtt) {
               break;
@@ -1466,21 +1488,32 @@ bool Env::waitSCD4X() {
   #else 
 
     if (updateSCD4X() == false) {
-          for(unsigned int attempt=0; attempt < 20; attempt++) {
+          
+      // usually needs 2-3sec to initialize after power ON \ reset
+
+          for(unsigned int attempt=0; attempt < SCD41_READ_ATTEMPTS; attempt++) {
+
               delay(500);
+
               if (updateSCD4X() == true) {
-                Serial.println("[waitSCD4X] SCD data ready [OK]");
+
+                Serial.println(F("[waitSCD4X] SCD data ready [OK]"));
                 return true;
-              } else Serial.println("[waitSCD4X] SCD data not ready | Attempt : " + String(attempt) + " / 20");
+
+              } else {
+                Serial.print(F("[waitSCD4X] SCD data not ready | Attempt : "));
+                Serial.println(attempt);
+              }
           }
+
     } else {
       
-      Serial.println("[waitSCD4X] SCD data ready [OK][0]");
+      Serial.println(F("[waitSCD4X] SCD data ready [OK][0]"));
       return true;
     }   
     
     
-    Serial.println("[waitSCD4X] SCD data ready [All attempts fail]");
+    Serial.println(F("[waitSCD4X] SCD data ready [All attempts fail]"));
     return false;
   #endif
 }
@@ -1726,6 +1759,10 @@ KellyCanvas * Env::getCanvas() {
 
 float Env::readBatteryV() {
 
+    if (batteryReadOnce && lastBat != BAD_SENSOR_DATA) {
+        return lastBat;
+    }
+
     #if !defined(BATTERY_R1V)
     #define BATTERY_R1V 50.7f
     #endif
@@ -1761,7 +1798,9 @@ float Env::readBatteryV() {
       // Vout = (4.2f * R2GND) / (R1V + R2GND) 
       // float rV = aInputSensor.computeVolts(adc0) * ((R1V + R2GND) / R2GND); // back devider val
       float rV2 = (float(adc0) * 0.1875 / 1000.0) * ((R1V + R2GND) / R2GND); // back devider val
-      return rV2;
+
+      lastBat = rV2;
+      return lastBat;
 
     #elif defined(BAT_A0) && BAT_A0 >= 0
 
@@ -1780,7 +1819,9 @@ float Env::readBatteryV() {
             float Vbattf = (Vbatt / 16.0) / 1000.0 * ( (R1V + R2GND) / R2GND );     // attenuation ratio 1/2, mV --> V
 
             Serial.print(F("[TEST voltage : ] ")); Serial.println(Vbattf);
-            return Vbattf + BATTERY_OFFSETV;
+
+            lastBat = Vbattf + BATTERY_OFFSETV;
+            return lastBat;
 
           #else
 
@@ -1792,11 +1833,10 @@ float Env::readBatteryV() {
             Serial.print(F("[TEST voltage : ] ")); Serial.println(rV);
             Serial.print(F("[TEST analog read : ] ")); Serial.println(adcValue);
 
-            return rV + BATTERY_OFFSETV;
+            lastBat = rV + BATTERY_OFFSETV;
+            return lastBat;
           #endif
           
-
-
       #else
 
           // thanks to reference code - https://github.com/SlimeVR/SlimeVR-Tracker-ESP/blob/main/src/batterymonitor.h
@@ -1811,7 +1851,8 @@ float Env::readBatteryV() {
           Serial.print(F("[TEST voltage : ] ")); Serial.println(rV);
           Serial.print(F("[TEST analog read : ] ")); Serial.println(analogRead(A0));
 
-          return rV + BATTERY_OFFSETV;
+          lastBat = rV + BATTERY_OFFSETV;
+          return lastBat;
       #endif  
       
 
@@ -1905,6 +1946,14 @@ void Env::forceRefreshAll() {
 }
 
 bool Env::initSensors() {
+
+    #if !defined(DEFAULT_I2C_SCL)
+      #define DEFAULT_I2C_SCL SCL
+    #endif
+
+    #if !defined(DEFAULT_I2C_SDA)
+      #define DEFAULT_I2C_SDA SDA
+    #endif
 
     Wire.begin(DEFAULT_I2C_SDA, DEFAULT_I2C_SCL); 
     bool error = false;

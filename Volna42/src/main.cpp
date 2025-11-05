@@ -99,8 +99,15 @@ void setup()
   env.screen = &screenController;
   env.begin(); 
 
+  /*
+    unsigned long start = millis();
+    while ((millis() - start < 10000)) {
+      delay(10);
+    }
+    Serial.println(F("Serial debug delay"));
+  */
+
   if (env.isPartialUpdateRequired()) {
-    
     env.disableNTP();  
     env.initDefaultTime();
     env.updateTime();
@@ -111,15 +118,14 @@ void setup()
 
   } else if (env.isSleepRequired() && !env.isSyncRequired()) {
     
-    env.initSensors();
     Serial.println(F("[Sleep requested]: no any addition actions required...update screen & goto sleep"));  
     env.disableNTP();  
     env.initDefaultTime(); 
 
-    //  ToDo : датчик SCD требует 5сек. на переинициализацию т.к. шина I2C остается жить. Нужно выключать его по питанию отдельно 
+    env.initSensors();
     env.waitSCD4X();
-    delay(300);
 
+    delay(300); // базовый делей для обновления статистики
     env.updateTelemetry();
 
     env.updateScreen();
@@ -128,7 +134,12 @@ void setup()
 
   } else {
 
-    env.initSensors();
+    // для предотвращения возможных разночтений при вкл. \ выкл. wifi, чтобы было одинаково с другими режимами
+    if (env.isSleepRequired()) {
+        env.batteryReadOnce = true;
+        env.readBatteryV();
+    }
+
     // Sync & Refresh data required
     // Connect to WiFi -> run full get data sequense (External sensor & update time by NTP, get battery info, update screen ... ) -> sleep if server mode disabled
     if (!env.lastState.timeConfigured) env.ledBlink(2); // clean load blink
@@ -140,28 +151,33 @@ void setup()
           
       env.setupNTP();
 
-    } else if (!env.isSleepRequired()) {
+    } else {
 
-      // Not on battery & WiFi connection fail -> Run as Access Point
+        env.initDefaultTime();
 
-      wifi->runAsAccesspoint(FPSTR(defaultWifiAP), FPSTR(defaultWifiAPP));
-      env.wifiInfo = wifi->getIP().toString() + " AP"; 
-      env.initDefaultTime();
+        if (!env.isSleepRequired()) {
 
-      Serial.print(F("IP: ")); Serial.println(wifi->getIP().toString());
+          // Not on battery & WiFi connection fail -> Run as Access Point
 
-    } else if (env.lastState.connectTimes == 0) { 
-      
-      // WiFi connection fail -> Need to sleep -> Cant start AP mode
+          wifi->runAsAccesspoint(FPSTR(defaultWifiAP), FPSTR(defaultWifiAPP));
+          env.wifiInfo = wifi->getIP().toString() + " AP"; 
 
-      // Ниразу не было успешных подключений по WiFi - мы не знаем даже примерного времени ни данных внешних датчиков
-      // если на устройстве сохранено время по умолчанию, оно будет использовано
+          Serial.print(F("IP: ")); Serial.println(wifi->getIP().toString());
 
-      env.wifiInfo = FPSTR(noWiFi);
-      Serial.println(F("FAIL to connect Wifi - critical - device not configured"));    
+        } else if (env.lastState.connectTimes == 0) { 
+          
+          // WiFi connection fail -> Need to sleep -> Cant start AP mode
+
+          // Ниразу не было успешных подключений по WiFi - мы не знаем даже примерного времени ни данных внешних датчиков
+          // если на устройстве сохранено время по умолчанию, оно будет использовано
+
+          env.wifiInfo = FPSTR(noWiFi);
+          Serial.println(F("FAIL to connect Wifi - critical - device not configured"));    
+        }
     }
-
-    env.waitSCD4X();        
+    
+    env.initSensors();
+    env.waitSCD4X();
     env.updateTelemetry();
 
     if (wifiConnectResult > 0) {

@@ -143,7 +143,7 @@ class Env {
         bool mqtt = false; // connected (init stage passed)
         std::vector<String> rawMqttIds;
         
-        unsigned long secondTimerStart;
+        unsigned long secondTimerStart; // initialized in constructor, by default = current millis()
 
         int telemetryBufferMax = 5;
         
@@ -196,6 +196,7 @@ class Env {
         uint8_t tempSource = 0;
         uint8_t humSource = 0;
 
+
     public:
         time_t defaultTime = 1510592825;
 
@@ -209,7 +210,10 @@ class Env {
 
         bool batteryInit = false;
         bool mqttSuccess = false; // connected & succesfull data send
-		
+        
+        bool batteryReadOnce = false;		
+        float lastBat = BAD_SENSOR_DATA;
+
 		// config depended variables, check validateConfig for defaults
         bool celsius;  // Celsius or Fahrenheit
         bool hour12;   // 12-hour format
