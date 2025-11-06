@@ -1,10 +1,24 @@
 #ifndef CfgDefines_h
 #define CfgDefines_h
 
+// ESP32
+
 #if defined(ESP32)
 
-#define DEFAULT_I2C_SCL SCL // I2C SCL [ESP32] Can be assigned any unused pin
-#define DEFAULT_I2C_SDA SDA // I2C SDA [ESP32] Can be assigned any unused pin
+#define FEEDBACK_LED -1
+
+#define VCCCONTROLL_PIN -1   // Опциональный переключатель питания сенсоров (мосфет - IRF4905, IRF9Z34N или аналоги \ свитч - например TPS22810 )
+#define VCCCONTROLL_ON LOW
+#define VCCCONTROLL_OFF HIGH
+
+// [Optional sleep switch] | [Опциональный тригер режима сна]
+// По умолчанию переход в режим сна осуществляется всегда при наличии данных от сенсора уровня батареи, но можно вынести на отдельную кнопку \ переключатель
+// Если установлен SLEEP_SWITCH_PIN, переход в режим сна осуществляется только если SLEEP_SWITCH_PIN в состоянии digitalRead = LOW, если параметр не установлен то уходим в сон если работаем от батареи (есть данные на сенсоре A0)
+
+#define SLEEP_SWITCH_PIN -1    // [ESP32] [ESP8266 - not enough pins, if 4.2' display used]
+
+#define DEFAULT_I2C_SCL 5 // I2C SCL [ESP32] Can be assigned any unused pin
+#define DEFAULT_I2C_SDA 6 // I2C SDA [ESP32] Can be assigned any unused pin
 
 #define DEEPSLEEP_MEMORY 1  // 1 - Использовать RTC (энергозависимая память) при уходе в режим глубокого сна, 2 - Использовать NVS память (постоянная память - рекомендуется использовать если есть проблемы с RTC)
 
@@ -13,24 +27,30 @@
 // Делитель (BATTERY_R1V и BATTERY_R2GND) подбирается исходя из верхнего порога чтения V аналогового входа вашей ESP32 (зависит от модели) и максимального V источника питания (4.2v)
 // Разные ESP32 имеют разный порог чтения V. Из тех что проверял - ESP32-S3 SuperMini понимает входное напряжение до 3.1v, ESP-C3 Zero ~2.5v, ESP-S2 Mini ~2.6v
 // Вы можете найти документацию по своей плате или провести тест используя Serial.println(analogRead(BATTERY_SENSOR_PIN)) для разных входных напряжений и вычислить соответствие V для значения 4095
-#define BATTERY_R1V 32.6f            
-#define BATTERY_R2GND 47.2f
+#define BATTERY_R1V 200.0f    // 200кОм \ 200кОм подойдет для большенства плат         
+#define BATTERY_R2GND 200.0f     
+#define BATTERY_OFFSETV 0.2f  // компенсация просадки в рабочем режиме для корректного расчета процентов заряда   
+#define BATTERY_READ_METHOD 2 // 1 - analogRead - чтение в условных единицах / 2 - analogReadMilliVolts - чтение в новом API сразу в вольтах - делает 16 замеров и выдает усредненное значение
+// необходимо только для метода analogRead
 #define BATTERY_INPUT_MAXRANGE 4095.0 // максимально возможное значение в условных единицах analogRead(BATTERY_SENSOR_PIN)
-#define BATTERY_INPUT_MAXRANGEV 2.6   // соответствующее условному значению напряжение на входе BATTERY_SENSOR_PIN
+#define BATTERY_INPUT_MAXRANGEV 3.1   // соответствующее условному значению напряжение на входе BATTERY_SENSOR_PIN
 
 // #define WIFI_TX_POWER 40    // Переопределить мощность wifi датчика поумолчанию (в случае с проблемами с подключением к сети)
+// #define WIFI_MAX_POWER      // DHCP restart \ sleep off \ disable any build in power save
+// #define WIFI_CLOSE_BEFORE_SLEEP  
 
 #else
 
-#define DEFAULT_I2C_SCL 5 // I2C SCL [ESP8266] dont edit, no variations
-#define DEFAULT_I2C_SDA 4 // I2C SDA [ESP8266] dont edit, no variations
-
+// ESP8266
 
 // Workaround wakeup from deepsleep issue - https://github.com/esp8266/Arduino/issues/6318
 // Решение для исправления проблемы дешевых клонов плат ESP8266 D1 Mini с зависанием при выходе из сна 
 #define FIX_DEEPSLEEP   0                     // 0 - OFF, 1 - первый метод - непроверен \ first method - untested, 2 - второй, проверен в долгих тестах \ second, tested in long tests
-#define BATTERY_SENSOR_PIN 0				  // A0 или -1 - без батареи 
+#define BATTERY_SENSOR_PIN A0				  // A0 или -1 - без батареи 
+
 #endif
+
+// Общие настройки
 
 #define PRESSURE_HPA false                    // pressure in hPa (default - mmHg - мм.рт.ст)
 #define PARTIAL_UPDATE_INTERVAL 120           // Интервал частичного обновления экрана по умолчанию (если поддерживается) в секундах для обновления часов - полностью экран рекомендуют обновлять не чаще 1 раза в 3 минуты (не должно превышать период полных обновления экрана -- sleepTime)
@@ -115,12 +135,13 @@
 		// клон ESP32-S3-DevKitC - протестировано
 		// В ESP32 практически нет ограничений на какие пины что можно назначать, в тестовой сборке работало с такой распиновкой, избегайте использования пинов SPI RAM (PSRAM), RX, TX, 0
 
-		#define EPD_BUSY_PIN 4  
-		#define EPD_RST_PIN  5 
-		#define EPD_DC_PIN   6   
-		#define EPD_CS_PIN   -1    // GND (-1)  
-		#define EPD_CLK_PIN   15    
-		#define EPD_DIN_PIN   7    
+
+		#define EPD_BUSY_PIN 8
+		#define EPD_RST_PIN 9
+		#define EPD_DC_PIN 10
+		#define EPD_CS_PIN -1
+		#define EPD_CLK_PIN 12
+		#define EPD_DIN_PIN 13  
 
 	#else
 		
@@ -198,12 +219,9 @@
 
 #define DEFAULT_TIME_BY_EXTERAL  // подгружать время по умолчанию с внешнего датчика если доступно. работает для Home Assistant (скип ожидания синхронизации с NTP)
 
-// [Optional sleep switch] | [Опциональный тригер режима сна]
-// По умолчанию переход в режим сна осуществляется всегда при наличии данных от сенсора уровня батареи, но можно вынести на отдельную кнопку \ переключатель
-// Если установлен SLEEP_SWITCH_PIN, переход в режим сна осуществляется только если SLEEP_SWITCH_PIN в состоянии digitalRead = LOW, если параметр не установлен то уходим в сон если работаем от батареи (есть данные на сенсоре A0)
+// DEBUG 
 
-// #define SLEEP_SWITCH_PIN -1    // [ESP32] [ESP8266 - not enough pins, if 4.2' display used]
-
+// #define DISABLE_SCREEN_UPDATE
 // #define SLEEP_ALWAYS_IGNORE    // [DEBUG OPTION] Ignore sleep mode. Even if work from battery | Игнорировать режим сна. Не засыпать, даже если работаем от батареи. 
 // #define SLEEP_ALWAYS_SLEEP     // [DEBUG OPTION] Always go to sleep mode | Всегда уходить в режим сна 
 #define SAFE_MODE false           // [DEBUG OPTION] игнорировать настройки сохраненные в EEPROM при запуске - на случай если по каким-то причинам конфиг вызывает зависания при запуске или иные проблемы

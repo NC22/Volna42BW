@@ -44,11 +44,11 @@ typedef struct {
 
 typedef struct {
     
-    float temperature;
-    float pressure;
-    float humidity;
+    float temperature; // Celsius 
+    float pressure; // in Pa (ex. 99740.91) (hPa = Pa / 100)
+    float humidity; // percent 
     
-    float bat;
+    float bat;  // percent
     
     time_t t;
   
