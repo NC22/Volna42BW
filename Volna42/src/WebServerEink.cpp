@@ -104,6 +104,8 @@ void WebServerEink::router() {
         apiCuiDownload();
     } else if (server->uri().indexOf("/api/direct/widgets") != -1) {
         apiDirectWidgets();
+    } else if (server->uri().indexOf("/api/scdcalibrate") != -1) {
+        apiSCDForceCalibration();
     } else if (server->uri().indexOf("/api/update") != -1) {
         apiUpdate();
     } else if (server->uri().indexOf("/api/clear") != -1) {
@@ -400,6 +402,58 @@ void WebServerEink::apiClockFontChange() {
     }
 
     server->send(200, "application/json", "{\"status\":\"fail\"}"); 
+}
+
+void WebServerEink::apiSCDForceCalibration() {
+
+#if defined(CO2_SCD41) 
+    if (server->method() != HTTP_POST) {
+        
+        String response = "";
+                response += "<html><head></head><body>[Recomended run SCD4X at least 3min before run force calibration]<br><form src=\"/api/scdcalibrate\" method=\"POST\">";
+                response += "<input name=\"ppm-value\" type=\"text\" placeholder=\"normal ppm value\">";
+                response += "<input type=\"submit\" value=\"Run SCD4X Calibration \">";
+                response += "</form></body></html>";
+    
+        server->send(200, "text/html; charset=utf-8", response);
+
+    } else {
+
+        int ppmValue = -1;
+        for (int i = 0; i < server->args(); i++)  {
+            if (server->argName(i) == "ppm-value") {
+                
+                if(sscanf(server->arg(i).c_str(), "%d", &ppmValue) != 1) {
+                    ppmValue = -1;
+                }
+
+                if (ppmValue < 1 || ppmValue > 1000) {
+                    ppmValue = -1;
+                }
+            }
+        }
+
+        if (ppmValue > -1) {
+            
+             int32_t result = env->calibrateSCD4X(ppmValue);
+
+             if (result >= -10003 && result <= -10000) {
+                server->send(200, "application/json", "{\"status\":\"write new ppm : " + String(ppmValue) + "\",\"result\":\"FAIL " + String(result) + "\"}");
+             } else {
+                server->send(200, "application/json", "{\"status\":\"write new ppm : " + String(ppmValue) + "\",\"result\":\"CORRECTION OK - " + String(result) + "\"}"); 
+             }
+
+        } else {
+            
+             server->send(200, "application/json", "{\"status\":\"value :" + String(ppmValue) + " | bad value (not in range 1-1000)\"}"); 
+        }
+
+    }
+#else
+
+    server->send(200, "application/json", "{\"status\":\"no SCD40 sensor\"}");
+#endif
+
 }
 
 void WebServerEink::apiDirectWidgets() {

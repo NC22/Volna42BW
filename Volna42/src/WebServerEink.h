@@ -58,6 +58,7 @@ class WebServerEink:public WebServerBase {
         void apiUpdate(); // insta update  
         void apiTestLowPower(); // test low power screen
         void apiPartialTest(); // test low power screen
+        void apiSCDForceCalibration(); 
         void showUploadImagePage();
         void getUploaderToolsJs();
         void getUploaderJs();

@@ -311,7 +311,7 @@ void Env::setDefaultLastStateData() {
     1. defaultTime variable if RTC memory restored
     2. timestamp from user config
 */
-void Env::initDefaultTime() {
+void Env::initDefaultTime(bool compensateDelay) {
 
     String defaultTimestamp = getConfig()->cfgValues[cTimestamp];
 
@@ -341,14 +341,17 @@ void Env::initDefaultTime() {
     // todo - possibly can be more accurate if calc blocking time (ex. wifi connection time) = blocking time (ms) = millis() - secondTimerStart (on init = millis from esp start)
     // defaultTime in sec. We can fix time if its innaccurate more then a sec. Add lastState.blockingTime - to collect assync time and apply it
 
-    unsigned long elapsedMs = millis() - secondTimerStart;
-    if (elapsedMs > 1000) {
-        defaultTime += (elapsedMs / 1000);
-        Serial.printf("[Time Sync] Adjusted by +%lu ms (%.2f sec)\n", elapsedMs, elapsedMs / 1000.0);
-    } else {
-       Serial.printf("[Time Sync] Ignore blocking time +%lu ms \n", elapsedMs);
+    // ignore compensation if time setted by NTP or HTTP request
+    
+    if (compensateDelay) {
+        unsigned long elapsedMs = millis() - secondTimerStart;
+        if (elapsedMs > 1000) {
+            defaultTime += (elapsedMs / 1000);
+            Serial.printf("[Time Sync] Adjusted by +%lu ms (%.2f sec)\n", elapsedMs, elapsedMs / 1000.0);
+        } else {
+          Serial.printf("[Time Sync] Ignore blocking time +%lu ms \n", elapsedMs);
+        }
     }
-
 
     Serial.println(F("Restore time by defaults (RTC or default setting)"));
     timeval tv = { defaultTime, 0 };
@@ -462,7 +465,7 @@ bool Env::requestTimeByDomoticz(u_int8_t tryn, u_int8_t attempts) {
 
     bool result = false;
 
-    Serial.print(F("[Domoticz] Get default time..."));
+    Serial.println(F("[Domoticz] Get default time..."));
     WiFiClient client;  
     HTTPClient http;
     
@@ -504,7 +507,7 @@ bool Env::requestTimeByDomoticz(u_int8_t tryn, u_int8_t attempts) {
         getConfig()->cfgValues[cTimestamp] = collectedData;
         setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
         tzset();
-        initDefaultTime();
+        initDefaultTime(false);
 
         result = true;
 
@@ -559,7 +562,7 @@ bool Env::requestTimeByHA(u_int8_t tryn, u_int8_t attempts) {
     getConfig()->cfgValues[cTimestamp] = http.getString();
     setenv("TZ", cfg.cfgValues[cTimezone].c_str(), 1);
     tzset();
-    initDefaultTime();
+    initDefaultTime(false);
 
     // lastState.connectTimes = 999; // todo - remove - for test
 
@@ -588,7 +591,7 @@ bool Env::setupNTP(unsigned int attempt) {
     if (getConfig()->cfgValues[cNtpHosts].equals(F("off")) || getConfig()->cfgValues[cNtpHosts].length() <= 0) {
 
       Serial.println(F("No NTP servers specified, setting time by default timestamp"));
-      initDefaultTime();
+      initDefaultTime(false);
       return false;
     }
 
@@ -696,7 +699,7 @@ bool Env::setupNTP(unsigned int attempt) {
               #endif
 
               lastError = F("NTP server is not accessible. Default time set (by config or firmware variable)");
-              initDefaultTime();
+              initDefaultTime(false);
               return false;
             }
           }
@@ -1479,6 +1482,56 @@ void Env::updateTelemetry()  {
   Serial.println(lastState.lastTelemetry[key].humidity);
   Serial.println(lastState.lastTelemetry[key].pressure);
   Serial.println(lastState.lastTelemetry[key].bat);
+}
+
+// apply force callibration for SCD4X by default ppm value
+// https://gml.noaa.gov/ccgg/trends/global.html
+// return calibration value or -10000 to -10003 - on Fail
+int32_t Env::calibrateSCD4X(int value) {
+
+  #if !defined(CO2_SCD41) 
+      return -10003;
+  #else
+
+    scd4x.stopPeriodicMeasurement();
+    delay(500); 
+    
+    uint16_t frcCorrection;
+    int16_t error = scd4x.performForcedRecalibration(value, frcCorrection);
+    int32_t result = -1; // default error marker
+
+    if (scd4XCalibrated) return -10002;
+
+    if (error) {
+
+      Serial.print(F("FRC command failed! Error code: "));
+      Serial.println(error);
+      result = -10000;
+
+    } else {
+      if (frcCorrection == 0xFFFF) {
+
+        Serial.println(F("FRC failed internally (0xFFFF)."));
+        result = -10001;
+
+      } else {
+
+        result = (int32_t) frcCorrection - 0x8000;
+
+        scd4XCalibrated = true;
+
+        Serial.print(F("FRC correction: "));
+        Serial.print(result);
+        Serial.println(F(" ppm"));
+      }
+    }
+
+    scd4x.startPeriodicMeasurement();    
+    delay(500); 
+
+    return result;
+
+  #endif
 }
 
 bool Env::waitSCD4X() {
@@ -3401,7 +3454,7 @@ void Env::validateConfig(unsigned int version, std::vector<cfgOptionKeys> * upda
 
                 // setenv("TZ", "GMT0", 1);
                 // tzset();
-                initDefaultTime();
+                initDefaultTime(false);
 
                 lastState.timeConfigured = true;
 

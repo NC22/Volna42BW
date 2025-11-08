@@ -202,6 +202,7 @@ class Env {
 
         #if defined(CO2_SCD41) 
             uint16_t scd4XCO2 = 0;
+            bool scd4XCalibrated = false; // prevent EPPROM damage on accident HTTP rePOST - write only once during run cycle
             float scd4XTemp = -1000;
             float scd4XHumidity = -1000;
             unsigned int scd4XerrorTick = 0;
@@ -258,7 +259,7 @@ class Env {
         void updateTelemetry();
         void updateScreen();
         bool updateExtSensorData();
-        void initDefaultTime();
+        void initDefaultTime(bool compensateDelay = true);
         void resetTimers(bool minuteTimerOnly = false);
         void resetPartialData();
         void updateExtIconState();
@@ -275,6 +276,7 @@ class Env {
         
         bool updateSCD4X();
         bool waitSCD4X();
+        int32_t calibrateSCD4X(int value);
         void updateBattery(int &telemetryIndex);
 
         float readTemperature(bool defaultSource = false);
