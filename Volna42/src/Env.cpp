@@ -336,7 +336,14 @@ void Env::initDefaultTime(bool compensateDelay) {
         // Serial.println(defaultTime);
       }
     }     
-    
+#if defined(EXTERNAL_RTC_DS3231)
+    else if (!lastState.timeConfigured) {
+
+      if (syncTimeFromExtRTC()) {
+        Serial.println(F("Default time restored from DS3231"));
+      }
+    }
+#endif
     // important for long autonomus work without ntp \ http time sync
     // todo - possibly can be more accurate if calc blocking time (ex. wifi connection time) = blocking time (ms) = millis() - secondTimerStart (on init = millis from esp start)
     // defaultTime in sec. We can fix time if its innaccurate more then a sec. Add lastState.blockingTime - to collect assync time and apply it
@@ -357,6 +364,83 @@ void Env::initDefaultTime(bool compensateDelay) {
     timeval tv = { defaultTime, 0 };
     settimeofday(&tv, nullptr);
 }
+#if defined(EXTERNAL_RTC_DS3231)
+
+bool Env::initExternalRTC() {
+	#ifndef DEFAULT_I2C_SCL
+	#define DEFAULT_I2C_SCL SCL
+	#endif
+	#ifndef DEFAULT_I2C_SDA
+	#define DEFAULT_I2C_SDA SDA
+	#endif
+
+	Wire.begin(DEFAULT_I2C_SDA, DEFAULT_I2C_SCL);
+	rtcChip.begin(&Wire, 0x68);
+
+	if (rtcChip.isReset()) {
+	Serial.println(F("[DS3231] Power lost / first run - time not valid"));
+		return false;
+	}
+
+	if (!rtcChip.isOK()) {
+	Serial.println(F("[DS3231] Not responding on I2C"));
+		return false;
+	}
+
+	return true;
+}
+
+void Env::syncExtRTCFromNTP() {
+	if (!rtcChip.setTime((uint32_t) time(nullptr))) {
+		Serial.println(F("[DS3231] Sync FAILED"));
+	} else {
+		Serial.println(F("[DS3231] Synced from system time (NTP)"));
+	}
+}
+
+bool Env::syncTimeFromExtRTC() {
+
+    if (!initExternalRTC()) return false;
+
+    Datime dt = rtcChip.getTime();
+    if (!dt.valid() || dt.year == 2000) return false;
+
+    struct tm tmSet = {0};
+    tmSet.tm_year = dt.year - 1900;
+    tmSet.tm_mon  = dt.month - 1;
+    tmSet.tm_mday = dt.day;
+    tmSet.tm_hour = dt.hour;
+    tmSet.tm_min  = dt.minute;
+    tmSet.tm_sec  = dt.second;
+    tmSet.tm_isdst = -1;
+
+    time_t unixT = mktime(&tmSet);
+    if (unixT < 1000000000) return false;
+
+    timeval tv = { unixT, 0 };
+    settimeofday(&tv, nullptr);
+    defaultTime = unixT;
+
+    Serial.print(F("[DS3231] System time restored: "));
+
+	auto time = rtcChip.getTime();
+	Serial.printf("[DS3231] Date: %s, DateIso: %s, Time: %s, Unix: %d\n",
+		time.dateToString().c_str(),
+		time.dateToStringISO().c_str(),
+		time.timeToString().c_str(),
+		time.getUnix()
+		);
+
+	// print as log (logs can be read on debug port, port named com on esp32s3 devkitc-1)
+	// log_i("[DS3231] Date: %s, DateIso: %s, Time: %s, Unix: %d\n",
+	// time.dateToString().c_str(),
+	// time.dateToStringISO().c_str(),
+	// time.timeToString().c_str(),
+	// time.getUnix());
+
+    return true;
+}
+#endif
 
 void Env::tick() {
 
@@ -710,7 +794,7 @@ bool Env::setupNTP(unsigned int attempt) {
 
     Serial.println(F("NTP ready!"));
     defaultTime = time(nullptr);
-    
+
     lastState.t = defaultTime;
     lastState.timeConfigured = true;
 
@@ -719,6 +803,10 @@ bool Env::setupNTP(unsigned int attempt) {
       uint32_t cal = esp_clk_slowclk_cal_get();
       esp_clk_slowclk_cal_set(cal);
       Serial.printf("[RTC] Slow clock calibrated (cal=%u)\n", cal);
+    #endif
+
+    #if defined(EXTERNAL_RTC_DS3231)
+      syncExtRTCFromNTP();
     #endif
 
     // lastState.syncT = defaultTime;

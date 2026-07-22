@@ -1,2 +1,5 @@
 .pio
 .vscode
+
+.idea
+.clang-format

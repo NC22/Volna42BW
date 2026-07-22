@@ -51,6 +51,10 @@
 #include "Adafruit_ADS1X15.h" 
 #endif
 
+#if defined(EXTERNAL_RTC_DS3231)
+#include <GyverDS3231Min.h>
+#endif
+
 extern const char cdTimezone[] PROGMEM;
 extern const char cdNtpHosts[] PROGMEM;
 extern const char cfgWifiSSID[] PROGMEM;
@@ -178,6 +182,15 @@ class Env {
             DallasTemperature * dsSensors;
             DeviceAddress dsTermometr;
         #endif
+
+    #if defined(EXTERNAL_RTC_DS3231)
+        private:
+            GyverDS3231Min rtcChip;
+        public:
+            bool initExternalRTC();
+            void syncExtRTCFromNTP();
+            bool syncTimeFromExtRTC();
+    #endif
 
         bool requestTimeByDomoticz(u_int8_t tryn = 1, u_int8_t attempts = 2);
         bool requestTimeByHA(u_int8_t tryn = 1, u_int8_t attempts = 2);

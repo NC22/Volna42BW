@@ -23,6 +23,7 @@
 #define DEEPSLEEP_MEMORY 1  // 1 - Использовать RTC (энергозависимая память) при уходе в режим глубокого сна, 2 - Использовать NVS память (постоянная память - рекомендуется использовать если есть проблемы с RTC)
 
 #define BATTERY_SENSOR_PIN -1 // аналоговый пин для замеров уровня заряда батареи -1 - без батареи
+// #define EXTERNAL_RTC_DS3231   // дополнительный rtc модуль DS3231 на default I2C, для работы со временем без интернета \ additional DS3231 RTC module on the default I2C bus for timekeeping without an internet connection.
 
 // Делитель (BATTERY_R1V и BATTERY_R2GND) подбирается исходя из верхнего порога чтения V аналогового входа вашей ESP32 (зависит от модели) и максимального V источника питания (4.2v)
 // Разные ESP32 имеют разный порог чтения V. Из тех что проверял - ESP32-S3 SuperMini понимает входное напряжение до 3.1v, ESP-C3 Zero ~2.5v, ESP-S2 Mini ~2.6v
@@ -139,7 +140,7 @@
 		#define EPD_BUSY_PIN 8
 		#define EPD_RST_PIN 9
 		#define EPD_DC_PIN 10
-		#define EPD_CS_PIN -1
+		#define EPD_CS_PIN 11
 		#define EPD_CLK_PIN 12
 		#define EPD_DIN_PIN 13  
 
