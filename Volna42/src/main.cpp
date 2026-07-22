@@ -1,7 +1,7 @@
 
 /* 
 	Volna 2BW42 firmware
-	nradiowave | https://42volna.com/
+	nradiowave | https://volna42.com/
 
   Configuration files : UserDefines.h & UserSettings.h
 

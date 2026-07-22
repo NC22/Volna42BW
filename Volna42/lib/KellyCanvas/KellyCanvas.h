@@ -5,15 +5,15 @@
    @license        GPLv3
    @version        v0.71 
 	
-	Part of Volna 42 project  |  https://42volna.com/
+	Part of Volna 42 project  |  https://volna42.com/
 
 	Prepare compatible with KellyEInk 1-bit, 2-bit pixel buffer. 
     Include basic draw functions for output text strings, draw shapes and output images
 
     Instruments for prepare structures : 
 
-    https://42volna.com/tools/fontconverter - generate compatible fonts
-    https://42volna.com/tools/glypheditor   - convert images to compatible bin format
+    https://volna42.com/tools/fontconverter - generate compatible fonts
+    https://volna42.com/tools/glypheditor   - convert images to compatible bin format
 
     Tools Github - https://github.com/NC22/Volna42BW-Tools
 */
