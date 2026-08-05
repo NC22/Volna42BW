@@ -115,7 +115,14 @@ function KellyImgUplDebug() {
               }
         }
         
+        console.log(bufferData);
+        
         handler.bufferToText(bufferData);
+    }
+    
+    handler.screenBufferToText = function() {
+        handler.bufferToText(sbController.buffer);
+        return false;
     }
     
     handler.bufferToText = function(bufferData) {
@@ -217,7 +224,7 @@ function KellyImgUplDebug() {
         
         var downloadTxt = document.createElement('BUTTON');
             downloadTxt.innerText = 'Скачать текстовый массив (txt)';
-            downloadTxt.onclick = handler.bufferToText;
+            downloadTxt.onclick = handler.screenBufferToText;
                     
         var downloadTxt2 = document.createElement('BUTTON');
             downloadTxt2.innerText = 'Скачать 1 Pixel per Byte (txt)';
